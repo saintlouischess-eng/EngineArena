@@ -1,0 +1,48 @@
+/* Independent board and engine-search windows. All geometry is local to a panel. */
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live]){position:relative;display:flex;flex-direction:column;resize:none;overflow:hidden;--focus-text-scale:1}
+.dock-panel[data-panel=focus]{height:clamp(560px,85vh,1100px);min-height:max(480px,calc(320px + 12rem))}
+.dock-panel[data-panel=search]{height:600px;min-height:240px}
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live])>.panel-title{flex:none;padding:12px 14px;gap:9px}
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live]) .panel-heading{gap:5px;flex-wrap:wrap}
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live]) .panel-heading h2{min-width:100px;white-space:normal;overflow-wrap:anywhere}
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live]) .panel-heading>button{font-size:.75rem;padding:4px 6px;min-height:28px}
+.dock-panel:is([data-panel=focus],[data-panel=search],[data-panel=live]) .panel-tools{gap:7px}
+#focusPicker,#searchGamePicker{min-width:0;flex:1 1 100%;font-size:.8rem}
+#searchSide{min-width:0;max-width:100%;font-size:.78rem}
+.dock-panel[data-panel=focus] .focus-content{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);gap:10px;padding:10px 12px 22px;flex:1;min-height:0;min-width:0;font-size:calc(1rem * var(--focus-text-scale));overflow:hidden}
+.dock-panel[data-panel=focus] .focus-content.is-empty{display:flex}
+.focus-content .focus-toolbar{grid-column:1;grid-row:1;font-size:max(11px,.74em);line-height:1.4;gap:5px 8px}
+.focus-content .focus-toolbar button{font-size:.95em;padding:3px 5px;min-height:26px}
+.focus-content .focus-clocks{grid-column:1;grid-row:2;gap:8px}
+.focus-content .focus-clocks .clock-face{padding:8px 10px;gap:4px;container-type:inline-size}
+.focus-content .focus-clocks .clock-name{font-size:.83em;line-height:1.3}
+.focus-content .focus-clocks .clock-time{font-size:clamp(16px,22cqw,1.85em);line-height:1.05}
+.focus-content .focus-clocks .clock-caption{font-size:max(10px,.68em);line-height:1.35}
+.dock-panel[data-panel=focus] .focus-board{grid-column:1;grid-row:3;min-width:0;min-height:0;container-type:size;display:grid;place-items:center}
+.focus-board>.board{width:min(100cqw,100cqh);height:min(100cqw,100cqh);max-width:none;max-height:none}
+.focus-resizer{position:absolute;bottom:0;right:0;width:24px;height:24px;cursor:nwse-resize;touch-action:none;z-index:3;border-radius:5px 0 8px 0;background:var(--raised)}
+.focus-resizer::after{content:'';position:absolute;right:5px;bottom:5px;width:11px;height:11px;background:repeating-linear-gradient(135deg,transparent 0 3px,var(--muted) 3px 4px);clip-path:polygon(100% 0,100% 100%,0 100%)}
+.focus-resizer:hover,.focus-resizer:focus-visible{background:var(--border);outline:2px solid var(--accent);outline-offset:-2px}
+.search-content{min-height:0;min-width:0;flex:1;overflow:auto;scrollbar-gutter:stable;padding:16px 14px 24px;font-size:calc(1rem * var(--focus-text-scale));overscroll-behavior:contain}
+.search-engine{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.search-engine>div{min-width:0;flex:1 1 160px}.search-engine h3{font-size:1.05em;line-height:1.4;margin:3px 0 0;overflow-wrap:anywhere}
+.search-side{font-size:max(10px,.65em)}.search-phase{font-size:.7em;padding:3px 7px;border:1px solid var(--border);border-radius:5px;color:var(--muted)}.search-phase.thinking{color:var(--accent);border-color:var(--accent)}
+.search-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8.3em),1fr));gap:9px}
+.search-stats .analysis-stat{padding:10px 11px}.search-stats .analysis-stat>span{font-size:max(11px,.76em);line-height:1.4}.search-stats .analysis-stat strong{font-size:1.5em;line-height:1.5}.search-stats .analysis-stat small{font-size:max(10px,.67em);line-height:1.4}
+.search-stats .analysis-stat:last-child strong{font-size:1.1em;line-height:2.05}
+.search-pv{padding:12px 14px;border-radius:8px;background:var(--raised);margin-top:12px}
+.search-pv h3{font-size:.78em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.search-pv p{font: .92em/1.8 Consolas,monospace;color:var(--text);margin:0;overflow-wrap:anywhere;white-space:normal}
+.search-note,.search-referee{font-size:max(11px,.72em);line-height:1.65;color:var(--muted);margin:13px 0 0}.search-referee{border-left:2px solid var(--accent);padding-left:10px}
+.dock-panel.floating-panel{position:fixed;max-width:none;margin:0;box-shadow:0 18px 70px #0007;border-color:color-mix(in srgb,var(--accent) 40%,var(--border));min-height:min(max(480px,calc(320px + 12rem)),calc(100dvh - 16px))}
+.dock-panel[data-panel=search].floating-panel{min-height:min(240px,calc(100dvh - 16px))}
+.floating-panel .panel-heading{cursor:move;touch-action:none;user-select:none}
+.floating-panel .panel-heading button{cursor:pointer}
+.floating-panel.expanded-panel{border-radius:10px}
+.floating-panel.workspace-inactive{display:none!important}
+/* The board list scrolls; its header, summary and resize grip stay within reach. */
+.dock-panel[data-panel=live]{height:min(680px,80dvh);min-height:min(300px,calc(100dvh - 16px));max-height:calc(100dvh - 16px)}
+.dock-panel[data-panel=live] .boards{flex:1;min-height:0;overflow:auto;align-content:start;align-items:start;grid-auto-rows:max-content;scrollbar-gutter:stable;overscroll-behavior:contain}
+.dock-panel[data-panel=live]>.caption{flex:none;margin:0;padding:9px 30px 12px 14px;border-top:1px solid var(--border);font-size:.72rem;line-height:1.45}
+.dock-panel[data-panel=live] .boards>.caption{grid-column:1/-1;margin:0}
+.dock-panel[data-panel=live].floating-panel{min-height:min(300px,calc(100dvh - 16px))}

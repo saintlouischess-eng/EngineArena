@@ -1,0 +1,13 @@
+ENGINE ARENA 0.2.0 BETA 1
+
+Windows 11, 64-bit Intel/AMD. A development beta for testing and feedback.
+
+This setup includes Engine Arena, its Python and .NET runtimes, and Microsoft's full offline WebView2 installer. WebView2 is installed only when missing, unless you select the repair option. No separate runtime downloads are needed during setup.
+
+Chess engines, neural-network files, opening books and tablebases are not included. Add your own UCI engines after installation.
+
+CPU temperature and fastest-core readings are optional. The included signed PawnIO driver setup can be opened after installation or from Hardware display. It requires Windows administrator approval. Choose its signed edition. The chess program itself runs with normal user permissions.
+
+Tournament databases, PGNs and settings live outside the program folder. Updates and uninstall preserve them. WebView2 and PawnIO are shared components and are not removed by Engine Arena's uninstaller.
+
+The Engine Arena installer is unsigned. Its Microsoft and PawnIO prerequisite installers retain their original verified digital signatures. Multi-day testing and broader hardware testing are still pending.

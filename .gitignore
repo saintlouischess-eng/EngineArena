@@ -1,0 +1,15 @@
+.venv/
+.validation-venv/
+__pycache__/
+.pytest_cache/
+pytest-cache-files-*/
+build/
+dist/
+release/
+data/
+test-output/
+*.spec
+bin/
+obj/
+validation-engines/
+optional-components/

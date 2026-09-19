@@ -1,0 +1,16 @@
+Engine Arena
+Copyright (C) 2026 Engine Arena contributors
+
+Engine Arena application source is distributed under GNU GPL version 3 or,
+at your option, any later version. See LICENSE. It is provided without warranty.
+
+Bundled third-party components retain their own licenses and notices. The
+Microsoft WebView2 Runtime installer is a separate, unmodified prerequisite
+distributed under Microsoft's terms. The optional, unmodified PawnIO installer
+retains its upstream license and signature. No license in this repository
+relicenses these separate third-party components.
+
+Application source is included in the installed Source directory and the
+EngineArena GitHub repository. python-chess source and notices are included
+under ThirdParty/python-chess. Exact LibreHardwareMonitor and PawnIO source
+archives and upstream notices accompany the package. See docs/THIRD_PARTY.md.
