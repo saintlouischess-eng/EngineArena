@@ -37,7 +37,7 @@ public sealed class ArenaWindow : Window
     Process? worker; string token = "", origin = "", ready = ""; bool closing, shutdownComplete;
     public ArenaWindow()
     {
-        Title = "Engine Arena — 0.2.0 Beta 1"; Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
+        Title = "Engine Arena — 0.2.0 Beta 2"; Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = System.Windows.Media.Brushes.Black;
         Content = new TextBlock { Text = "Starting Engine Arena…", Foreground = System.Windows.Media.Brushes.White, Margin = new Thickness(40), FontSize = 22 };
@@ -70,7 +70,7 @@ public sealed class ArenaWindow : Window
         var args = Environment.GetCommandLineArgs();
         var dataIndex = Array.IndexOf(args, "--data");
         var data = dataIndex >= 0 && dataIndex + 1 < args.Length ? Path.GetFullPath(args[dataIndex + 1]) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EngineArena", "Data");
-        if (dataIndex >= 0) Title = "Engine Arena — " + new DirectoryInfo(data).Name + " · 0.2.0 Beta 1";
+        if (dataIndex >= 0) Title = "Engine Arena — " + new DirectoryInfo(data).Name + " · 0.2.0 Beta 2";
         Directory.CreateDirectory(data); ready = Path.Combine(data, "worker-ready.json");
         if (File.Exists(ready)) File.Delete(ready);
         var baseDir = AppContext.BaseDirectory;

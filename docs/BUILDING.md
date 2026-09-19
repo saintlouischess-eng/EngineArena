@@ -23,3 +23,7 @@ The script downloads missing WebView2/PawnIO installers only from their pinned o
 The payload includes corresponding application/Python source and third-party notices. It excludes development databases, personal PGNs, recordings and internal handoff notes. `package-manifest.json` records each installed payload file's hash. The separately installed compiler is a build dependency and is not needed by testers.
 
 The exact optional PawnIO 2.2.0 source archive, including its pinned PawnPP submodule, is in `vendor/PawnIO`. LibreHardwareMonitor's pinned source archive is in `vendor/LibreHardwareMonitor`. Other dependencies retain upstream notices in the installed `ThirdParty` directories.
+
+## Installer regression checks
+
+The installer build also resolves the WebView2 SDK's x86 loader for the 32-bit Inno Setup process. The application continues using its x64 loader. `installer/WebView2Policy.iss` is shared by setup and the compiled `installer/WebView2Tests.iss` regression harness. Compile that harness with ISCC after preparing the installer, then run it with `/VERYSILENT /SUPPRESSMSGBOXES /LOG="test-output\webview-tests.log"`. It intentionally exits without installing anything; verify the `WEBVIEW_REGRESSION_PASS: 10` log marker. To test absent-runtime detection without changing Windows, set `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER` to an empty folder for that process only and pass `/EXPECTAVAILABLE=0`. Never remove the machine's shared runtime for these tests.

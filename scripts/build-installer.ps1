@@ -26,6 +26,20 @@ if (-not $SkipPortableBuild) {
     if ($LASTEXITCODE -ne 0) { throw 'Portable build failed' }
 }
 
+# Setup is x86 even though the application is x64. Resolve the loader from
+# the restored SDK package instead of assuming a particular NuGet cache path.
+$assets = Get-Content -LiteralPath desktop\obj\project.assets.json -Raw | ConvertFrom-Json
+$sdk = @($assets.libraries.PSObject.Properties.Name | Where-Object { $_ -like 'Microsoft.Web.WebView2/*' })
+if ($sdk.Count -ne 1) { throw 'Could not identify the restored WebView2 SDK' }
+$probe = $null
+foreach ($cache in $assets.packageFolders.PSObject.Properties.Name) {
+    $candidate = Join-Path $cache ($sdk[0].ToLower()+'/runtimes/win-x86/native/WebView2Loader.dll')
+    if (Test-Path -LiteralPath $candidate) { $probe = $candidate; break }
+}
+if (-not $probe) { throw 'WebView2 x86 setup loader missing; restore/build the desktop project first' }
+New-Item -ItemType Directory -Path build\installer-tools -Force | Out-Null
+Copy-Item -LiteralPath $probe -Destination build\installer-tools\ArenaWebViewProbe.dll -Force
+
 $payload = [IO.Path]::GetFullPath((Join-Path $taskRoot 'build\installer-payload'))
 $expectedPayload = [IO.Path]::GetFullPath($taskRoot).TrimEnd('\')+'\build\installer-payload'
 if ($payload -ne $expectedPayload) { throw 'Unexpected installer payload directory' }
@@ -63,7 +77,7 @@ $inventory = foreach ($file in Get-ChildItem -LiteralPath $payload -Recurse -Fil
 $inventory | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $payload 'package-manifest.json') -Encoding UTF8
 & $Compiler '/Qp' ('/DPayloadDir='+$payload) installer\EngineArena.iss
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
-$setup = Join-Path $taskRoot 'release\EngineArenaSetup-0.2.0-beta.1-win-x64.exe'
+$setup = Join-Path $taskRoot 'release\EngineArenaSetup-0.2.0-beta.2-win-x64.exe'
 $hash = (Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash.ToLower()
 Set-Content -LiteralPath ($setup+'.sha256') -Value ($hash+'  '+[IO.Path]::GetFileName($setup)) -Encoding ASCII
 Write-Output "Single offline installer: $setup"

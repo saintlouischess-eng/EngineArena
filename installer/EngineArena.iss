@@ -4,12 +4,15 @@
 #ifndef RuntimeInstaller
   #define RuntimeInstaller "..\optional-components\WebView2\MicrosoftEdgeWebView2RuntimeInstallerX64.exe"
 #endif
+#ifndef WebViewLoader
+  #define WebViewLoader "..\build\installer-tools\ArenaWebViewProbe.dll"
+#endif
 
 [Setup]
 AppId={{579ABF77-881B-49B9-ACE4-E7D302683E37}
 AppName=Engine Arena
-AppVersion=0.2.0-beta.1
-AppVerName=Engine Arena 0.2.0 Beta 1
+AppVersion=0.2.0-beta.2
+AppVerName=Engine Arena 0.2.0 Beta 2
 AppPublisher=Engine Arena
 AppPublisherURL=https://github.com/saintlouischess-eng/EngineArena
 AppSupportURL=https://github.com/saintlouischess-eng/EngineArena/issues
@@ -28,8 +31,8 @@ CloseApplications=no
 RestartApplications=no
 UninstallDisplayIcon={app}\EngineArena.exe
 OutputDir=..\release
-OutputBaseFilename=EngineArenaSetup-0.2.0-beta.1-win-x64
-VersionInfoVersion=0.2.0.1
+OutputBaseFilename=EngineArenaSetup-0.2.0-beta.2-win-x64
+VersionInfoVersion=0.2.0.2
 Compression=lzma2
 SolidCompression=yes
 DiskSpanning=no
@@ -40,9 +43,10 @@ UninstallLogMode=append
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Shortcuts:"; Flags: unchecked
-Name: "repairwebview"; Description: "Repair or update WebView2 using the included Microsoft installer"; GroupDescription: "Optional repair:"; Flags: unchecked
+Name: "repairwebview"; Description: "Run Microsoft WebView2 setup again (usually unnecessary)"; GroupDescription: "Optional runtime setup:"; Flags: unchecked
 
 [Files]
+Source: "{#WebViewLoader}"; Flags: dontcopy
 Source: "{#PayloadDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#RuntimeInstaller}"; Flags: dontcopy
 
@@ -57,6 +61,8 @@ Filename: "{app}\Optional\PawnIO_setup.exe"; Description: "Set up optional CPU t
 Filename: "{app}\EngineArena.exe"; Description: "Launch Engine Arena"; WorkingDir: "{app}"; Flags: postinstall nowait skipifsilent
 
 [Code]
+#include "WebView2Probe.iss"
+
 const
   WebViewKey = 'SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}';
 
@@ -70,40 +76,34 @@ begin
     Result := StrToVersion(Version, Packed) and (Packed > 0);
 end;
 
-function WebViewInstalled: Boolean;
+function RuntimeAvailable: Boolean;
 begin
-  Result := HasRuntimeVersion(HKLM32) or HasRuntimeVersion(HKCU32) or HasRuntimeVersion(HKCU64);
+  // Registry state is diagnostic only: stale/missing registration must not
+  // override the same loader API used by the actual desktop application.
+  Log(Format('WebView2 registry versions: machine32=%d machine64=%d user32=%d user64=%d', [
+     Ord(HasRuntimeVersion(HKLM32)), Ord(HasRuntimeVersion(HKLM64)),
+     Ord(HasRuntimeVersion(HKCU32)), Ord(HasRuntimeVersion(HKCU64))]));
+  Result := ProbeWebViewRuntime;
 end;
 
-function PrepareToInstall(var NeedsRestart: Boolean): String;
-var
-  Code: Integer;
+function RunRuntimeInstaller(var Code: Integer): Boolean;
 begin
-  Result := '';
-  if WebViewInstalled and not WizardIsTaskSelected('repairwebview') then begin
-    Log('WebView2 is already installed; bundled runtime installer skipped.');
-    exit;
-  end;
   WizardForm.StatusLabel.Caption := 'Installing Microsoft Edge WebView2 Runtime...';
   ExtractTemporaryFile('MicrosoftEdgeWebView2RuntimeInstallerX64.exe');
-  if not Exec(ExpandConstant('{tmp}\MicrosoftEdgeWebView2RuntimeInstallerX64.exe'),
-      '/silent /install', '', SW_HIDE, ewWaitUntilTerminated, Code) then begin
-    Result := 'Could not start the included Microsoft WebView2 installer. ' + SysErrorMessage(Code);
-    exit;
-  end;
-  Log(Format('WebView2 installer exit code: %d', [Code]));
-  if Code = 3010 then begin
-    NeedsRestart := True;
-    Result := 'WebView2 needs a Windows restart. Restart Windows, then run EngineArenaSetup again. Your tournament data is preserved.';
-    exit;
-  end;
-  if (Code <> 0) or not WebViewInstalled then
-    Result := Format('WebView2 setup did not finish (code %d). Restart Windows and retry setup. No tournament data was changed.', [Code]);
+  Result := Exec(ExpandConstant('{tmp}\MicrosoftEdgeWebView2RuntimeInstallerX64.exe'),
+      '/silent /install', '', SW_HIDE, ewWaitUntilTerminated, Code);
+end;
+
+#include "WebView2Policy.iss"
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  Result := EnsureWebView2(WizardIsTaskSelected('repairwebview'), NeedsRestart);
 end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 0.2.0 Beta 1 for this Windows account.' + #13#10#13#10 +
+  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 0.2.0 Beta 2 for this Windows account.' + #13#10#13#10 +
     'The app, Python, .NET and the offline Microsoft WebView2 installer are included. Chess engines and opening books are added separately.' + #13#10#13#10 +
     'Close Engine Arena before updating. Existing tournaments and settings are preserved.';
 end;

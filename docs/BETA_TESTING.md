@@ -1,14 +1,16 @@
-# Engine Arena 0.2.0 Beta 1
+# Engine Arena 0.2.0 Beta 2
 
 ## Install on your laptop
 
-1. Download **EngineArenaSetup-0.2.0-beta.1-win-x64.exe** from the [GitHub prerelease](https://github.com/saintlouischess-eng/EngineArena/releases).
+1. Download **EngineArenaSetup-0.2.0-beta.2-win-x64.exe** from the [GitHub prerelease](https://github.com/saintlouischess-eng/EngineArena/releases).
 2. Run the installer on Windows 11, 64-bit Intel/AMD. Install for your Windows account; Python, .NET and the full offline WebView2 installer are included.
 3. Keep the default installation folder unless you need another location. Choose a desktop shortcut if wanted.
 4. Launch Engine Arena and add your own UCI engines. Engine binaries, networks, books and tablebases are not included.
 5. Start with a small paired match. Check live results, the focused board, reports and PGN export. Close and reopen the app to check retained results before starting a long tournament.
 
 The Engine Arena installer is unsigned. The bundled Microsoft and PawnIO installers retain their verified publisher signatures. Obtain the beta only from this repository. Do not disable Windows security protections.
+
+Beta 2 fixes the Beta 1 error `-2147219416` when the optional WebView2 setup box was checked. Microsoft uses this code for an already-installed runtime. Setup now verifies availability and continues when that runtime can be detected. Leave **Run Microsoft WebView2 setup again** unchecked for ordinary installation. If Beta 1 is already working, you can continue testing it; an immediate reinstall is not required.
 
 ## Optional CPU sensors
 

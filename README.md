@@ -1,6 +1,6 @@
 # Engine Arena
 
-Windows x64 desktop application for UCI engine testing. **0.2.0 Beta 1 for testing and feedback; production acceptance pending.** Download the single **EngineArenaSetup-0.2.0-beta.1-win-x64.exe** from [GitHub Releases](https://github.com/saintlouischess-eng/EngineArena/releases). See the [laptop testing guide](docs/BETA_TESTING.md) and [validation scope](docs/BETA_VALIDATION.md). All requirements in [the acceptance contract](docs/ACCEPTANCE.md) remain mandatory.
+Windows x64 desktop application for UCI engine testing. **0.2.0 Beta 2 for testing and feedback; production acceptance pending.** Download the single **EngineArenaSetup-0.2.0-beta.2-win-x64.exe** from [GitHub Releases](https://github.com/saintlouischess-eng/EngineArena/releases). See the [laptop testing guide](docs/BETA_TESTING.md) and [validation scope](docs/BETA_VALIDATION.md). All requirements in [the acceptance contract](docs/ACCEPTANCE.md) remain mandatory.
 
 ## Run
 

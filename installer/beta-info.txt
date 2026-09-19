@@ -1,8 +1,8 @@
-ENGINE ARENA 0.2.0 BETA 1
+ENGINE ARENA 0.2.0 BETA 2
 
 Windows 11, 64-bit Intel/AMD. A development beta for testing and feedback.
 
-This setup includes Engine Arena, its Python and .NET runtimes, and Microsoft's full offline WebView2 installer. WebView2 is installed only when missing, unless you select the repair option. No separate runtime downloads are needed during setup.
+This setup includes Engine Arena, its Python and .NET runtimes, and Microsoft's full offline WebView2 installer. WebView2 is installed only when missing, unless you select the optional runtime setup. No separate runtime downloads are needed during setup.
 
 Chess engines, neural-network files, opening books and tablebases are not included. Add your own UCI engines after installation.
 
