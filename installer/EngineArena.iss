@@ -11,8 +11,8 @@
 [Setup]
 AppId={{579ABF77-881B-49B9-ACE4-E7D302683E37}
 AppName=Engine Arena
-AppVersion=0.2.0-beta.2
-AppVerName=Engine Arena 0.2.0 Beta 2
+AppVersion=1.2.14
+AppVerName=Engine Arena 1.2.14
 AppPublisher=Engine Arena
 AppPublisherURL=https://github.com/saintlouischess-eng/EngineArena
 AppSupportURL=https://github.com/saintlouischess-eng/EngineArena/issues
@@ -31,14 +31,14 @@ CloseApplications=no
 RestartApplications=no
 UninstallDisplayIcon={app}\EngineArena.exe
 OutputDir=..\release
-OutputBaseFilename=EngineArenaSetup-0.2.0-beta.2-win-x64
-VersionInfoVersion=0.2.0.2
+OutputBaseFilename=EngineArenaSetup-1.2.14-win-x64
+VersionInfoVersion=1.2.14.0
 Compression=lzma2
 SolidCompression=yes
 DiskSpanning=no
 WizardStyle=modern
 SetupLogging=yes
-InfoBeforeFile=beta-info.txt
+InfoBeforeFile=release-info.txt
 UninstallLogMode=append
 
 [Tasks]
@@ -52,7 +52,7 @@ Source: "{#RuntimeInstaller}"; Flags: dontcopy
 
 [Icons]
 Name: "{group}\Engine Arena"; Filename: "{app}\EngineArena.exe"; WorkingDir: "{app}"
-Name: "{group}\Beta testing guide"; Filename: "{app}\docs\BETA_TESTING.html"
+Name: "{group}\User guide"; Filename: "{app}\docs\USER_GUIDE.html"
 Name: "{group}\Uninstall Engine Arena"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\Engine Arena"; Filename: "{app}\EngineArena.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
@@ -103,7 +103,7 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 0.2.0 Beta 2 for this Windows account.' + #13#10#13#10 +
+  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 1.2.14 for this Windows account.' + #13#10#13#10 +
     'The app, Python, .NET and the offline Microsoft WebView2 installer are included. Chess engines and opening books are added separately.' + #13#10#13#10 +
     'Close Engine Arena before updating. Existing tournaments and settings are preserved.';
 end;

@@ -1,4 +1,4 @@
-ENGINE ARENA 0.2.0 BETA 2
+ENGINE ARENA 0.2.0 BETA 3 RC 2
 
 Windows 11, 64-bit Intel/AMD. A development beta for testing and feedback.
 
@@ -10,4 +10,4 @@ CPU temperature and fastest-core readings are optional. The included signed Pawn
 
 Tournament databases, PGNs and settings live outside the program folder. Updates and uninstall preserve them. WebView2 and PawnIO are shared components and are not removed by Engine Arena's uninstaller.
 
-The Engine Arena installer is unsigned. Its Microsoft and PawnIO prerequisite installers retain their original verified digital signatures. Multi-day testing and broader hardware testing are still pending.
+The Engine Arena installer is unsigned. Its Microsoft and PawnIO prerequisite installers retain their original verified digital signatures. A 76,500-game endurance tournament completed. This candidate still needs final packaged-build and broader hardware checks; see docs/RELEASE_CANDIDATE.md.

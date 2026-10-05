@@ -53,11 +53,13 @@ def game_page(db,tid,reason='',offset=0,limit=100):
     tournament=db.execute('SELECT settings FROM tournaments WHERE id=?',(tid,)).fetchone()
     if not tournament:raise ValueError('Tournament no longer exists')
     settings=json.loads(tournament[0])
+    from .knockout import game_control,game_label
     for g in items:
         profiles={side:participant(tid,g[side]) for side in ('white','black')}
         g['white_name']=profiles['white']['name'];g['black_name']=profiles['black']['name']
         attempt=db.execute('SELECT clocks FROM attempts WHERE gid=? ORDER BY seq DESC LIMIT 1',(g['id'],)).fetchone()
-        g['clocks']=json.loads(attempt[0]) if attempt and attempt[0] else {side:Clock(TimeControl.parse(p.get('time_control') or settings['time_control'])).snapshot() for side,p in profiles.items()}
+        opening=json.loads(g['opening']);g['competition_label']=game_label(settings,g['round'],opening)
+        g['clocks']=json.loads(attempt[0]) if attempt and attempt[0] else {side:Clock(TimeControl.parse(game_control(settings,p,opening))).snapshot() for side,p in profiles.items()}
 
     return {'total':total,'items':items}
 

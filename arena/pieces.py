@@ -5,6 +5,7 @@ import uuid
 import xml.etree.ElementTree as ET
 
 FILES=[side+piece+'.svg' for side in ('w','b') for piece in 'KQRBNP']
+BUILTIN_SETS=[('classic','Classic'),('classic-refined','Classic Refined'),('classic-bold','Classic Bold'),('classic-heritage','Classic Heritage'),('studio','Studio'),('outline','Outline'),('geometric','Geometric'),('modern','Modern'),('walnut','Walnut'),('tournament','Tournament'),('nordic','Nordic'),('deco','Art Deco'),('rounded','Rounded'),('line','Monoline'),('pixel','Pixel'),('regal','Regal'),('heirloom','Heirloom'),('porcelain','Porcelain'),('classic-sculpted','Classic Sculpted'),('aurora','Aurora'),('citadel','Citadel')]
 ALLOWED={'svg','g','path','circle','ellipse','rect','polygon','polyline','line','defs','linearGradient','radialGradient','stop','use','clipPath','title','desc'}
 
 def sanitize_svg(text):
@@ -33,7 +34,7 @@ def import_set(data_folder,source,name):
     return {'id':key,'name':name or source.name}
 
 def list_sets(data_folder):
-    sets=[{'id':key,'name':name} for key,name in [('classic','Classic'),('studio','Studio'),('outline','Outline'),('geometric','Geometric'),('modern','Modern'),('walnut','Walnut')]]
+    sets=[{'id':key,'name':name} for key,name in BUILTIN_SETS]
     root=Path(data_folder)/'pieces'
     if root.exists():
         for path in root.iterdir():

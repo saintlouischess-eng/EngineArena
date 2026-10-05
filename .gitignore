@@ -13,3 +13,12 @@ bin/
 obj/
 validation-engines/
 optional-components/
+
+# Local artwork exports and private development notes
+exports/
+media/
+docs/HANDOFF.md
+docs/LIVE_TOURNAMENT_AUDIT_*.md
+docs/RELEASE_REVIEW_*.md
+docs/REPORT-AUDIT-*.md
+docs/gui-comparison-*/

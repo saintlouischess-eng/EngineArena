@@ -1,6 +1,9 @@
 Engine Arena
 Copyright (C) 2026 Engine Arena contributors
 
+Designed by Mark Young.
+Coding and implementation by OpenAI Codex, under Mark Young's direction.
+
 Engine Arena application source is distributed under GNU GPL version 3 or,
 at your option, any later version. See LICENSE. It is provided without warranty.
 
@@ -14,3 +17,7 @@ Application source is included in the installed Source directory and the
 EngineArena GitHub repository. python-chess source and notices are included
 under ThirdParty/python-chess. Exact LibreHardwareMonitor and PawnIO source
 archives and upstream notices accompany the package. See docs/THIRD_PARTY.md.
+
+The optional 3D renderer includes Three.js (MIT), with its license and pinned
+provenance under ThirdParty/Three. The 1849-style models and wood maps are
+original Engine Arena artwork under GPL-3.0-or-later.

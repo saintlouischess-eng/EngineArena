@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, asdict
 from typing import Any
 
 FAILURES = ('timeout', 'crash', 'hang', 'illegal_move', 'interrupted', 'startup_timeout', 'readiness_timeout', 'protocol_error')
-FORMATS = ('match', 'round_robin', 'gauntlet', 'self_play', 'swiss', 'knockout', 'double_elimination', 'ladder', 'sprt')
+FORMATS = ('match', 'round_robin', 'gauntlet', 'self_play', 'swiss', 'knockout', 'double_elimination', 'ladder', 'sprt', 'custom')
 
 @dataclass
 class TimeControl:

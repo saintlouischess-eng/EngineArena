@@ -87,6 +87,11 @@ def order_sql(settings,alias='r'):
     terms.append(f'{alias}.seed ASC');return ','.join(terms)
 
 def rows(store,tid,settings,offset=0,limit=-1):
+    if settings['format'] in ('knockout','double_elimination'):
+        from .knockout_results import read
+        competition=read(store,tid,settings);order=competition['order'];selected=order[offset:] if limit<0 else order[offset:offset+limit]
+        values={r['slot']:r for r in store.rows('SELECT r.*,r.score+r.bye_points points FROM rankings r WHERE tid=?',(tid,))}
+        return [values[a]|competition['people'][a] for a in selected]
     if settings['format']=='ladder':
         saved=store.one('SELECT body FROM round_state WHERE tid=? ORDER BY round DESC LIMIT 1',(tid,))
         if saved:

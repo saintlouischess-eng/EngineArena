@@ -28,4 +28,8 @@ These requirements are mandatory. A working beta is not a production acceptance 
 
 ## Acceptance status
 
-Not yet accepted for production. See [beta validation scope](BETA_VALIDATION.md) for published measurements and remaining checks. Unimplemented or unverified requirements remain production release blockers.
+Version 1.0 is undergoing final local acceptance and the owner's laptop approval;
+public release remains on hold. See the [current review](V1_REVIEW.md) for fresh
+measurements and explicit limits. The [beta validation scope](BETA_VALIDATION.md)
+documents historical builds and must not be mistaken for a new run. Outstanding
+mandatory requirements remain release blockers until their evidence is accepted.

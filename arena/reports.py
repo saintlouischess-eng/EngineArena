@@ -28,7 +28,8 @@ def crosstable(path,tid,row=0,column=0,search='',confidence=95):
                 values=summarize(r['w'],r['d'],r['l'],[r[f'p{i}'] for i in range(5)] if settings['paired'] else None,confidence)
                 if r['a']==r['b']:values.update(elo=None,ci=None,ci_conservative=None,ci95=None,ci95_conservative=None,los=None,model='Self-play, White perspective; no between-engine inference')
                 cells.append({'a':r['a'],'b':r['b'],**values})
-        return {'total':total,'rows':rows,'columns':columns,'cells':cells,'paired':settings['paired']}
+        from .knockout import sample_note
+        return {'total':total,'rows':rows,'columns':columns,'cells':cells,'paired':settings['paired'],'sample_scope':sample_note(settings)}
     finally:db.close()
 
 
@@ -78,11 +79,14 @@ def opening_report(path,tid,slot=-1,offset=0,limit=50,export=False):
           'total_openings':total,'offset':offset,'paired':settings['paired'],
           'summary':counts(*(overall[k] or 0 for k in ('w','d','l'))),'colors':colors,
           'model':'Descriptive official results. Color subsets are not independent opening pairs. No rating inference is made.'}
+        from .knockout import sample_note
+        if sample_note(settings):base['model']+=' '+sample_note(settings)
         rows=({'opening_index':r['opening_index'],'name':r['opening_name'] or 'Opening','fen':r['fen'],
               **counts(r['w'],r['d'],r['l']),'complete_pairs':r['pairs'] if settings['paired'] else None} for r in db.execute(sql,page_args))
-        if export:
-            output=io.StringIO();writer=csv.DictWriter(output,fieldnames=['perspective','opening_index','name','fen','games','wins','draws','losses','score_pct','draw_pct','complete_pairs']);writer.writeheader()
-            for r in rows:writer.writerow({'perspective':base['perspective'],**r})
+        if export is True or export=='csv':
+            context={'sample_scope':sample_note(settings)} if sample_note(settings) else {}
+            output=io.StringIO();writer=csv.DictWriter(output,fieldnames=['perspective','opening_index','name','fen','games','wins','draws','losses','score_pct','draw_pct','complete_pairs',*context]);writer.writeheader()
+            for r in rows:writer.writerow({'perspective':base['perspective'],**r,**context})
             return output.getvalue()
         return base|{'openings':list(rows)}
     finally:db.close()

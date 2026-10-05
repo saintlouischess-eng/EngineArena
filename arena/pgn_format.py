@@ -1,6 +1,7 @@
 """Readable PGN rendering from committed records, also used for old tournaments."""
 import base64
 import json
+import re
 import time
 from functools import lru_cache
 
@@ -15,8 +16,16 @@ class SafePgnExporter(chess.pgn.StringExporter):
     def visit_header(self, name, value):
         if self.headers:
             self.found_headers = True
-            text = str(value).replace('\\', '\\\\').replace('"', '\\"').replace('\r', ' ').replace('\n', ' ')
+            text = re.sub(r'[\x00-\x1f\x7f]', ' ', str(value)).replace('\\', '\\\\').replace('"', '\\"')
             self.write_line(f'[{name} "{text}"]')
+
+    def visit_move(self,board,move):
+        if self.variations or not self.variation_depth:
+            # Keep the move number attached to its SAN instead of leaving
+            # "12..." stranded at the end of a wrapped line.
+            prefix=str(board.fullmove_number)+'. ' if board.turn else str(board.fullmove_number)+'... ' if self.force_movenumber else ''
+            self.write_token(prefix+board.san(move)+' ')
+            self.force_movenumber=False
 
 
 def number(value):
@@ -28,7 +37,8 @@ def control(tc):
     seconds = number(tc.get('seconds', 180))
     if kind == 'nodes': return '-', f"{tc['nodes']} nodes/move; no chess clock"
     if kind == 'depth': return '-', f"depth {tc['depth']} plies; no chess clock"
-    if kind == 'movetime': return '*' + seconds, seconds + ' seconds/move'
+    # PGN's asterisk denotes an hourglass clock, not fixed time per move.
+    if kind == 'movetime': return '1/' + seconds, seconds + ' seconds/move'
     if kind == 'fischer': return seconds + '+' + number(tc.get('increment', 0)), 'Fischer'
     if kind in ('delay', 'bronstein'):
         return '?', f"{seconds}s with {number(tc.get('delay', 0))}s {'Bronstein' if kind == 'bronstein' else 'simple'} delay"
@@ -79,7 +89,11 @@ class PgnContext:
         return json.loads(self.db.execute('SELECT profile FROM participants WHERE tid=? AND slot=?', (self.tid, slot)).fetchone()[0])
 
 
-def render_attempt(db, aid, style='compact', perspective='engine', annotations=None, context=None):
+def render_attempt(db, aid, style='compact', perspective='engine', annotations=None, context=None, *, export_options=None):
+    from .pgn_options import normalize, select_headers
+    presentation=normalize(export_options) if export_options is not None else None
+    if presentation:
+        style,perspective,annotations=(presentation[k] for k in ('style','perspective','annotations'))
     style, perspective, selected = options(style, perspective, annotations)
     def row(sql, args):
         cursor = db.execute(sql, args)
@@ -102,7 +116,8 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
                    'rules infraction' if reason == 'illegal_move' else
                    'adjudication' if 'adjudication' in reason else
                    'abandoned' if reason in ('crash', 'hang', 'startup_timeout', 'readiness_timeout', 'protocol_error') else 'normal')
-    pgn.headers.update(Event=ctx.name, Site='Engine Arena', Date=time.strftime('%Y.%m.%d', time.localtime(a['started'])),
+    date=time.gmtime(a['started']) if presentation and presentation['date_zone']=='utc' else time.localtime(a['started'])
+    pgn.headers.update(Event=ctx.name, Site='Engine Arena', Date=time.strftime('%Y.%m.%d', date),
                        Round=str(g['round'] + 1), White=white['name'], Black=black['name'], Result=a['result'] or '*')
     pgn.headers.update({'WhiteEngine': identity.get('white', {}).get('name', white.get('identity', {}).get('name', white['name'])),
         'BlackEngine': identity.get('black', {}).get('name', black.get('identity', {}).get('name', black['name'])),
@@ -111,30 +126,64 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
         'OpeningPair': str(g['pair_no']), 'OpeningLeg': str(g['leg']), 'Opening': opening.get('name', 'FEN'),
         'OpeningSeed': str(opening.get('seed', '')), 'BookPlyCount': str(len(book_moves)),
         'CompetitionStage': opening.get('competition_stage', 'regular')})
+    if presentation:
+        pgn.headers['GameNumber']=str(g['number']+1)
+        pgn.headers['UTCDate']=time.strftime('%Y.%m.%d',time.gmtime(a['started']))
+        pgn.headers['UTCTime']=time.strftime('%H:%M:%S',time.gmtime(a['started']))
+        from .report_evidence import filename
+        if s.get('opening_source',{}).get('name'):pgn.headers['OpeningBook']=filename(s['opening_source']['name'])
+        if presentation['event']:pgn.headers['Event']=presentation['event']
+        if presentation['site']:pgn.headers['Site']=presentation['site']
+        if presentation['names']=='engine':
+            pgn.headers['White']=pgn.headers['WhiteEngine'];pgn.headers['Black']=pgn.headers['BlackEngine']
+    if opening.get('selection') is not None:pgn.headers['OpeningPosition']=str(opening['selection']+1)
+    if opening.get('assignment') is not None:pgn.headers['OpeningAssignment']=str(opening['assignment']+1)
+    if opening.get('ko_opening_progression'):pgn.headers['OpeningPolicy']='KO shared sequence; new opening per pair' if s['paired'] else 'KO shared sequence; new opening per game'
     if opening.get('eco'): pgn.headers['ECO'] = opening['eco']
     if opening.get('variation'): pgn.headers['Variation'] = opening['variation']
-    controls = {}
+    if opening.get('playoff_stage') is not None:pgn.headers['PlayoffStage']=str(opening['playoff_stage'])
+    from .knockout import game_control
+    controls = {};raw_controls={}
     for side, profile in (('White', white), ('Black', black)):
-        tc = profile.get('time_control') or s['time_control']
+        book=profile.get('move_book') if s.get('use_engine_books',True) else None
+        if book:
+            for key,value in (('Book',book['name']),('BookSHA256',book['id']),('BookPolicy',book['policy']),('BookMaxPly',book['max_plies'])):pgn.headers[side+key]=str(value)
+        tc = game_control(s,profile,opening)
+        raw_controls[side]=tc
         controls[side] = control(tc)
         pgn.headers[side + 'TimeControl'] = controls[side][0]
         pgn.headers[side + 'SearchControl'] = controls[side][1]
         for option, fallback in (('Threads', 1), ('Hash', 1024)):
-            value = next((v for k, v in profile.get('options', {}).items() if k.lower() == option.lower()), profile.get(option.lower(), fallback))
+            from .report_evidence import configured_option
+            value = configured_option(profile,option,fallback)
             pgn.headers[side + ('HashMB' if option == 'Hash' else option)] = str(value)
+        if profile.get('gpu_group'):pgn.headers[side+'GPUGroup']=profile['gpu_group']
+        cache=next((v for k,v in profile.get('options',{}).items() if k.casefold()=='nncachesize'),None)
+        if cache is not None:pgn.headers[side+'NNCachePositions']=str(cache)
+    if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='attempt_engines'").fetchone():
+        for side,encoded in db.execute('SELECT x.side,e.body FROM attempt_engines x JOIN engine_evidence e ON e.id=x.evidence WHERE x.aid=?',(aid,)):
+            observed=json.loads(encoded);prefix=side.title()
+            from .report_evidence import filename
+            if observed.get('network_file'):pgn.headers[prefix+'Network']=filename(observed['network_file'])
+            if observed.get('network',{}).get('sha256'):pgn.headers[prefix+'NetworkSHA256']=observed['network']['sha256']
+            if observed.get('backend'):pgn.headers[prefix+'Backend']=observed['backend']
+            if observed.get('gpu'):pgn.headers[prefix+'GPU']=observed['gpu']
     pgn.headers['TimeControl'] = controls['White'][0] if controls['White'] == controls['Black'] else '?'
     pgn.headers['Ponder'] = 'true' if s.get('ponder') else 'false'
-    pgn.headers['OpeningPolicy'] = s.get('opening_policy', 'legacy')
+    if 'OpeningPolicy' not in pgn.headers:pgn.headers['OpeningPolicy'] = s.get('opening_policy', 'legacy')
     if history_note: pgn.headers['OpeningHistory'] = history_note
     if style != 'moves': pgn.headers['ScorePerspective'] = 'White' if perspective == 'white' else 'Moving engine'
-    if style == 'archive':
+    settings_headers=set(presentation['headers']) if presentation else {'WhiteSettings','BlackSettings','TournamentSettings'} if style=='archive' else set()
+    if settings_headers.intersection(('WhiteSettings','BlackSettings','TournamentSettings')):
         pgn.headers['SettingsEncoding'] = 'base64-json-utf8'
         for key, value in (('WhiteSettings', white), ('BlackSettings', black), ('TournamentSettings', s)):
-            pgn.headers[key] = base64.b64encode(json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()).decode()
+            if key in settings_headers:pgn.headers[key] = base64.b64encode(json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()).decode()
     node = pgn
-    for move in book_moves:
+    book_comments=presentation['book_comments'] if presentation else 'all'
+    for index,move in enumerate(book_moves):
         node = node.add_variation(move)
-        node.comment = 'book'
+        if book_comments=='all':node.comment = 'book'
+        elif book_comments=='boundary' and index==len(book_moves)-1:node.comment='End of opening book'
         board.push(move)
     if selected is None:
         selected = ({'eval', 'depth', 'elapsed'} if style == 'compact' else {'eval', 'depth', 'elapsed', 'clock', 'nodes', 'nps', 'seldepth'}) if s.get('annotations', True) else set()
@@ -145,7 +194,14 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
         move = board.parse_uci(uci)
         node = node.add_variation(move)
         board.push(move)
-        info, clocks = json.loads(info_json), json.loads(clocks_json)
+        from .telemetry import clean
+        info, clocks = clean(json.loads(info_json),elapsed), json.loads(clocks_json)
+        if info.get('source')=='book':
+            if style!='moves' and book_comments!='none':node.comment='Book: '+info.get('book_name','')
+            if 'clock' in selected:
+                remaining=clocks.get('white' if color else 'black',{}).get('remaining')
+                if remaining is not None:node.set_clock(max(0,remaining))
+            continue
         if style == 'compact':
             score = ''
             sign = 1 if perspective == 'white' or color else -1
@@ -173,4 +229,13 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
             if remaining is not None: node.set_clock(max(0, remaining))
         node.comment = node.comment.strip()
     pgn.headers['PlyCount'] = str(sum(1 for _ in pgn.mainline()))
-    return pgn.accept(SafePgnExporter(columns=100)) + '\n\n'
+    if presentation:
+        # FEN, variant, exceptional controls and annotation perspective must
+        # remain interpretable even with a deliberately small header selection.
+        needs_controls=controls['White']!=controls['Black'] or any(tc.get('kind') in ('nodes','depth','movetime','delay','bronstein') or tc.get('repeat') for tc in raw_controls.values())
+        kept=select_headers(pgn.headers,presentation,needs_controls=needs_controls,
+                            has_evaluation='eval' in selected,has_timing=bool(selected.intersection(('clock','elapsed'))))
+        from .pgn_options import REQUIRED
+        pgn.headers.clear()
+        pgn.headers.update({key:kept[key] for key in (*REQUIRED,*sorted(set(kept)-set(REQUIRED))) if key in kept})
+    return pgn.accept(SafePgnExporter(columns=presentation['columns'] if presentation else 100)) + '\n\n'

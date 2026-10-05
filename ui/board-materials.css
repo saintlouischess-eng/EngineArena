@@ -1,0 +1,20 @@
+/* Wood grain is pre-rendered from our original SVGs for inexpensive bitmap caching. */
+.square{--square-texture:var(--board-light-texture,none);background-image:var(--square-texture);background-size:300% 100%;background-position:var(--grain-position,0%) center}
+.square.dark{--square-texture:var(--board-dark-texture,none);background-image:var(--square-texture)}
+.square,.square.dark,.square.highlight{background-size:300% 100%;background-position:var(--grain-position,0%) center}
+.square:nth-child(3n){--grain-position:43%}.square:nth-child(5n){--grain-position:100%}.square:nth-child(7n){--grain-position:74%}
+.square.highlight{background-image:linear-gradient(#e4d85888,#e4d85888),var(--square-texture);box-shadow:inset 0 0 0 1px #71621866}
+.board{container-type:inline-size}
+.square .coord{font:700 clamp(7px,2.8cqw,40px)/1.05 'Segoe UI',sans-serif;color:var(--board-light-ink,#334a43);background:#ffffff22;padding:0 .1em;border-radius:2px;z-index:1;pointer-events:none;text-shadow:none;font-variant-numeric:tabular-nums}
+.square .coord-file{left:auto;right:.12em;bottom:.08em;top:auto}
+.square .coord-rank{left:.12em;top:.08em;right:auto;bottom:auto}
+.square.dark .coord{color:var(--board-dark-ink,#fff4de)}.square.highlight .coord{color:#342d18}
+.wood-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.wood-presets button{padding:9px;text-align:left;white-space:normal;font-size:.77rem}
+.wood-presets button[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.wood-swatch{display:grid;grid-template-columns:1fr 1fr;height:32px;border-radius:4px;overflow:hidden;margin-bottom:7px}
+.wood-swatch span{background-size:200% 100%}.wood-note{font-size:.77rem;color:var(--muted);margin:0 0 12px}
+.appearance-preview{grid-template-columns:minmax(260px,.9fr) minmax(300px,1.1fr)}
+#appearanceBoard{position:sticky;top:0}.appearance-preview .board{width:100%}
+@media(max-width:1000px){.appearance-preview{grid-template-columns:minmax(220px,.9fr) minmax(260px,1.1fr)}.wood-presets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.appearance-preview{grid-template-columns:minmax(0,1fr)}#appearanceBoard{max-width:420px;margin:auto}.wood-presets{grid-template-columns:repeat(2,minmax(0,1fr))}}

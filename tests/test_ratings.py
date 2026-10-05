@@ -5,7 +5,7 @@ import io
 import math
 import pytest
 from aiohttp.test_utils import TestClient,TestServer
-from arena.ratings import fit_pool,estimate,pool_report,SCALE
+from arena.ratings import fit_pool,estimate,pool_report,SCALE,STATUS_LABELS
 from arena.server import create_app
 from arena.store import Store
 
@@ -83,4 +83,35 @@ def test_pool_paging_anchor_validation_and_background_api(tmp_path):
             assert r.status==200 and result['total']==101 and len(result['items'])==1 and result['items'][0]['rating']==3000
             r=await client.get(f'/api/tournaments/{tid}/ratings?q=Engine%20050');result=await r.json();assert result['total']==1 and result['items'][0]['slot']==50
             r=await client.get(f'/api/tournaments/{tid}/ratings?export=json');result=await r.json();assert len(result['items'])==101
+            r=await client.get(f'/api/tournaments/{tid}/ratings?sort=name&direction=desc&offset=100');result=await r.json()
+            assert result['items'][0]['slot']==0 and result['sort']=='name' and result['direction']=='desc'
+            r=await client.get(f'/api/tournaments/{tid}/ratings?sort=invalid');assert r.status==400
     asyncio.run(run())
+
+
+def test_global_rating_sort_pagination_nulls_ties_filter_and_export(tmp_path):
+    s=Store(tmp_path)
+    try:
+        t=s.create_tournament('Sorted pool',[{'name':f'Engine {106-i:03}'} for i in range(107)],{'format':'round_robin','cycles':1,'paired':False});tid=t['id']
+        with s.tx():
+            for i in range(1,106):
+                s.db.execute('INSERT INTO aggregates(tid,a,b,w,d,l) VALUES(?,?,?,?,?,?)',(tid,0,i,1+i%7,3,7))
+        all_rows=pool_report(s.path,tid,export='json')['items']
+        for key in ('slot','name','rating','delta','ci','los','samples','status'):
+            def value(r):
+                if key=='name':return r['name'].casefold()
+                if key=='ci':return r['ci'][1]-r['ci'][0] if r['ci'] else None
+                if key=='status':return STATUS_LABELS[r['status']].casefold()
+                return r[key]
+            valid=[r for r in all_rows if value(r) is not None];missing=[r for r in all_rows if value(r) is None]
+            for direction in ('asc','desc'):
+                expected=sorted(valid,key=value,reverse=direction=='desc')+missing
+                pages=[pool_report(s.path,tid,offset=o,limit=50,sort=key,direction=direction)['items'] for o in (0,50,100)]
+                assert [r['slot'] for page in pages for r in page]==[r['slot'] for r in expected]
+        filtered=pool_report(s.path,tid,search='Engine 00',sort='name',direction='desc')
+        assert filtered['total']==10 and [r['name'] for r in filtered['items']]==sorted([r['name'] for r in filtered['items']],reverse=True)
+        exported=list(csv.DictReader(io.StringIO(pool_report(s.path,tid,export='csv',sort='rating',direction='desc'))))
+        assert len(exported)==107 and int(exported[-1]['slot'])==106
+        for key,direction in [('unknown','asc'),('rating','sideways')]:
+            with pytest.raises(ValueError):pool_report(s.path,tid,sort=key,direction=direction)
+    finally:s.close()

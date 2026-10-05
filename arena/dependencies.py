@@ -40,9 +40,9 @@ def invalidate_playoffs(store,tid,effect):
             store.db.execute('UPDATE round_state SET body=? WHERE tid=? AND round=?',(json.dumps(state,separators=(',',':')),tid,round_no));store.audit(tid,'playoff_dependencies_invalidated',{'round':round_no,'previous':original,'current':state})
 
 def update_total(store,tid):
-    from .models import scheduled_pairs
+    from .knockout import base_pairs
     t=store.tournament(tid);s=t['settings'];legs=2 if s['paired'] else 1
-    base=scheduled_pairs(t['participants'],s['format'],s['cycles'],s['candidates'],s['rounds'],s.get('ladder_distance',1));regular=playoffs=0
+    base=base_pairs(t['participants'],s);regular=playoffs=0
     for row in store.rows('SELECT body FROM round_state WHERE tid=?',(tid,)):
         state=json.loads(row['body'])
         if 'chunks' not in state:regular+=len(state.get('matches',[]))*s['cycles']

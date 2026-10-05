@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,32 +34,41 @@ public sealed class ArenaWindow : Window
     readonly string sensorSession = Guid.NewGuid().ToString("N");
     Process? sensorReader;
     bool startingSensor;
+    Mutex? workspaceGuard;
+    bool ownsWorkspace;
     readonly TextBlock closingMessage = new() { FontSize = 18, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 18, 0, 18) };
     readonly ProgressBar closingProgress = new() { Height = 6, IsIndeterminate = true, Maximum = 100 };
-    Process? worker; string token = "", origin = "", ready = ""; bool closing, shutdownComplete;
+    Process? worker; string token = "", origin = "", ready = "", workspaceFolder = ""; bool closing, shutdownComplete;
     public ArenaWindow()
     {
-        Title = "Engine Arena — 0.2.0 Beta 2"; Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
+        L.LoadFromArguments();
+        Title = L.T("Engine Arena — 1.2.14"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        Background = System.Windows.Media.Brushes.Black;
-        Content = new TextBlock { Text = "Starting Engine Arena…", Foreground = System.Windows.Media.Brushes.White, Margin = new Thickness(40), FontSize = 22 };
-        Loaded += async (_, _) => { try { await Initialize(); } catch (Exception ex) { Content = new TextBox { Text = ex is WebView2RuntimeNotFoundException ? "Microsoft Edge WebView2 Runtime is missing.\n\nRun EngineArenaSetup again to install the included runtime, then reopen Engine Arena. Your saved tournaments are preserved." : "Engine Arena could not start.\n\n" + ex, IsReadOnly = true, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(30) }; } };
+        Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 19, 24));
+        Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/assets/engine-arena.ico", UriKind.Absolute));
+        var startup = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center, MaxWidth = 520, Margin = new Thickness(40) };
+        startup.Children.Add(new Image { Source = Icon, Width = 88, Height = 88, Margin = new Thickness(0, 0, 0, 20) });
+        startup.Children.Add(new TextBlock { Text = "Engine Arena", Foreground = System.Windows.Media.Brushes.White, FontSize = 32, FontWeight = FontWeights.SemiBold, TextAlignment = TextAlignment.Center });
+        startup.Children.Add(new TextBlock { Text = L.T("Starting Engine Arena…"), Foreground = System.Windows.Media.Brushes.LightSlateGray, FontSize = 15, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 12, 0, 24) });
+        startup.Children.Add(new ProgressBar { Height = 3, Width = 220, IsIndeterminate = true });
+        Content = startup;
+        Loaded += async (_, _) => { try { await Initialize(); } catch (Exception ex) { Content = new TextBox { Text = ex is WebView2RuntimeNotFoundException ? L.T("Microsoft Edge WebView2 Runtime is missing.\n\nRun EngineArenaSetup again to install the included runtime, then reopen Engine Arena. Your saved tournaments are preserved.") : L.T("Engine Arena could not start.\n\n") + ex, IsReadOnly = true, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(30) }; } };
         Closing += async (_, e) =>
         {
             if (closing) { e.Cancel = !shutdownComplete; return; } e.Cancel = true; closing = true; exportCancellation.Cancel();
-            Title = "Engine Arena — finishing saved games and backup…";
+            Title = L.T("Engine Arena — finishing saved games and backup…");
             var closingPanel = new StackPanel { Margin = new Thickness(48), MaxWidth = 650, VerticalAlignment = VerticalAlignment.Center };
-            closingPanel.Children.Add(new TextBlock { Text = "Saving your workspace", FontSize = 28 });
-            closingMessage.Text = "Finishing game records and checking the recovery backup. Large histories can take a little longer.";
+            closingPanel.Children.Add(new TextBlock { Text = L.T("Saving your workspace"), FontSize = 28 });
+            closingMessage.Text = L.T("Finishing game records and checking the recovery backup. Large histories can take a little longer.");
             closingPanel.Children.Add(closingMessage); closingPanel.Children.Add(closingProgress);
-            closingPanel.Children.Add(new TextBlock { Text = "Engine Arena will close automatically when saving finishes.", Margin = new Thickness(0, 20, 0, 0), TextWrapping = TextWrapping.Wrap });
+            closingPanel.Children.Add(new TextBlock { Text = L.T("Engine Arena will close automatically when saving finishes."), Margin = new Thickness(0, 20, 0, 0), TextWrapping = TextWrapping.Wrap });
             closingPanel.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
             Content = closingPanel;
             // Large verified backups can exceed twelve seconds. Let the worker
             // finish its durable shutdown instead of killing a healthy save.
             try { if (origin.Length > 0) { using var req = new HttpRequestMessage(HttpMethod.Post, origin + "/api/shutdown"); req.Headers.Add("X-Arena-Token", token); req.Content = new StringContent("{}"); await client.SendAsync(req); } if (worker is { HasExited: false }) await worker.WaitForExitAsync(); }
             catch { if (worker is { HasExited: false }) worker.Kill(true); }
-            finally { job.Dispose(); browser.Dispose(); client.Dispose(); exportClient.Dispose(); shutdownComplete = true; Close(); }
+            finally { job.Dispose(); browser.Dispose(); client.Dispose(); exportClient.Dispose(); if (ownsWorkspace) workspaceGuard?.ReleaseMutex(); workspaceGuard?.Dispose(); shutdownComplete = true; Close(); }
         };
         AllowDrop = true;
         DragOver += (_, e) => { e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None; e.Handled = true; };
@@ -70,7 +81,26 @@ public sealed class ArenaWindow : Window
         var args = Environment.GetCommandLineArgs();
         var dataIndex = Array.IndexOf(args, "--data");
         var data = dataIndex >= 0 && dataIndex + 1 < args.Length ? Path.GetFullPath(args[dataIndex + 1]) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EngineArena", "Data");
-        if (dataIndex >= 0) Title = "Engine Arena — " + new DirectoryInfo(data).Name + " · 0.2.0 Beta 2";
+        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.2.14";
+        workspaceFolder = data; L.Load(data);
+        // Claim the workspace before touching its readiness file. A second desktop
+        // must not erase the live worker's connection record or launch a rival worker.
+        var workspaceKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(data.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).ToUpperInvariant())));
+        workspaceGuard = new Mutex(false, @"Local\EngineArena.Workspace." + workspaceKey);
+        try { ownsWorkspace = workspaceGuard.WaitOne(0); }
+        catch (AbandonedMutexException) { ownsWorkspace = true; }
+        if (!ownsWorkspace)
+        {
+            workspaceGuard.Dispose(); workspaceGuard = null;
+            var panel = new StackPanel { Margin = new Thickness(48), MaxWidth = 650, VerticalAlignment = VerticalAlignment.Center };
+            panel.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+            panel.Children.Add(new TextBlock { Text = L.T("This workspace is already open"), FontSize = 28, TextWrapping = TextWrapping.Wrap });
+            panel.Children.Add(new TextBlock { Text = L.T("Return to the existing Engine Arena window to continue. Your games are still running there. To use a separate workspace, start Engine Arena with a different data folder."), FontSize = 16, Margin = new Thickness(0, 18, 0, 18), TextWrapping = TextWrapping.Wrap });
+            panel.Children.Add(new TextBlock { Text = data, FontSize = 13, TextWrapping = TextWrapping.Wrap });
+            var dismiss = new Button { Content = L.T("Close"), Padding = new Thickness(24, 10, 24, 10), Margin = new Thickness(0, 24, 0, 0), HorizontalAlignment = HorizontalAlignment.Left };
+            dismiss.Click += (_, _) => Close(); panel.Children.Add(dismiss); Content = panel;
+            return;
+        }
         Directory.CreateDirectory(data); ready = Path.Combine(data, "worker-ready.json");
         if (File.Exists(ready)) File.Delete(ready);
         var baseDir = AppContext.BaseDirectory;
@@ -79,21 +109,23 @@ public sealed class ArenaWindow : Window
         if (File.Exists(workerExe)) start.FileName = workerExe;
         else
         {
+            Title += " (development)";
             var dir = new DirectoryInfo(baseDir);
             while (dir != null && !File.Exists(Path.Combine(dir.FullName, "worker.py"))) dir = dir.Parent;
-            if (dir == null) throw new FileNotFoundException("Worker missing. Run the reproducible build or use the complete portable folder.");
+            if (dir == null) throw new FileNotFoundException(L.T("Worker missing. Run the reproducible build or use the complete portable folder."));
             start.FileName = Path.Combine(dir.FullName, ".venv", "Scripts", "python.exe"); start.ArgumentList.Add(Path.Combine(dir.FullName, "worker.py")); start.WorkingDirectory = dir.FullName;
         }
         foreach (var a in new[] { "--data", data, "--ready", ready }) start.ArgumentList.Add(a);
         start.Environment["ARENA_CPU_SENSOR_PIPE"] = $"EngineArena.Cpu.{Environment.ProcessId}.{sensorSession}";
-        worker = Process.Start(start) ?? throw new InvalidOperationException("Could not launch worker."); job.Assign(worker);
+        start.Environment["ARENA_CPU_SENSOR_HELPER"] = Path.Combine(baseDir, "ArenaSensors.exe");
+        worker = Process.Start(start) ?? throw new InvalidOperationException(L.T("Could not launch worker.")); job.Assign(worker);
         var errors = worker.StandardError.ReadToEndAsync(); _ = ReadWorkerProgress(worker.StandardOutput);
         for (int i = 0; i < 600 && !File.Exists(ready); i++)
         {
-            if (worker.HasExited) throw new InvalidOperationException("Worker startup failed:\n" + await errors);
+            if (worker.HasExited) throw new InvalidOperationException(L.T("Worker startup failed:\n") + await errors);
             await Task.Delay(100);
         }
-        if (!File.Exists(ready)) throw new TimeoutException("Worker readiness file did not arrive. Check the data folder and available disk space.");
+        if (!File.Exists(ready)) throw new TimeoutException(L.T("Worker readiness file did not arrive. Check the data folder and available disk space."));
         using var info = JsonDocument.Parse(await File.ReadAllTextAsync(ready)); token = info.RootElement.GetProperty("token").GetString()!;
         origin = "http://127.0.0.1:" + info.RootElement.GetProperty("port").GetInt32();
         var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(data, "WebView2"));
@@ -104,7 +136,7 @@ public sealed class ArenaWindow : Window
         browser.CoreWebView2.DownloadStarting += (_, e) =>
         {
             // Other export links use WebView downloads; always let the user choose.
-            var save = new SaveFileDialog { Title = "Save export as", FileName = Path.GetFileName(e.ResultFilePath), Filter = "All files|*.*", AddExtension = true };
+            var save = new SaveFileDialog { Title = L.T("Save export as"), FileName = Path.GetFileName(e.ResultFilePath), Filter = L.T("All files") + "|*.*", AddExtension = true };
             e.Handled = true;
             if (save.ShowDialog(this) != true) { e.Cancel = true; return; }
             e.ResultFilePath = save.FileName;
@@ -115,7 +147,7 @@ public sealed class ArenaWindow : Window
                 if (operation.State == CoreWebView2DownloadState.Completed)
                     browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "downloaded", name = save.FileName }));
                 else if (operation.State == CoreWebView2DownloadState.Interrupted)
-                    browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "exportError", error = "Export did not finish: " + operation.InterruptReason }));
+                    browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "exportError", error = L.T("Export did not finish: ") + operation.InterruptReason }));
             };
         };
         browser.CoreWebView2.NavigationStarting += (_, e) => { if (!e.Uri.StartsWith(origin + "/", StringComparison.Ordinal)) e.Cancel = true; };
@@ -146,12 +178,12 @@ public sealed class ArenaWindow : Window
                         if (!closing) return;
                         closingMessage.Text = phase switch
                         {
-                            "copying" => $"Creating the recovery copy… {percent:0}%",
-                            "verifying" => "Checking the recovery copy for errors…",
-                            "flushing" => "Finishing the verified backup on disk…",
-                            "ready" => "Your workspace is saved. Closing…",
-                            "error" => "The backup could not finish. Committed game records remain in the database; check Worker & recovery after reopening.",
-                            _ => "Finishing saved game records…"
+                            "copying" => L.T("Creating the recovery copy…") + $" {percent:0}%",
+                            "verifying" => L.T("Checking the recovery copy for errors…"),
+                            "flushing" => L.T("Finishing the verified backup on disk…"),
+                            "ready" => L.T("Your workspace is saved. Closing…"),
+                            "error" => L.T("The backup could not finish. Committed game records remain in the database; check Worker & recovery after reopening."),
+                            _ => L.T("Finishing saved game records…")
                         };
                         closingProgress.IsIndeterminate = percent is null;
                         if (percent is double value) closingProgress.Value = value;
@@ -170,6 +202,7 @@ public sealed class ArenaWindow : Window
         {
             using var doc = JsonDocument.Parse(e.WebMessageAsJson); var m = doc.RootElement;
             var type = m.GetProperty("type").GetString();
+            if (type == "language") { L.Save(workspaceFolder, m.GetProperty("language").GetString() ?? "en"); return; }
             if (type == "enableCpuSensors")
             {
                 if (startingSensor) return;
@@ -178,12 +211,14 @@ public sealed class ArenaWindow : Window
                 {
                     if (sensorReader is null || sensorReader.HasExited)
                     {
-                        var sensorStart = new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "ArenaSensors.exe"))
+                        var sensorPath = Path.Combine(AppContext.BaseDirectory, "ArenaSensors.exe");
+                        if (!File.Exists(sensorPath)) throw new FileNotFoundException(L.T("The CPU sensor reader is missing from this build. Use the complete Engine Arena build or reinstall the app. Games continue normally."));
+                        var sensorStart = new ProcessStartInfo(sensorPath)
                         { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
                         using var current = Process.GetCurrentProcess();
                         foreach (var arg in new[] { "--serve", Environment.ProcessId.ToString(), current.StartTime.ToUniversalTime().Ticks.ToString(), sensorSession,
                             System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, "cpu-only" }) sensorStart.ArgumentList.Add(arg);
-                        sensorReader = Process.Start(sensorStart) ?? throw new IOException("Could not start CPU sensor reader.");
+                        sensorReader = Process.Start(sensorStart) ?? throw new IOException(L.T("Could not start CPU sensor reader."));
                     }
                     using var pipe = new System.IO.Pipes.NamedPipeClientStream(".", $"EngineArena.Cpu.{Environment.ProcessId}.{sensorSession}", System.IO.Pipes.PipeDirection.In, System.IO.Pipes.PipeOptions.Asynchronous);
                     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(12));
@@ -196,7 +231,7 @@ public sealed class ArenaWindow : Window
                 catch (Exception ex)
                 {
                     browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "cpuSensorsEnabled", ok = false,
-                        message = ex is System.ComponentModel.Win32Exception w && w.NativeErrorCode == 1223 ? "CPU sensor permission was cancelled. Games continue normally." : "CPU sensor reader could not start: " + ex.Message }));
+                        message = ex is System.ComponentModel.Win32Exception w && w.NativeErrorCode == 1223 ? L.T("CPU sensor permission was cancelled. Games continue normally.") : L.T("CPU sensor reader could not start: ") + ex.Message }));
                 }
                 finally { startingSensor = false; }
                 return;
@@ -215,8 +250,9 @@ public sealed class ArenaWindow : Window
                 {
                     var url = new Uri(new Uri(origin), m.GetProperty("url").GetString()!);
                     if (url.GetLeftPart(UriPartial.Authority) != origin || !System.Text.RegularExpressions.Regex.IsMatch(url.AbsolutePath, @"^/api/export/[a-f0-9]{32}/pgn$"))
-                        throw new InvalidOperationException("Invalid local PGN export URL.");
-                    var save = new SaveFileDialog { Title = "Save tournament PGN as", FileName = Path.GetFileName(m.GetProperty("name").GetString() ?? "tournament.pgn"), DefaultExt = ".pgn", Filter = "Chess games (*.pgn)|*.pgn|All files (*.*)|*.*", AddExtension = true, OverwritePrompt = true };
+                        throw new InvalidOperationException(L.T("Invalid local PGN export URL."));
+                    var textExport = Array.Exists(url.Query.TrimStart('?').Split('&'), part => part == "filetype=txt");
+                    var save = new SaveFileDialog { Title = L.T(textExport ? "Save text as" : "Save tournament PGN as"), FileName = Path.GetFileName(m.GetProperty("name").GetString() ?? (textExport ? "tournament.txt" : "tournament.pgn")), DefaultExt = textExport ? ".txt" : ".pgn", Filter = (textExport ? L.T("Text files") + " (*.txt)|*.txt|" : L.T("Chess games") + " (*.pgn)|*.pgn|") + L.T("All files") + " (*.*)|*.*", AddExtension = true, OverwritePrompt = true };
                     if (save.ShowDialog(this) != true)
                     {
                         browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "pgnSaved", id = exportId, cancelled = true }));
@@ -225,7 +261,7 @@ public sealed class ArenaWindow : Window
                     using var request = new HttpRequestMessage(HttpMethod.Get, url);
                     request.Headers.Add("X-Arena-Token", token);
                     using var response = await exportClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, exportCancellation.Token);
-                    if (!response.IsSuccessStatusCode) throw new IOException("PGN export failed: " + await response.Content.ReadAsStringAsync(exportCancellation.Token));
+                    if (!response.IsSuccessStatusCode) throw new IOException(L.T("PGN export failed: ") + await response.Content.ReadAsStringAsync(exportCancellation.Token));
                     temporary = Path.Combine(Path.GetDirectoryName(save.FileName)!, "." + Path.GetFileName(save.FileName) + "." + Guid.NewGuid().ToString("N") + ".tmp");
                     await using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None, 65536, FileOptions.Asynchronous))
                     {
@@ -256,7 +292,7 @@ public sealed class ArenaWindow : Window
             if (type == "download")
             {
                 var name = Path.GetFileName(m.GetProperty("name").GetString() ?? "export.txt");
-                var save = new SaveFileDialog { Title = "Save export", FileName = name, DefaultExt = Path.GetExtension(name), Filter = "All files|*.*", AddExtension = true };
+                var save = new SaveFileDialog { Title = L.T("Save export"), FileName = name, DefaultExt = Path.GetExtension(name), Filter = L.T("All files") + "|*.*", AddExtension = true };
                 if (save.ShowDialog(this) == true)
                 {
                     await File.WriteAllTextAsync(save.FileName, m.GetProperty("text").GetString() ?? "", new System.Text.UTF8Encoding(false));
@@ -268,15 +304,15 @@ public sealed class ArenaWindow : Window
             var id = m.GetProperty("id").GetInt32(); string[] paths = [];
             if (m.GetProperty("folder").GetBoolean())
             {
-                var dialog = new OpenFolderDialog { Title = "Select folder" }; if (dialog.ShowDialog(this) == true) paths = [dialog.FolderName];
+                var dialog = new OpenFolderDialog { Title = L.T("Select folder") }; if (dialog.ShowDialog(this) == true) paths = [dialog.FolderName];
             }
             else
             {
-                var dialog = new OpenFileDialog { Filter = m.GetProperty("filter").GetString() ?? "All files|*.*", Multiselect = m.GetProperty("multiple").GetBoolean() }; if (dialog.ShowDialog(this) == true) paths = dialog.FileNames;
+                var dialog = new OpenFileDialog { Filter = m.GetProperty("filter").GetString() ?? L.T("All files") + "|*.*", Multiselect = m.GetProperty("multiple").GetBoolean() }; if (dialog.ShowDialog(this) == true) paths = dialog.FileNames;
             }
             browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id, paths }));
         }
-        catch (Exception ex) { MessageBox.Show(this, ex.Message, "File operation", MessageBoxButton.OK, MessageBoxImage.Error); }
+        catch (Exception ex) { MessageBox.Show(this, ex.Message, L.T("File operation"), MessageBoxButton.OK, MessageBoxImage.Error); }
     }
 }
 

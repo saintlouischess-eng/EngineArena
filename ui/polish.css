@@ -16,7 +16,7 @@ h1{font-size:1.9rem;font-weight:650;letter-spacing:-.04em}h2{font-size:1.05rem;l
 .panel{border-radius:var(--radius);box-shadow:0 3px 12px #0000000b;overflow:hidden}
 .dock-panel{overflow:auto;container-type:inline-size}
 .panel-title{display:flex;flex-direction:column;align-items:stretch;gap:12px;padding:16px 18px;margin:0;border-bottom:1px solid var(--border)}
-.panel-heading{display:flex;align-items:center;gap:9px;min-width:0}.panel-heading h2{flex:1;margin:0}.panel-heading>.live-indicator{font-size:.7rem;white-space:nowrap}.panel-heading>button[title="Hide panel"]{margin-left:auto}
+.panel-heading{display:flex;align-items:center;gap:9px;min-width:0}.panel-heading h2{flex:1;margin:0}.panel-heading>.live-indicator{font-size:.7rem;white-space:nowrap}.panel-heading>button:is([title="Hide panel"],[data-arena-help-title="Hide panel"]){margin-left:auto}
 .panel-tools{display:flex;align-items:center;flex-wrap:wrap;gap:7px;min-width:0}.panel-tools select{flex:1;min-width:140px;max-width:100%}.panel-tools label{font-size:.83rem}
 .panel-tools button{font-size:.82rem}.dock-handle{font-size:1.3rem!important;min-height:24px;opacity:.65}.dock-handle:hover{opacity:1}
 .panel>.caption{padding:0;margin:14px 18px;font-size:.77rem;line-height:1.65}
@@ -69,3 +69,14 @@ dialog::backdrop{background:#061019bd;backdrop-filter:blur(5px)}.modal-head{padd
 @container(min-width:720px){.focus-content{grid-template-columns:minmax(0,1fr) 230px}}
 
 .library-empty{padding:36px 24px;color:var(--muted);text-align:center}
+
+.ko-config{border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:16px;margin:16px 0;min-width:0}.ko-config h3,.ko-live-results h3{margin:0 0 10px}.ko-config p{line-height:1.6}.ko-config [data-ko-round]{width:8em;max-width:100%}.ko-stage{border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0;min-width:0}.ko-stage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.ko-stage-heading h4{margin:0}.ko-stage .tc-editor{margin-top:12px}.ko-live-results{padding:16px;border-bottom:1px solid var(--border);min-width:0}.ko-match-scroll{max-height:340px;overflow:auto;overscroll-behavior:contain}.ko-match-scroll table{min-width:560px;width:100%}.ko-match-scroll th{position:sticky;top:0;background:var(--panel);z-index:1}.ko-config[hidden],.ko-live-results[hidden]{display:none}
+.ko-rules-summary{margin:10px 0 4px}.ko-rules>summary{cursor:pointer;color:var(--accent);font-size:.82rem;padding:5px 0;width:fit-content;max-width:100%}.ko-rules>summary:hover{text-decoration:underline}.ko-rules>p{margin:6px 0 0;line-height:1.6;overflow-wrap:anywhere}
+
+.storage-panel{margin-top:18px;padding:0 18px 18px}.storage-panel>.panel-title{margin:0 -18px 18px}.storage-panel .toolbar{flex-wrap:wrap}.storage-panel #storageProgress{overflow-wrap:anywhere}
+
+#engineBook .fields>label{display:flex;flex-direction:column;gap:8px;min-width:0}#engineBook select{width:100%;max-width:100%}#engineBook .book-actions{display:flex;flex-wrap:wrap;align-items:end;gap:6px}#engineBook .book-actions button{white-space:normal}
+
+#sprtPanel>p:not(.caption),#sprtPanel>details{margin:1rem 1.15rem} #sprtPanel .panel-title{flex-wrap:wrap;gap:.5rem} #sprtPanel[hidden],#sprtSetup[hidden]{display:none!important}
+
+.modal-foot .hover-help-setting{display:flex;align-items:center;gap:6px;margin:0;font-size:.85rem}

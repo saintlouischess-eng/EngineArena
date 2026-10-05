@@ -4,6 +4,7 @@ import hashlib
 import json
 import networkx as nx
 from .rankings import rows as ranking_rows,point_delta
+from .knockout import round_cycles,playoff_control
 
 DYNAMIC=('swiss','knockout','double_elimination','ladder')
 def encode(v):return json.dumps(v,separators=(',',':'),sort_keys=True)
@@ -78,6 +79,7 @@ def resolve_match(previous,records,a,b,s,ranks):
     score,count=score_match(records,a,b,*span)
     if count and score!=count/2:return {'winner':a if score>count/2 else b,'method':'playoff' if stages else 'score'}
     method=s.get('knockout_tiebreak','seed')
+    if method=='continuous':return {'playoff':True}
     if method=='playoff' and len(stages)<s.get('playoff_limit',3):return {'playoff':True}
     if method=='playoff':method=s.get('playoff_fallback','seed')
     if method=='manual':return {'manual':True}
@@ -158,7 +160,10 @@ def materialize(store,t,window):
         with store.tx():
             for c in state.get('chunks',[]):
                 done=c.get('materialized',c['count']);take=min(c['count']-done,(remaining+legs-1)//legs)
-                for j in range(take):store._insert_pair(t['id'],c['start']+done+j,c['a'],c['b'],row['round'],s,fixed_colors=True,stage=c['phase'],cycle=(done+j)%s['cycles'])
+                for j in range(take):
+                    a,b=c['a'],c['b']
+                    if legs==1 and (s.get('ko_round_games') or s.get('knockout_tiebreak')=='continuous') and (c.get('color_offset',0)+done+j)%2:a,b=b,a
+                    store._insert_pair(t['id'],c['start']+done+j,a,b,row['round'],s,fixed_colors=True,stage=c['phase'],cycle=(done+j)%round_cycles(s,row['round']),playoff_stage=c.get('playoff_stage'),playoff_time_control=c.get('time_control'),opening_assignment=c['opening_start']+done+j if c.get('opening_start') is not None else None)
                 if take:c['materialized']=done+take;remaining-=take*legs;changed=True
                 if remaining<=0:break
             if changed:store.db.execute('UPDATE round_state SET body=? WHERE tid=? AND round=?',(encode(state),t['id'],row['round']))
@@ -179,11 +184,18 @@ def apply_plan(store,plan,allow_paused=False):
             store.db.execute("UPDATE tournaments SET state='paused',dependency=?,note=? WHERE id=?",(plan['note'],plan['note'],tid));store.audit(tid,'pairing_attention_required',plan);return True
         start=max(t['cursor'],store.one('SELECT coalesce(max(pair_no),-1)+1 n FROM games WHERE tid=?',(tid,))['n']);cursor=start
         if kind=='playoffs':state=current['states'][round_no];cycles=s.get('playoff_cycles',1)
-        else:state={k:v for k,v in plan.items() if k not in ('signature','kind','tid')};state.update(chunks=[],regular_pairs={},playoffs={});cycles=s['cycles']
+        else:state={k:v for k,v in plan.items() if k not in ('signature','kind','tid')};state.update(chunks=[],regular_pairs={},playoffs={});cycles=round_cycles(s,round_no)
         for a,b in plan['matches']:
-            key=match_key(a,b);state['chunks'].append({'start':cursor,'count':cycles,'materialized':0,'a':a,'b':b,'phase':'playoff' if kind=='playoffs' else 'regular'})
-            if kind=='playoffs':state.setdefault('playoffs',{}).setdefault(key,[]).append({'start':cursor,'end':cursor+cycles})
+            key=match_key(a,b);chunk={'start':cursor,'count':cycles,'materialized':0,'a':a,'b':b,'phase':'playoff' if kind=='playoffs' else 'regular'}
+            if kind=='playoffs':
+                stages=state.setdefault('playoffs',{}).setdefault(key,[]);stage=len(stages)
+                chunk.update(playoff_stage=stage+1,time_control=playoff_control(s,stage),color_offset=round_cycles(s,round_no)+stage*cycles)
+                stages.append({'start':cursor,'end':cursor+cycles,'stage':stage+1,'time_control':chunk['time_control']})
             else:state['regular_pairs'][key]=[cursor,cursor+cycles]
+            from .opening_policy import shared_ko,reserve_ko_suite
+            if shared_ko(s):
+                chunk['opening_start']=reserve_ko_suite(store,t,current['states'],round_no,chunk.get('playoff_stage',0),cycles)
+            state['chunks'].append(chunk)
             cursor+=cycles
         if kind!='playoffs':
             state['bye_awards']=[(a,cycles*(2 if s['paired'] else 1)*s.get('bye_score',1)) for a in plan['byes']] if s['format']=='swiss' else []

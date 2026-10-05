@@ -87,7 +87,7 @@ def seed(folder, target):
                 outbox.append((aid, 'games', pgn))
             with s.tx():
                 s.db.executemany('INSERT INTO games VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', games)
-                s.db.executemany('INSERT INTO attempts VALUES(?,?,?,?,?,?,?,?,?,?,?)', attempts)
+                s.db.executemany('INSERT INTO attempts(id,gid,seq,mode,started,ended,result,reason,detail,clocks,identity) VALUES(?,?,?,?,?,?,?,?,?,?,?)', attempts)
                 s.db.executemany('INSERT INTO moves VALUES(?,?,?,?,?,?,?,?)', plies)
                 s.db.executemany('INSERT INTO outbox(aid,stream,pgn) VALUES(?,?,?)', outbox)
                 s.db.execute('UPDATE tournaments SET cursor=? WHERE id=?', (end//2, tid))
@@ -152,17 +152,27 @@ def benchmark(folder, tid, count):
         result['cached_history_graph'] = measure(lambda: tournament_series(s.path, tid))
         result['working_set_bytes'] = psutil.Process().memory_info().rss
         result['outbox_query_plan'] = s.rows('EXPLAIN QUERY PLAN SELECT * FROM outbox WHERE stream=? AND id>? ORDER BY id LIMIT 64', ('interrupted', 0))
-        start=time.perf_counter();reader=OfficialPgnReader(s.path,tid);size=0;peak=0;ids=set();digest=hashlib.sha256()
+        start=time.perf_counter();reader=OfficialPgnReader(s.path,tid);size=0;peak=0;ids=set();digest=hashlib.sha256();chunks=0;export_samples=0
         try:
             while chunk:=reader.chunk():
                 size+=len(chunk);digest.update(chunk)
                 for aid in re.findall(rb'\[AttemptId "([^\"]+)"\]',chunk):
                     assert aid not in ids;ids.add(aid)
+                if chunks%63==0:
+                    game=chess.pgn.read_game(io.StringIO(chunk.decode('utf-8')))
+                    assert game and not game.errors and len(list(game.mainline_moves()))==80
+                    assert game.headers['Result']=='1/2-1/2'
+                    export_samples+=1
+                chunks+=1
                 peak=max(peak,psutil.Process().memory_info().rss)
         finally:reader.close()
-        assert len(ids)==count and size==result['automatic_pgn_bytes']
+        # Current readable exports intentionally differ from old automatic archive
+        # bytes. Check the complete official attempt set and legal exported moves,
+        # not an obsolete equality between different PGN presentation formats.
+        expected={r['official'].encode() for r in s.rows('SELECT official FROM games WHERE tid=? AND official IS NOT NULL AND invalid=0',(tid,))}
+        assert len(ids)==count and ids==expected and size>0
         result['streamed_official_pgn']={'seconds':time.perf_counter()-start,'bytes':size,
-            'unique_attempts':len(ids),'sha256':digest.hexdigest(),'peak_process_working_set_bytes':peak}
+            'unique_attempts':len(ids),'sha256':digest.hexdigest(),'peak_process_working_set_bytes':peak,'independently_parsed_export_samples':export_samples}
         # Validate legal moves/annotations for both color templates and samples
         # throughout the fixture; all remaining records are exact move copies.
         samples=s.rows('SELECT o.pgn FROM games g JOIN outbox o ON o.aid=g.official '

@@ -91,6 +91,8 @@ class Sampler:
     def __init__(self,folder):
         self.folder=Path(folder);self.previous={};self.cpu_primed=False
         self.identity=None;self.frequency=None;self.last_static=0
+        from .cpu_usage import CpuUsage
+        self.cpu_usage=CpuUsage()
 
     def rate(self,key,value,now):
         previous=self.previous.get(key);self.previous[key]=(now,value)
@@ -102,7 +104,7 @@ class Sampler:
         if self.identity is None:
             self.identity={'cpu_name':cpu_name(),'physical_cores':psutil.cpu_count(logical=False),'logical_cpus':psutil.cpu_count()}
         try:
-            cores=psutil.cpu_percent(percpu=True)
+            cores=self.cpu_usage.sample()
             metrics.update(cpu_percent=sum(cores)/len(cores) if cores and self.cpu_primed else None,
                            cpu_peak=max(cores) if cores and self.cpu_primed else None)
             self.cpu_primed=True

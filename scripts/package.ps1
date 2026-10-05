@@ -3,9 +3,11 @@ $taskSourceRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $taskSourceRoot
 New-Item -ItemType Directory -Path release\EngineArena\worker -Force | Out-Null
 Copy-Item -Path dist\ArenaWorker\* -Destination release\EngineArena\worker -Recurse -Force
-Copy-Item -LiteralPath README.md,requirements.txt -Destination release\EngineArena -Force
+Copy-Item -LiteralPath LICENSE,NOTICE,README.md,requirements.txt -Destination release\EngineArena -Force
 New-Item -ItemType Directory -Path release\EngineArena\docs -Force | Out-Null
-Copy-Item -Path docs\* -Destination release\EngineArena\docs -Recurse -Force
+foreach ($name in Get-Content installer\public-docs.txt) {
+    Copy-Item -LiteralPath (Join-Path docs $name) -Destination release\EngineArena\docs -Force
+}
 New-Item -ItemType Directory -Path release\EngineArena\Validation -Force | Out-Null
 foreach ($evidence in @('tester-preview-acceptance.xml','tester-math-audit.json','tester-pool-audit.json','tester-backup-report.json','tester-packaged-report.json','tester-ui-report.json','fastest-clock-acceptance.xml','fastest-clock-report.json','cpu-sensors-acceptance.xml','cpu-sensors-report.json','cpu-sensors-pipe-report.json','cpu-sensors-dependency-audit.json','hardware-acceptance.xml','hardware-report.json','results-controls-acceptance.xml','results-controls-report.json','results-controls-scale.json','pgn-export-acceptance.xml','pgn-export-report.json','pgn-export-scale.json','pgn-user-sample-report.json')) {
     $evidencePath = Join-Path 'test-output' $evidence
@@ -29,13 +31,20 @@ foreach ($metadata in Get-ChildItem -Path .venv\Lib\site-packages\*.dist-info -D
 }
 New-Item -ItemType Directory -Path release\EngineArena\ThirdParty\LibreHardwareMonitor -Force | Out-Null
 Copy-Item -Path vendor\LibreHardwareMonitor\* -Destination release\EngineArena\ThirdParty\LibreHardwareMonitor -Force
-$sourceFiles = & rg --files arena desktop sensors ui scripts tests installer
-$sourceFiles += @('worker.py','README.md','pytest.ini','requirements.txt','requirements-dev.txt','requirements.lock.txt','requirements-statistics.txt')
+foreach ($notices in @('Three','DotNet','WebView2SDK','Python','PawnIO','InnoSetup')) {
+    Copy-Item -LiteralPath (Join-Path 'vendor' $notices) -Destination release\EngineArena\ThirdParty -Recurse -Force
+}
+$sourceFiles = @(& rg --files arena desktop sensors ui tests installer vendor locales)
+$sourceFiles += @(Get-Content installer\source-scripts.txt | ForEach-Object { Join-Path scripts $_ })
+$sourceFiles += @('worker.py','README.md','LICENSE','NOTICE','pytest.ini','requirements.txt','requirements-dev.txt','requirements.lock.txt','requirements-statistics.txt')
 foreach ($source in $sourceFiles) {
     $sourceTarget = Join-Path 'release\EngineArena\Source' $source
     New-Item -ItemType Directory -Path (Split-Path -Parent $sourceTarget) -Force | Out-Null
     Copy-Item -LiteralPath $source -Destination $sourceTarget -Force
 }
+Copy-Item -LiteralPath release\EngineArena\docs -Destination release\EngineArena\Source -Recurse -Force
 Compress-Archive -Path release\EngineArena\* -DestinationPath release\EngineArena-win-x64.zip -Force
+$portableHash = (Get-FileHash -LiteralPath release\EngineArena-win-x64.zip -Algorithm SHA256).Hash.ToLower()
+Set-Content -LiteralPath release\EngineArena-win-x64.zip.sha256 -Value ($portableHash+'  EngineArena-win-x64.zip') -Encoding ASCII
 Write-Output 'Portable output: release\EngineArena\EngineArena.exe'
 

@@ -59,7 +59,7 @@ def test_backup_does_not_hold_move_writer_or_scheduler(tmp_path):
             actual_backup=db.store._backup_snapshot
             def slow_backup():entered.set();assert release.wait(5);actual_backup()
             with patch.object(db.store,'_backup_snapshot',slow_backup):
-                runner.last_backup-=61;await runner.start()
+                runner.last_backup-=db.store.storage_settings['backup_minutes']*60+1;await runner.start()
                 assert await asyncio.to_thread(entered.wait,2)
                 board=chess.Board();board.push_uci('e2e4')
                 await asyncio.wait_for(db.save_move(g['aid'],1,'e2e4','e4',board.fen(),.1,

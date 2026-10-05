@@ -1,0 +1,36 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+(async()=>{
+ const ready=JSON.parse(fs.readFileSync('test-output/workflow-ready.json','utf8')),out='test-output/workflow-ui';fs.mkdirSync(out,{recursive:true});
+ const browser=await chromium.launch({headless:true,channel:'msedge',args:['--enable-unsafe-swiftshader']}),errors=[];
+ try{
+  const page=await browser.newPage({viewport:{width:1640,height:1100}});page.on('pageerror',e=>errors.push(e.stack));await page.goto(ready.url);await page.waitForFunction(()=>state.snapshot&&moveSheet.rows.length>0);
+  await page.screenshot({path:out+'/scoresheet.png',fullPage:true});
+  const before=await page.evaluate(()=>({fen:state.live[0].fen,rows:moveSheet.rows.length,game:focusId}));assert(before.rows>20);
+  await page.locator('[data-move="3"]').click();assert.equal(await page.locator('#focusContent [data-clock-game]').count(),0);
+  assert.match(await page.locator('.focus-game-state').textContent(),/Reviewing/);assert.notEqual(await page.evaluate(()=>gameMovesView(selectedFocusGame()).fen),before.fen);
+  const review=await page.evaluate(()=>({fen:gameMovesView(selectedFocusGame()).fen,scroll:document.querySelector('.scoresheet-scroll').scrollTop,ply:moveSheet.latest}));
+  await page.request.post(new URL('/fixture/step',ready.url).href);await page.waitForFunction(p=>moveSheet.latest>p,review.ply);assert.equal(await page.evaluate(()=>gameMovesView(selectedFocusGame()).fen),review.fen);assert.equal(await page.locator('.scoresheet-scroll').evaluate(el=>el.scrollTop),review.scroll);
+  await page.locator('#movesDetails').check();await page.locator('#movesFont').fill('18');await page.locator('#movesFont').press('Tab');assert.equal(await page.locator('.scoresheet th').count(),7);
+  await page.locator('#movesLatest').click();await page.waitForFunction(()=>!moveSheet.review);assert.equal(await page.evaluate(()=>gameMovesView(selectedFocusGame()).fen),await page.evaluate(()=>state.live[0].fen));
+  await page.evaluate(()=>boardViewDialog());await page.locator('#focusBoardStyle').selectOption('3d');await page.locator('#applyBoardView').click();await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0);
+  await page.screenshot({path:out+'/board-3d.png',fullPage:true});
+  const frames=await page.locator('.board-3d').getAttribute('data-frames');await page.waitForTimeout(2100);assert.equal(await page.locator('.board-3d').getAttribute('data-frames'),frames,'Idle 3D board must not redraw on status polling');
+  await page.locator('.board-3d').focus();await page.keyboard.press('ArrowRight');await page.waitForFunction(n=>Number(document.querySelector('.board-3d').dataset.frames)>Number(n),frames);
+  await page.evaluate(()=>{state.flip=!state.flip;renderFocus()});await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0);assert.equal(await page.locator('.board-3d').count(),1);
+  await page.evaluate(()=>{displayPrefs.theme='light';applyDisplay()});await page.screenshot({path:out+'/board-3d-light.png',fullPage:true});
+  await page.evaluate(()=>{board3dCanvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()});await page.waitForFunction(()=>board3dFailed&&!document.querySelector('.board-3d'));assert.equal(await page.locator('.focus-board .board').isVisible(),true);
+  await page.evaluate(()=>{displayPrefs.theme='dark';displayPrefs.focus3d=false;applyDisplay()});
+  await page.request.post(new URL('/fixture/finish',ready.url).href);await page.waitForFunction(()=>!state.live.length&&moveSheet.data?.attempt?.ended);await page.waitForTimeout(850);assert.equal(await page.evaluate(()=>focusId),before.game);assert.equal(await page.locator('#focusContent .board').count(),1);assert.equal(await page.locator('#focusContent [data-clock-game]').count(),0);
+  await page.locator('#tournamentPicker').selectOption(ready.completed);await page.waitForFunction(()=>!completionCard.hidden&&completionCard.querySelector('[data-complete=final]'));assert.match(await page.locator('.completion-card').textContent(),/1 official engine failures/);await page.locator('[data-complete=final]').click();assert.equal(await page.locator('#focusContent .board').count(),1);await page.screenshot({path:out+'/completion.png',fullPage:true});
+  await page.locator('#quickMatch').click();await page.waitForFunction(()=>document.querySelector('#quickEngine1')?.options.length>=2);
+  await page.locator('#quickPairs').fill('7');await page.locator('#quickTc [data-tc=kind]').selectOption('nodes');await page.locator('#quickTc [data-tc=nodes]').fill('12000');await page.locator('#quickReview').click();await page.waitForSelector('#createTournament');assert.match(await page.locator('.quick-review').textContent(),/14/);await page.screenshot({path:out+'/quick-review.png'});
+  const count=await page.evaluate(async()=>(await api('tournaments')).length);await page.locator('#createTournament').click();await page.waitForFunction(()=>!document.querySelector('#modal').open&&state.snapshot?.name==='Quick match');assert.equal(await page.evaluate(async()=>(await api('tournaments')).length),count+1);assert.equal(await page.evaluate(()=>state.snapshot.total),14);assert.equal(await page.evaluate(()=>state.snapshot.settings.time_control.kind),'nodes');
+  await page.evaluate(()=>view('engines'));await page.locator('#importEngines').click();
+  const data=await page.evaluate(async()=>{const p=(await api('profiles')).items[0];return [{name:'Imported Cute profile',command:p.path,protocol:'uci',arguments:'--test "a b"',options:[{name:'Threads',value:2},{name:'Hash',value:64}]},{app:{name:'Banksia import',command:p.path,protocol:'uci'}},{name:'WinBoard skipped',command:p.path,protocol:'xboard'}]});
+  await page.locator('#profileSource').setInputFiles({name:'engines.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.locator('#previewProfiles').click();await page.waitForSelector('[data-import-index]');assert.match(await page.locator('#profileImportStatus').textContent(),/2 ready/);await page.screenshot({path:out+'/import-preview.png'});await page.locator('#commitProfiles').click();await page.waitForFunction(()=>!document.querySelector('#modal').open&&document.querySelector('#notice').textContent.includes('2 profiles imported'));
+  const importedNames=await page.evaluate(async()=>(await api('profiles')).items.map(p=>p.name));assert(importedNames.includes('Imported Cute profile'));assert(importedNames.includes('Banksia import'));
+  await page.setViewportSize({width:1280,height:800});await page.evaluate(()=>{view('overview');displayPrefs.focus3d=true;board3dFailed=false;state.tid=state.snapshot.id;applyDisplay()});await page.screenshot({path:out+'/laptop.png',fullPage:true});
+  assert.deepEqual(errors,[]);fs.writeFileSync(out+'/result.json',JSON.stringify({passed:true,scoresheetReview:true,recordedClocksFrozen:true,idle3dFrames:frames,contextLossFallback:true,finalGameRetained:true,completion:true,quickMatchNodes:14,imports:2,errors},null,2));console.log('Workflow UI checks passed.');
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});

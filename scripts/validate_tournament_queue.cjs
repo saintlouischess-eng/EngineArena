@@ -1,0 +1,43 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+(async()=>{
+ const ready=JSON.parse(fs.readFileSync('test-output/tournament-queue-ready.json','utf8'));
+ const browser=await chromium.launch({headless:true,channel:'msedge'});
+ try{
+  const page=await browser.newPage({viewport:{width:1550,height:1050}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));await page.goto(ready.url);
+  await page.waitForFunction(()=>typeof state!=='undefined'&&state.snapshot&&typeof showQueue==='function');
+  await page.locator('[data-view=tournamentQueue]').click();await page.waitForSelector('#queueAddAll');
+  await page.locator('#queueAddAll').click();await page.waitForFunction(()=>queueData?.total===3&&!queueMutating);
+  const order=()=>page.locator('[data-queue-row]').evaluateAll(rows=>rows.map(e=>e.dataset.queueRow));
+  assert.deepEqual(await order(),ready.ids);
+  await page.locator(`[data-tid="${ready.ids[2]}"][data-qmove=up]`).click();await page.waitForFunction(()=>!queueMutating);
+  assert.deepEqual(await order(),[ready.ids[0],ready.ids[2],ready.ids[1]]);
+  await page.locator(`[data-qedit="${ready.ids[1]}"]`).click();
+  await page.waitForFunction(()=>document.querySelector('#modal').open&&document.querySelector('#editParticipants')&&!document.querySelector('#createTournament').disabled);
+  await page.locator('#tname').fill('Edited while waiting');await page.locator('#createTournament').click();await page.waitForFunction(()=>!document.querySelector('#modal').open);
+  await page.locator('[data-view=tournamentQueue]').click();await page.waitForFunction(()=>document.querySelector('#queueRows').textContent.includes('Edited while waiting'));
+  await page.locator('.manager-timing summary').click();await page.locator('#queueStartMode').selectOption('later');
+  const future=new Date(Date.now()+3600000),local=new Date(future.getTime()-future.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  await page.locator('#queueDate').fill(local);await page.locator('#queueRun').click();await page.waitForFunction(()=>queueData?.mode==='running'&&!queueMutating);
+  assert.equal(await page.evaluate(()=>state.live.length),0);assert.ok(await page.locator('#queueStatus').textContent().then(t=>t.includes('Scheduled start')));
+  await page.reload();await page.waitForFunction(()=>state.snapshot&&queueData?.mode==='running');
+  await page.locator('[data-view=tournamentQueue]').click();await page.locator('#queuePause').click();await page.waitForFunction(()=>queueData?.mode==='paused'&&!queueMutating);
+  await page.locator('.manager-timing summary').click();await page.locator('#queueStartMode').selectOption('now');await page.locator('#queueRun').click();
+  await page.waitForFunction(()=>queueData?.active_tid&&state.live.length>0);
+  await page.locator('#queuePause').click();await page.waitForFunction(()=>queueData?.mode==='paused'&&!state.live.length,{},{timeout:15000});
+  await page.waitForFunction(()=>queueData.active?.state==='paused');
+  const attempts=await page.evaluate(async id=>(await api(`tournaments/${id}`)).official_games,ready.ids[0]);assert.ok(attempts>0&&attempts<6);
+  await page.locator('#queueRun').click();await page.waitForFunction(()=>queueData?.mode==='running'&&state.live.length>0);
+  await page.locator('#queueFinish').click();await page.waitForFunction(()=>queueData?.mode==='paused'&&queueData.completed===1,{},{timeout:20000});
+  await page.screenshot({path:'test-output/tournament-queue.png'});
+  assert.equal(await page.evaluate(()=>queueData.remaining),2);
+  await page.locator('#queueRun').click();await page.waitForFunction(()=>queueData?.mode==='completed',{},{timeout:25000});
+  await page.locator('#queueRefresh').click();await page.waitForFunction(()=>!queueLoading&&queueData.completed===3&&[...document.querySelectorAll('#queueRows tr td:nth-child(4)')].every(e=>e.textContent==='6 / 6'));
+  const counts=await page.locator('#queueRows tr td:nth-child(4)').allTextContents();assert.deepEqual(counts,['6 / 6','6 / 6','6 / 6']);
+  await page.locator('#queueClear').click();await page.waitForFunction(()=>queueData.total===0&&!queueMutating);
+  assert.equal(await page.evaluate(async()=> (await api('tournaments')).length),3);
+  assert.deepEqual(errors,[]);fs.writeFileSync('test-output/tournament-queue-ui.json',JSON.stringify({errors,reorder:true,editWhileWaiting:true,timedStart:true,drain:true,finishCurrent:true,automaticAdvancement:true,completedGames:18,clearPreservesTournaments:true},null,2));
+  console.log('Queue browser workflow passed; 18 games completed');
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});

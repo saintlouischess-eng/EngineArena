@@ -1,5 +1,12 @@
 # Beta validation scope
 
+**September 27 local candidate:** see [RELEASE_CANDIDATE.md](RELEASE_CANDIDATE.md)
+for Beta 3 RC 2 and the historical RC 1 tests. The record below describes the already
+published Beta 2, not the new candidate. Subsequent evidence includes the owner's
+completed 76,500-game endurance test and working laptop CPU sensors; older pending
+items below must be read in that historical context. Clean-machine acceptance of
+the new candidate still needs its own check.
+
 Beta 2 fixes the optional WebView2 setup path: Microsoft's `-2147219416` (`0x80040828`, already installed) is accepted only after the SDK loader detects an available runtime. Setup uses the same detection API as the desktop app; all four registry views are logged for diagnostics. Ten compiled installer-policy cases passed, including the reported repair failure, missing/broken runtime, launch failure, unknown errors and restart-required. Real SDK probes passed with the installed runtime and with an empty per-process runtime override. These tests do not claim that an arbitrary damaged Windows installation has been repaired.
 
 The pre-installer 0.2.0 application passed 194 backend tests and 21 JavaScript checks. Independent reference calculations checked 1,408 score/Elo/confidence cases at eleven confidence levels, 144 SPRT cases and 180 pool-rating estimates. These verify the implemented models, not universal statistical calibration. Normal intervals can under-cover small samples; independence assumptions and sequential-stopping limitations remain.

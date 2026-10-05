@@ -51,7 +51,9 @@ def test_search_telemetry_retains_each_engine_and_clears_new_search(tmp_path):
             await runner.start()
             for _ in range(400):
                 for view in runner.status()['live']:
-                    if view.get('clock_active')=='black' and view['ply']==1:
+                    # Fresh info can arrive just before bestmove changes the ply.
+                    # Observe the actual waiting phase, not that valid transition.
+                    if view.get('clock_active')=='black' and view['ply']==1 and not view.get('info'):
                         assert view['info']=={} and view['info_side']=='black'
                         assert view['searches']['white']['info']['cp']==14
                         assert view['searches']['white']['complete']
@@ -59,7 +61,7 @@ def test_search_telemetry_retains_each_engine_and_clears_new_search(tmp_path):
                         assert view['searches']['black']['info']=={}
                         assert view['searches']['black']['move_number']==1
                         observed.add('black waiting')
-                    if view.get('clock_active')=='white' and view['ply']==2:
+                    if view.get('clock_active')=='white' and view['ply']==2 and not view.get('info'):
                         assert view['info']=={} and view['info_side']=='white'
                         assert view['searches']['black']['info']['cp']==-14
                         assert view['searches']['black']['info']['wdl']==[270,410,320]

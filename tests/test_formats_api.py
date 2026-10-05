@@ -17,6 +17,8 @@ def test_preview_and_audited_pairing_routes(tmp_path):
             assert r.status==200 and v['scheduled_games']=='99990000' and not v['conditional']
             r=await client.post('/api/schedule-preview',json={'participants':2,'settings':{'format':'double_elimination','cycles':1,'knockout_tiebreak':'playoff','playoff_limit':2,'playoff_cycles':1}});v=await r.json()
             assert v=={'scheduled_games':'4','maximum_games':'18','conditional':True}
+            r=await client.post('/api/schedule-preview',json={'participants':8,'settings':{'format':'knockout','ko_round_games':[4,6,8]}});v=await r.json()
+            assert r.status==200 and v=={'scheduled_games':'36','maximum_games':None,'conditional':True,'unbounded':True}
             r=await client.post('/api/schedule-preview',json={'participants':2,'settings':{'format':'ladder','ladder_distance':2}});assert r.status==400
             t=await db.call('create_tournament','Manual Swiss',[{'name':'One'},{'name':'Two'}],{'format':'swiss','cycles':1,'rounds':2})
             tid=t['id'];await db.call('set_state',tid,'running');await db.call('fill_queue',tid,8)

@@ -57,6 +57,9 @@ def test_report_pages_and_selfplay_count_each_game_once(tmp_path):
     assert first['summary']['games']==130 and first['summary']['wins']==130
     assert first['colors'][0]['color']=='White' and len(first['colors'])==1
     assert len(list(csv.DictReader(io.StringIO(opening_report(s.path,tid,0,export=True)))))==65
+    full=opening_report(s.path,tid,0,export='json')
+    assert len(full['openings'])==65 and full['summary']==first['summary']
+    assert full['openings'][-1]['opening_index']==64
     s.close()
 
 
@@ -84,6 +87,9 @@ def test_report_api_refreshes_only_official_revision(tmp_path):
             await db.call('set_state',tid,'running');await db.call('fill_queue',tid,2);g=await db.call('claim',tid);await db.call('finish',g['aid'],'1-0','fixture')
             r=await client.get(f'/api/tournaments/{tid}/openings');v2=await r.json();assert v2['summary']['games']==1 and v2['revision']>v['revision']
             r=await client.get(f'/api/tournaments/{tid}/openings?export=csv');assert r.content_type=='text/csv' and len(list(csv.DictReader(io.StringIO(await r.text()))))==1
+            r=await client.get(f'/api/tournaments/{tid}/openings?export=json');full=await r.json()
+            assert full['summary']==v2['summary'] and len(full['openings'])==1
+            assert (await client.get(f'/api/tournaments/{tid}/openings?export=wrong')).status==400
     asyncio.run(run())
 
 

@@ -26,7 +26,7 @@ DEFAULTS={'format':'match','cycles':10,'paired':True,'rounds':5,'candidates':1,'
  'resign_cp':0,'resign_plies':6,'draw_cp':0,'draw_plies':12,'draw_after':80,'ponder':False,
  'syzygy_path':'','sprt':{'elo0':0,'elo1':5,'alpha':.05,'beta':.05}}
 DEFAULTS.update(cpu_budget=0,memory_budget_mb=0,gpu_limits={})
-DEFAULTS.update(seeding='input',tiebreaks=['wins','seed'],bye_score=1,knockout_tiebreak='seed',playoff_limit=3,playoff_cycles=1,playoff_fallback='seed',swiss_rematches=False,ladder_swap='adjacent',ladder_distance=1)
+DEFAULTS.update(seeding='input',tiebreaks=['wins','seed'],bye_score=1,knockout_tiebreak='continuous',playoff_limit=3,playoff_cycles=1,playoff_fallback='seed',swiss_rematches=False,ladder_swap='adjacent',ladder_distance=1)
 
 class SavingError(RuntimeError): pass
 
@@ -36,7 +36,7 @@ class Store:
     Scheduling stores a cursor plus only a small ready window. Tournament profiles
     are immutable snapshots; editing the registry never changes a running test.
     """
-    def __init__(self,folder):
+    def __init__(self,folder,*,defer_maintenance=False):
         self.folder=Path(folder).resolve();self.folder.mkdir(parents=True,exist_ok=True)
         self.path=self.folder/'arena.sqlite3';self.warning='';self.failure='';self.revision=0;self.backup_lock=threading.Lock()
         self.backup_revision=-1;self.backup_file=None;self.backup_signature=None
@@ -53,13 +53,19 @@ class Store:
                 fcntl.flock(self.lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except OSError:
             self.lock.close();raise RuntimeError('This data folder is already open by another worker')
+        from .clean_shutdown import consume,CHECK_INTERVAL,restore_backup_hint
+        receipt=consume(self.folder,self.path)
+        self.checked_at=receipt.get('checked_at',0) if receipt else 0
         self.db=sqlite3.connect(self.path,isolation_level=None,timeout=30)
         self.db.row_factory=sqlite3.Row
         try:
-            if self.db.execute('PRAGMA quick_check').fetchone()[0]!='ok': raise sqlite3.DatabaseError('Integrity check failed')
+            if not receipt or not 0<=now()-self.checked_at<CHECK_INTERVAL:
+                if self.db.execute('PRAGMA quick_check').fetchone()[0]!='ok': raise sqlite3.DatabaseError('Integrity check failed')
+                self.checked_at=now()
         except sqlite3.DatabaseError:
             self.db.close(); self._restore()
             self.db=sqlite3.connect(self.path,isolation_level=None,timeout=30);self.db.row_factory=sqlite3.Row
+            receipt=None;self.checked_at=now()
         self.db.execute('PRAGMA journal_mode=WAL');self.db.execute('PRAGMA synchronous=FULL')
         self.db.execute('PRAGMA foreign_keys=ON');self.db.execute('PRAGMA busy_timeout=30000')
         self.db.executescript('''
@@ -96,7 +102,17 @@ class Store:
         CREATE TABLE IF NOT EXISTS pgn_rebuild(stream TEXT PRIMARY KEY);
         CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY,tid TEXT,created REAL,action TEXT,body TEXT);
         CREATE TABLE IF NOT EXISTS round_state(tid TEXT,round INTEGER,body TEXT,PRIMARY KEY(tid,round));
+        CREATE TABLE IF NOT EXISTS opening_suites(tid TEXT,round INTEGER,stage INTEGER,start INTEGER,count INTEGER,legacy INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(tid,round,stage));
+        CREATE TABLE IF NOT EXISTS workspace_version(singleton INTEGER PRIMARY KEY CHECK(singleton=1),identity TEXT NOT NULL,revision INTEGER NOT NULL);
         ''')
+        self.db.execute('INSERT OR IGNORE INTO workspace_version VALUES(1,?,0)',(uid(),))
+        restore_backup_hint(self,receipt)
+        from .storage import initialize as initialize_storage
+        initialize_storage(self)
+        from .adjudication import initialize as initialize_adjudication
+        initialize_adjudication(self)
+        from .runtime_evidence import initialize as initialize_runtime
+        initialize_runtime(self)
         from .history import initialize as initialize_history
         initialize_history(self)
         from .experiments import initialize
@@ -105,20 +121,52 @@ class Store:
         initialize_sequential(self)
         from .rankings import initialize as initialize_rankings
         initialize_rankings(self)
+        from .reliability import initialize as initialize_reliability
+        initialize_reliability(self)
+        from .move_books import initialize as initialize_books
+        initialize_books(self)
+        from .tournament_edit import initialize as initialize_edit
+        initialize_edit(self)
+        from .tournament_queue import initialize as initialize_queue
+        initialize_queue(self)
+        from .events import initialize as initialize_events
+        initialize_events(self)
+        self.schema_version=self.db.execute('PRAGMA schema_version').fetchone()[0]
+        if receipt and receipt.get('schema_version')!=self.schema_version:self.backup_revision=-1
         with self.tx():
             self.db.execute('INSERT OR IGNORE INTO presets VALUES(?,?)',('3m + 2s · 1 thread · 1 GB · paired',encode({'time_control':DEFAULTS['time_control'],'threads':1,'hash':1024,'ponder':False,'paired':True})))
-        from .deletion import apply_pending
-        try:apply_pending(self)
+        from .deletion import ledger
+        try:
+            with contextlib.closing(ledger(self.folder)) as deletions:
+                pending_deletion=bool(deletions.execute('SELECT 1 FROM deleted LIMIT 1').fetchone())
+        except (OSError,sqlite3.Error):pending_deletion=True # Report through normal recovery failure handling.
+        self.startup_pending=defer_maintenance and bool(pending_deletion or self.one('SELECT 1 FROM storage_jobs LIMIT 1'))
+        if self.startup_pending:
+            from .storage import progress
+            progress(self,busy=True,phase='Checking interrupted storage work',error='')
+            return
+        try:self.finish_startup()
         except SavingError:return
+
+    def finish_startup(self):
+        from .deletion import apply_pending
+        apply_pending(self)
         self.recover()
+        from .storage import resume as resume_storage
+        resume_storage(self)
+        self.startup_pending=False
+        from .storage import progress
+        progress(self,busy=False)
 
     @contextlib.contextmanager
-    def tx(self):
+    def tx(self,*,report_change=True):
         try:
             self.db.execute('BEGIN IMMEDIATE');before=self.db.total_changes
             yield
+            changed=self.db.total_changes!=before
+            if changed and report_change:self.db.execute('UPDATE workspace_version SET revision=revision+1 WHERE singleton=1')
             self.db.execute('COMMIT')
-            if self.db.total_changes!=before:self.revision+=1
+            if changed:self.revision+=1
         except (sqlite3.Error,OSError) as e:
             if self.db.in_transaction:self.db.rollback()
             self.failure=f'Saving failed: {e}. Scheduling is stopped; free disk space or repair storage, then retry.'
@@ -132,16 +180,16 @@ class Store:
         row=self.db.execute(sql,args).fetchone()
         return dict(row) if row else None
 
-    def execute(self,sql,args=()):
-        with self.tx():self.db.execute(sql,args)
+    def execute(self,sql,args=(),*,report_change=True):
+        with self.tx(report_change=report_change):self.db.execute(sql,args)
 
     def experiment_create(self,*args,**kwargs):
         from .experiments import create
         return create(self,*args,**kwargs)
 
-    def experiment_get(self,eid):
+    def experiment_get(self,eid,*args):
         from .experiments import get
-        return get(self,eid)
+        return get(self,eid,*args)
 
     def experiment_state(self,eid,state):
         from .experiments import state as set_state
@@ -159,22 +207,53 @@ class Store:
         g=self.one('SELECT * FROM games WHERE id=?',(gid,))
         if not g:raise ValueError('Game not found')
         g['opening']=json.loads(g['opening'])
+        from .knockout import game_label
+        g['competition_label']=game_label(self.tournament(g['tid'])['settings'],g['round'],g['opening'])
         g['attempts']=self.rows('SELECT * FROM attempts WHERE gid=? ORDER BY seq',(gid,))
         for a in g['attempts']:
             a['moves']=self.rows('SELECT * FROM moves WHERE aid=? ORDER BY ply',(a['id'],))
-            a['logs']=self.rows('SELECT line,created FROM logs WHERE aid=? ORDER BY id DESC LIMIT 300',(a['id'],))
+            from .telemetry import clean
+            for move in a['moves']:move['info']=encode(clean(json.loads(move['info']),move['elapsed']))
+            from .log_storage import read
+            a['logs']=read(self.db,a['id'])
         return g
 
     def set_state(self,tid,state):
         t=self.tournament(tid)
         if state=='running' and (t['dependency'] or self.failure):raise ValueError(t['dependency'] or self.failure)
         if state=='running' and t['settings']['format']=='sprt':
-            from .sequential import get
+            from .sequential import get,diagnostics
             decision=get(self,tid)
-            if decision and decision.get('frozen'):raise ValueError('SPRT has reached its recorded stopping boundary. Create a new test to collect further sequential evidence.')
+            if decision and decision.get('frozen') and not diagnostics(self,tid):raise ValueError('SPRT has reached its recorded stopping boundary. Create a new test to collect further sequential evidence.')
         if state not in ('running','paused','draining'):raise ValueError('Invalid tournament state')
         with self.tx():
-            self.db.execute('UPDATE tournaments SET state=? WHERE id=?',(state,tid));self.audit(tid,'state',{'state':state})
+            self.db.execute('UPDATE tournaments SET state=?,started_once=max(started_once,?) WHERE id=?',(state,int(state=='running'),tid));self.audit(tid,'state',{'state':state})
+            if state=='running' and t['note'].startswith('Recovered after restart.'):
+                self.db.execute('UPDATE tournaments SET note=? WHERE id=?',(t['note'].replace(' Resume when ready.',''),tid))
+            if state=='running' and t['note'].startswith('No remaining game fits the resource budgets:'):
+                self.db.execute("UPDATE tournaments SET note='' WHERE id=?",(tid,))
+
+    def set_concurrency(self,tid,value):
+        if isinstance(value,bool) or not isinstance(value,int) or value<1:
+            raise ValueError('Concurrent games must be a positive whole number')
+        t=self.tournament(tid)
+        if t['state'] not in ('paused','running','draining'):
+            raise ValueError('Concurrency can only change for an unfinished tournament')
+        previous=t['settings']['concurrency']
+        if value!=previous:
+            settings=t['settings']|{'concurrency':value}
+            with self.tx():
+                self.db.execute('UPDATE tournaments SET settings=?,setup_revision=setup_revision+1 WHERE id=?',(encode(settings),tid))
+                self.audit(tid,'concurrency_changed',{'before':previous,'after':value,'active':self.one("SELECT count(*) n FROM games WHERE tid=? AND state='running' AND invalid=0",(tid,))['n']})
+        return {'concurrency':value,'previous':previous,'state':t['state']}
+
+    def optimize_storage(self):
+        from .storage import optimize
+        return optimize(self)
+
+    def save_storage_settings(self,value):
+        from .storage import save_settings
+        return save_settings(self,value)
 
     def retry_saving(self,backup=True):
         from .deletion import apply_pending
@@ -185,6 +264,9 @@ class Store:
         self.recover()
         from .experiments import initialize
         initialize(self)
+        from .storage import resume as resume_storage
+        resume_storage(self)
+        self.startup_pending=False
         self.failure=''
 
     def deletion_preview(self,tid):
@@ -198,13 +280,43 @@ class Store:
     def audit(self,tid,action,body): self.db.execute('INSERT INTO audit(tid,created,action,body) VALUES(?,?,?,?)',(tid,now(),action,encode(body)))
 
     def save_profile(self,profile):
+        profile=self.validate_profile(profile)
+        with self.tx():self.db.execute('INSERT OR REPLACE INTO profiles VALUES(?,?,?)',(profile['id'],profile['name'],encode(profile)))
+        return profile
+
+    def validate_profile(self,profile):
         profile=dict(profile);profile.setdefault('id',uid());profile.setdefault('name',Path(profile.get('path','Engine')).stem)
         if not profile.get('path'):raise ValueError('Executable path required')
         for key,default in (('threads',1),('hash',1024)):
             if not isinstance(profile.get(key,default),int) or profile.get(key,default)<1:raise ValueError(key+' must be a positive integer')
+        from .engine_options import find_name
+        thread_key=find_name(profile.get('options',{}),'Threads')
+        if thread_key and int(profile['options'][thread_key])<1:
+            raise ValueError('Choose an explicit positive thread count for CPU budgeting; automatic thread counts are not supported.')
         if profile.get('time_control'):TimeControl.parse(profile['time_control'])
-        with self.tx():self.db.execute('INSERT OR REPLACE INTO profiles VALUES(?,?,?)',(profile['id'],profile['name'],encode(profile)))
+        from .move_books import validate
+        profile['move_book']=validate(self,profile.get('move_book'))
         return profile
+
+    def profile_import(self,body):
+        from .profile_import import preview,commit
+        return preview(self,body) if body.get('preview',True) else commit(self,body)
+
+    def commit_profile_import(self,checked,selected):
+        from .profile_import import commit_prepared
+        return commit_prepared(self,checked,selected)
+
+    def install_move_book(self,compiled):
+        from .move_books import install
+        return install(self,compiled)
+
+    def book_candidates(self,bid,position):
+        from .move_books import candidates
+        return candidates(self,bid,position)
+
+    def remove_move_book(self,bid):
+        from .move_books import remove
+        return remove(self,bid)
 
     def profiles(self,search='',offset=0,limit=100):
         return {'total':self.db.execute('SELECT count(*) FROM profiles WHERE name LIKE ?',('%'+search+'%',)).fetchone()[0],
@@ -237,8 +349,11 @@ class Store:
         from .conditions import save_position
         return save_position(self,*args)
 
-    def create_tournament(self,name,profiles,settings,openings=None,backup=True):
-        s=DEFAULTS|settings;TimeControl.parse(s['time_control'])
+    def prepare_tournament(self,profiles,settings,openings=None):
+        s=DEFAULTS|settings;s.pop('_custom_index',None);TimeControl.parse(s['time_control'])
+        from .move_books import validate
+        profiles=[dict(p,move_book=validate(self,p.get('move_book'))) for p in profiles]
+        if not isinstance(s.get('use_engine_books',True),bool):raise ValueError('Engine move book switch must be true or false')
         for k in ('cycles','rounds','concurrency'):
             if not isinstance(s[k],int) or s[k]<1:raise ValueError(k+' must be a positive integer')
         for k in ('startup_timeout','readiness_timeout','hang_timeout','stop_timeout'):
@@ -253,47 +368,101 @@ class Store:
         if not isinstance(s['tiebreaks'],list) or any(k not in TIEBREAKS for k in s['tiebreaks']):raise ValueError('Unknown standings tiebreak')
         if s['seeding'] not in ('input','random'):raise ValueError('Unknown seeding policy')
         if s['bye_score'] not in (0,.5,1):raise ValueError('Bye score must be 0, 0.5 or 1 per scheduled game')
-        if s['knockout_tiebreak'] not in (*TIEBREAKS,'playoff','manual'):raise ValueError('Unknown knockout tiebreak')
+        if s['knockout_tiebreak'] not in (*TIEBREAKS,'playoff','continuous','manual'):raise ValueError('Unknown knockout tiebreak')
         if s['playoff_fallback'] not in ('seed','manual'):raise ValueError('Unknown playoff fallback')
         if s['ladder_swap'] not in ('adjacent','leap'):raise ValueError('Unknown ladder movement policy')
         for k in ('playoff_limit','playoff_cycles'):
             if not isinstance(s[k],int) or isinstance(s[k],bool) or s[k]<1:raise ValueError(k+' must be a positive integer')
         if not isinstance(s['ladder_distance'],int) or s['ladder_distance']<1 or (s['format']=='ladder' and s['ladder_distance']>=len(profiles)):raise ValueError('Ladder distance must be positive and smaller than the field')
-        if s['format']=='sprt':sprt_llr([0]*5,**s['sprt'])
+        if s['format']=='sprt':
+            sprt_llr([0]*5,**s['sprt'])
+            if type(s.get('sprt_candidate',0)) is not int or s.get('sprt_candidate',0) not in (0,1):raise ValueError('Select one of the two engines as the SPRT candidate.')
+            s.setdefault('sprt_order','scheduled')
+            if s['sprt_order'] not in ('scheduled','completion'):raise ValueError('Unknown SPRT sampling order.')
         for p in profiles:
             if p.get('time_control'):TimeControl.parse(p['time_control'])
-        total=scheduled_pairs(len(profiles),s['format'],s['cycles'],s['candidates'],s['rounds'],s['ladder_distance'])*(2 if s['paired'] else 1)
+        if s['format']=='custom':
+            from .custom_matchups import validate
+            s['custom_matchups'],_=validate(len(profiles),s.get('custom_matchups'))
+            if s.get('opening_policy')=='round':raise ValueError('Custom matchups have no shared rounds. Choose opening pairs or shared cycles.')
+        if s['format']=='custom':
+            from .custom_matchups import validate
+            s['custom_matchups'],_=validate(len(profiles),s.get('custom_matchups'))
+            if s.get('opening_policy')=='round':raise ValueError('Custom matchups have no shared rounds. Choose opening pairs or shared cycles.')
+        from .knockout import base_pairs
+        total=base_pairs(len(profiles),s)*(2 if s['paired'] else 1)
         if total>9223372036854775807:raise ValueError('Schedule exceeds SQLite 64-bit game numbering capacity')
         from .opening_policy import prepare
-        tid=uid();s['openings']=prepare(s,openings or [{'fen':chess.STARTING_FEN,'name':'Initial position'}])
+        s['openings']=prepare(s,openings or [{'fen':chess.STARTING_FEN,'name':'Initial position'}])
         for o in s['openings']:
             board=chess.Board(o['fen'],chess960=s['chess960'])
             if not board.is_valid():raise ValueError('Invalid opening FEN: '+o['fen'])
+        return profiles,s,total
+
+    def create_tournament(self,name,profiles,settings,openings=None,backup=True):
+        prepared=self.prepare_tournament(profiles,settings,openings)
         with self.tx():
-            self.db.execute('INSERT INTO tournaments(id,name,settings,created,total) VALUES(?,?,?,?,?)',(tid,name,encode(s),now(),total))
-            self.db.executemany('INSERT INTO participants VALUES(?,?,?)',((tid,i,encode(p)) for i,p in enumerate(profiles)))
-            from .rankings import create as create_rankings
-            create_rankings(self,tid,s)
-            for i in range(len(profiles)):self.db.execute('INSERT INTO aggregates(tid,a,b) VALUES(?,?,-1)',(tid,i))
-            self.audit(tid,'created',{'participants':len(profiles),'total':total})
+            tid=self.insert_tournament(name,prepared)
         if backup:self.backup()
         return self.tournament(tid)
+
+    def insert_tournament(self,name,prepared):
+        """Caller owns transaction, so an event and its stage commit together."""
+        profiles,s,total=prepared;tid=uid()
+        self.db.execute('INSERT INTO tournaments(id,name,settings,created,total) VALUES(?,?,?,?,?)',(tid,name,encode(s),now(),total))
+        self.db.executemany('INSERT INTO participants VALUES(?,?,?)',((tid,i,encode(p)) for i,p in enumerate(profiles)))
+        from .rankings import create as create_rankings
+        create_rankings(self,tid,s)
+        self.db.executemany('INSERT INTO aggregates(tid,a,b) VALUES(?,?,-1)',((tid,i) for i in range(len(profiles))))
+        self.audit(tid,'created',{'participants':len(profiles),'total':total})
+        return tid
+
+    def tournament_setup(self,tid):
+        from .tournament_edit import setup
+        return setup(self,tid)
+
+    def event_call(self,method,*args,**kwargs):
+        from . import events
+        return getattr(events,method)(self,*args,**kwargs)
+
+    def queue_call(self,method,*args,**kwargs):
+        from . import tournament_queue
+        result=getattr(tournament_queue,method)(self,*args,**kwargs)
+        if method not in ('summary','page'):tournament_queue.summary(self)
+        return result
+
+    def edit_tournament(self,*args,**kwargs):
+        from .tournament_edit import edit
+        return edit(self,*args,**kwargs)
 
     def tournament(self,tid):
         t=self.one('SELECT * FROM tournaments WHERE id=?',(tid,))
         if not t:raise ValueError('Tournament not found')
         t['settings']=json.loads(t['settings']);t['participants']=self.db.execute('SELECT count(*) FROM participants WHERE tid=?',(tid,)).fetchone()[0]
+        from .tournament_edit import editable
+        t['can_edit']=editable(self,t)
+        from .events import membership
+        t['event']=membership(self,tid)
+        if t['event']:t['can_edit']=False
+        t['queue']=self.one('''SELECT q.position,q.finished,q.held,q.priority,c.mode,c.execution_mode,
+          CASE WHEN c.execution_mode='parallel' THEN t.state IN ('running','draining') ELSE c.active_tid=q.tid END active
+          FROM tournament_queue q CROSS JOIN queue_control c JOIN tournaments t ON t.id=q.tid WHERE q.tid=?''',(tid,))
         return t
 
     def participant(self,tid,slot):return json.loads(self.db.execute('SELECT profile FROM participants WHERE tid=? AND slot=?',(tid,slot)).fetchone()[0])
 
-    def _opening(self,s,pair_no,round_no=0,cycle=0):
+    def _opening(self,s,pair_no,round_no=0,cycle=0,assignment=None):
         from .opening_policy import select
-        return encode(select(s,pair_no,round_no,cycle))
+        return encode(select(s,pair_no,round_no,cycle,assignment))
 
-    def _insert_pair(self,tid,pair_no,a,b,round_no,s,fixed_colors=False,stage='regular',cycle=0):
+    def _insert_pair(self,tid,pair_no,a,b,round_no,s,fixed_colors=False,stage='regular',cycle=0,playoff_stage=None,playoff_time_control=None,opening_assignment=None):
         legs=2 if s['paired'] else 1
-        opening=encode(json.loads(self._opening(s,pair_no,round_no,cycle))|{'competition_stage':stage})
+        record=json.loads(self._opening(s,pair_no,round_no,cycle,opening_assignment))|{'competition_stage':stage}
+        # Scheduling owns these fields; imported opening metadata cannot set clocks.
+        record.pop('playoff_stage',None);record.pop('playoff_time_control',None)
+        if playoff_stage is not None:record['playoff_stage']=playoff_stage
+        if playoff_time_control is not None:record['playoff_time_control']=playoff_time_control
+        opening=encode(record)
         for leg in range(legs):
             w,bk=(a,b) if (leg if legs==2 else 0 if fixed_colors else pair_no%2)==0 else (b,a)
             self.db.execute('INSERT INTO games(id,tid,number,pair_no,leg,a,b,white,black,round,opening) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
@@ -302,25 +471,39 @@ class Store:
     def fill_queue(self,tid,window,defer_pairing=False):
         t=self.tournament(tid);s=t['settings']
         if t['dependency'] or t['state']!='running':return
+        from .sequential import frozen
+        if s['format']=='sprt' and frozen(self,tid):return
         if s['format'] in ('swiss','knockout','double_elimination','ladder'):
             from .rounds import advance_round
             return advance_round(self,t,window,defer_pairing)
         queued=self.db.execute("SELECT count(*) FROM games WHERE tid=? AND state IN ('pending','running') AND invalid=0",(tid,)).fetchone()[0]
         count=max(0,window-queued);legs=2 if s['paired'] else 1
-        end=min(t['total']//legs,t['cursor']+(count+legs-1)//legs)
+        end=min(t['total']//legs,t['cursor']+max(256,(count+legs-1)//legs)) if count else t['cursor']
         if end<=t['cursor']:return
         with self.tx():
             for k in range(t['cursor'],end):
-                from .opening_policy import round_pair
-                decoder=round_pair if s.get('opening_policy')=='round' else static_pair
-                a,b,rep=decoder(k,t['participants'],s['format'],s['cycles'],s['candidates'])
-                self._insert_pair(tid,k,a,b,rep,s)
+                # Admission may already have materialized this pair farther ahead.
+                # Both legs are always inserted in one transaction.
+                if not self.one('SELECT id FROM games WHERE tid=? AND pair_no=? LIMIT 1',(tid,k)):
+                    from .custom_matchups import pair
+                    a,b,rep=pair(k,t['participants'],s)
+                    self._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom');count-=legs
+                if count<=0:
+                    end=k+1;break
             self.db.execute('UPDATE tournaments SET cursor=? WHERE id=?',(end,tid))
 
-    def claim(self,tid):
+    def dispatch(self,tid,used,admission,scan=None,limit=256,dry_run=False):
+        from .scheduling import dispatch
+        return dispatch(self,tid,used,admission,scan,limit,dry_run)
+
+    def claim(self,tid,gid=None):
         with self.tx():
-            if self.one('SELECT state FROM tournaments WHERE id=?',(tid,))['state']!='running':return None
-            g=self.one("SELECT * FROM games WHERE tid=? AND state='pending' AND invalid=0 ORDER BY number LIMIT 1",(tid,))
+            t=self.one('SELECT state,dependency FROM tournaments WHERE id=?',(tid,))
+            if not t or t['state']!='running' or t['dependency']:return None
+            clause=' AND id=?' if gid is not None else ''
+            from .sequential import frozen
+            if frozen(self,tid):clause+=" AND mode='diagnostic'"
+            g=self.one("SELECT * FROM games WHERE tid=? AND state='pending' AND invalid=0"+clause+' ORDER BY number LIMIT 1',(tid,gid) if gid is not None else (tid,))
             if not g:return None
             aid=uid();seq=self.db.execute('SELECT coalesce(max(seq),0)+1 FROM attempts WHERE gid=?',(g['id'],)).fetchone()[0]
             self.db.execute('INSERT INTO attempts(id,gid,seq,mode,started) VALUES(?,?,?,?,?)',(aid,g['id'],seq,g['mode'],now()))
@@ -355,12 +538,18 @@ class Store:
             for aid,ply,uci,san,fen,elapsed,clocks,info,lines in items:
                 self.db.execute('INSERT INTO moves VALUES(?,?,?,?,?,?,?,?)',(aid,ply,uci,san,fen,elapsed,encode(clocks),encode(info)))
                 self.db.execute('UPDATE attempts SET clocks=? WHERE id=?',(encode(clocks),aid))
-                self.db.executemany('INSERT INTO logs(aid,line,created) VALUES(?,?,?)',((aid,l[:4096],now()) for l in lines))
+                from .log_storage import append
+                append(self,aid,lines)
 
     def log(self,aid,lines):
         if not lines:return
         with self.tx():
-            self.db.executemany('INSERT INTO logs(aid,line,created) VALUES(?,?,?)',((aid,l[:4096],now()) for l in lines))
+            from .log_storage import append
+            append(self,aid,lines)
+
+    def record_engine_evidence(self,aid,side,body,started=None,ended=None,sid=None):
+        from .runtime_evidence import write_engine
+        write_engine(self,aid,side,body,started,ended,sid)
 
     def _pair_bucket(self,tid,pair_no):
         rows=self.rows('SELECT g.*,a.result FROM games g LEFT JOIN attempts a ON a.id=g.official WHERE g.tid=? AND g.pair_no=? AND g.invalid=0 ORDER BY leg',(tid,pair_no))
@@ -395,23 +584,34 @@ class Store:
         self.db.execute('INSERT INTO report_revisions VALUES(?,1) ON CONFLICT(tid) DO UPDATE SET revision=revision+1',(g['tid'],))
         self._pair_delta(g['tid'],g['pair_no'],-1)
         if g['official']:
-            old=self.one('SELECT result FROM attempts WHERE id=?',(g['official'],));self._result_delta(g,old['result'],-1)
+            old=self.one('SELECT result,reason,mode FROM attempts WHERE id=?',(g['official'],));self._result_delta(g,old['result'],-1)
+            from .reliability import delta
+            delta(self,g,old,official=-1)
         self.db.execute('UPDATE games SET official=? WHERE id=?',(aid,g['id']))
         if aid:
             result=self.db.execute('SELECT result FROM attempts WHERE id=?',(aid,)).fetchone()[0];self._result_delta(g,result,1)
+            from .reliability import delta
+            delta(self,g,self.one('SELECT result,reason,mode FROM attempts WHERE id=?',(aid,)),official=1)
         self._pair_delta(g['tid'],g['pair_no'],1)
 
     def finish(self,aid,result,reason,detail='',identity=None):
         attempt=self.one('SELECT * FROM attempts WHERE id=?',(aid,))
         if not attempt or attempt['ended'] is not None:return
+        if attempt['adjudication']:
+            decision=json.loads(attempt['adjudication'])
+            result=decision['result'];reason='manual_adjudication';detail=decision['note']
         g=self.one('SELECT * FROM games WHERE id=?',(attempt['gid'],));t=self.tournament(g['tid']);s=t['settings']
         if result not in ('1-0','0-1','1/2-1/2','*'):raise ValueError('Invalid result')
         with self.tx():
+            from .log_storage import pack_attempt
+            pack_attempt(self.db,aid)
             self.db.execute('UPDATE attempts SET ended=?,result=?,reason=?,detail=?,identity=? WHERE id=?',(now(),result,reason,detail,encode(identity or {}),aid))
+            from .reliability import delta
+            delta(self,g,{'result':result,'reason':reason,'mode':attempt['mode']},attempts=1)
             if attempt['mode']!='diagnostic' and result!='*' and not g['invalid']:self._set_official(g,aid)
             self.db.execute("UPDATE games SET state='completed' WHERE id=?",(g['id'],))
             if reason=='interrupted' and not g['invalid']:self.db.execute("UPDATE games SET state='pending' WHERE id=?",(g['id'],))
-            if reason in s['retry_reasons'] and reason!='interrupted' and attempt['mode']!='diagnostic' and not g['invalid']:
+            if reason in s['retry_reasons'] and reason not in ('interrupted','manual_adjudication') and attempt['mode']!='diagnostic' and not g['invalid']:
                 retry_count=self.db.execute("SELECT count(*) FROM attempts WHERE gid=? AND mode='automatic'",(g['id'],)).fetchone()[0]
                 if retry_count<s['retry_limit']:self.db.execute("UPDATE games SET state='pending',mode='automatic' WHERE id=?",(g['id'],))
             if attempt['mode']!='diagnostic' and not g['invalid']:
@@ -422,7 +622,16 @@ class Store:
 
     def pgn(self,aid):
         from .pgn_format import render_attempt
-        return render_attempt(self.db,aid)
+        return render_attempt(self.db,aid,export_options={'preset':'testing','style':'compact',
+            'perspective':'engine','annotations':None,'book_comments':'boundary'})
+
+    def request_adjudication(self,*args):
+        from .adjudication import request
+        return request(self,*args)
+
+    def engine_failures(self,*args):
+        from .reliability import page
+        return page(self,*args)
 
     def export_pending(self):
         """Crash-safe append: truncate to committed offset, fsync bytes, commit cursor.
@@ -449,11 +658,11 @@ class Store:
             self.failure=f'PGN saving failed: {exc}. Results remain committed in the database. Scheduling stopped.'
             raise SavingError(self.failure) from exc
 
-    def export_official(self,tid,style='compact',perspective='engine',annotations=None):
+    def export_official(self,tid,style='compact',perspective='engine',annotations=None,*,export_options=None):
         # Compatibility helper for small callers. Downloads use a separate,
         # bounded WAL-snapshot reader, without work on the game writer thread.
         from .pgn_export import OfficialPgnReader
-        reader=OfficialPgnReader(self.path,tid,style,perspective,annotations)
+        reader=OfficialPgnReader(self.path,tid,style,perspective,annotations,export_options=export_options)
         try:
             parts=[]
             while chunk:=reader.chunk():parts.append(chunk.decode('utf-8'))
@@ -464,12 +673,18 @@ class Store:
         running=self.rows('SELECT a.id FROM attempts a JOIN games g ON a.gid=g.id WHERE a.ended IS NULL')
         for a in running:self.finish(a['id'],'*','interrupted','Worker/application terminated; restart from the recorded opening')
         with self.tx():
+            self.db.execute("UPDATE run_sessions SET state='interrupted' WHERE ended IS NULL AND state='running'")
             self.db.execute("UPDATE tournaments SET state='paused',note='Recovered after restart. Completed results retained; unfinished attempts archived. Resume when ready.' WHERE state IN ('running','draining')")
+            from .tournament_queue import recover
+            recover(self)
+            from .events import recovery
+            recovery(self)
         self.export_pending()
 
     def requeue(self,tid,ids=None,reason=None,mode='diagnostic',invalidate=False):
         if mode not in ('diagnostic','replacement'):raise ValueError('Select diagnostic or replacement replay')
         t=self.tournament(tid)
+        if t.get('event',{} ) and t['event']['event_state']=='running':raise ValueError('Pause and drain the whole event before changing attempts.')
         if t['state'] in ('running','draining'):raise ValueError('Pause and drain this tournament before changing attempts')
         sql='SELECT g.* FROM games g LEFT JOIN attempts a ON a.id=g.official WHERE g.tid=? AND g.invalid=0';args=[tid]
         if ids:
@@ -487,9 +702,14 @@ class Store:
         from .dependencies import effects,invalidate_playoffs,update_total
         effect=effects(self,tid,games) if t['settings']['format'] in ('swiss','knockout','double_elimination','ladder') and mode=='replacement' else None
         dependent=effect is not None and bool(effect['later_rounds'] or effect['playoffs'])
+        from .events import replacement
+        event_dependent=replacement(self,tid,invalidate) if mode=='replacement' else False
+        if event_dependent:
+            return {'queued':0,'dependency':True,'message':'Replacing this result changes event qualification. Archive all later stages and recalculate advancement after replay? All original games and attempts remain available.'}
         if dependent and not invalidate:
             return {'queued':0,'dependency':True,'effects':effect,'message':f'Replacement affects {len(effect["later_rounds"])} later round(s) and {len(effect["playoffs"])} playoff sequence(s). Explicitly invalidate these dependencies before replaying. Every previous attempt and pairing decision remains archived.'}
         with self.tx():
+            if mode=='replacement':replacement(self,tid,invalidate,apply=True)
             if dependent:
                 for g in self.rows('SELECT * FROM games WHERE tid=? AND round>? AND invalid=0',(tid,first_round)):
                     if g['official']:self._set_official(g,None)
@@ -526,18 +746,24 @@ class Store:
     def snapshot(self,tid,offset=0,limit=100,sort='rank',direction='asc',confidence=95,method='normal'):
         t=self.tournament(tid);paired=t['settings']['paired']
         from .standings import page
-        t['standings']=page(self,tid,t['settings'],offset,limit,sort,direction,confidence,method)
+        competition=None
+        if t['settings']['format'] in ('knockout','double_elimination'):
+            from .knockout_results import read,public
+            competition=read(self,tid,t['settings']);t['knockout']=public(competition,full=limit>=t['participants'])
+        t['standings']=page(self,tid,t['settings'],offset,limit,sort,direction,confidence,method,competition)
         t['standings_sort']={'key':sort,'direction':direction};t['confidence']=float(confidence)
         t['counts']={r['state']:r['n'] for r in self.rows('SELECT state,sum(n) n FROM game_counts WHERE tid=? AND invalid=0 GROUP BY state HAVING sum(n)>0',(tid,))}
         t['official_games']=self.db.execute('SELECT coalesce(sum(n),0) FROM game_counts WHERE tid=? AND invalid=0 AND has_official=1',(tid,)).fetchone()[0]
         t['complete_pairs']=self.db.execute('SELECT coalesce(sum(p0+p1+p2+p3+p4),0) FROM aggregates WHERE tid=? AND b=-1',(tid,)).fetchone()[0]//(1 if t['settings']['format']=='self_play' else 2) if paired else 0
         t['revision']=self.revision;t['saving_error']=self.failure;t['warning']=self.warning
         if t['settings']['format']=='sprt':
-            from .sequential import get
-            r=self.one('SELECT * FROM aggregates WHERE tid=? AND a=0 AND b=1',(tid,))
-            bins=[r[f'p{i}'] for i in range(5)] if r and paired else [r['l'],r['d'],r['w']] if r else [0]*5
+            from .sequential import get,presentation
+            candidate=t['settings'].get('sprt_candidate',0)
+            r=self.one('SELECT * FROM aggregates WHERE tid=? AND a=? AND b=?',(tid,candidate,1-candidate))
+            bins=[r[f'p{i}'] for i in range(5)] if r and paired else [r['l'],r['d'],r['w']] if r else [0]*(5 if paired else 3)
             t['sprt']=get(self,tid) or sprt_llr([0]*(5 if paired else 3),**t['settings']['sprt'])
             t['sprt_descriptive']=sprt_llr(bins,**t['settings']['sprt'])
+            t['sprt_status']=presentation(self,t,t['sprt'])
         return t
 
     def h2h(self,tid,slot):
@@ -549,7 +775,9 @@ class Store:
 
     def h2h_page(self,tid,slot,offset=0,search='',confidence=95):
         if offset<0:raise ValueError('Invalid head-to-head page')
-        paired=self.tournament(tid)['settings']['paired']
+        selected=self.one("SELECT slot,json_extract(profile,'$.name') name FROM participants WHERE tid=? AND slot=?",(tid,slot))
+        if not selected:raise ValueError('Tournament participant not found')
+        paired=self.one("SELECT json_extract(settings,'$.paired') paired FROM tournaments WHERE id=?",(tid,))['paired']
         clause="FROM aggregates a JOIN participants p ON p.tid=a.tid AND p.slot=a.b WHERE a.tid=? AND a.a=? AND a.b>=0 AND a.w+a.d+a.l>0 AND json_extract(p.profile,'$.name') LIKE ?"
         args=(tid,slot,'%'+search+'%');total=self.one('SELECT count(*) n '+clause,args)['n']
         records=self.rows("SELECT a.*,json_extract(p.profile,'$.name') name "+clause+' ORDER BY a.b LIMIT 50 OFFSET ?',(*args,offset));items=[]
@@ -557,7 +785,7 @@ class Store:
             values=summarize(r['w'],r['d'],r['l'],[r[f'p{i}'] for i in range(5)] if paired else None,confidence)
             if r['b']==slot:values.update(elo=None,ci=None,ci_conservative=None,ci95=None,ci95_conservative=None,los=None,model='Self-play, White perspective; no between-engine inference')
             items.append({'opponent':r['b'],'name':r['name'],**values})
-        return {'total':total,'items':items,'offset':offset}
+        return {'total':total,'items':items,'offset':offset,'selected':selected}
 
     def games(self,tid,reason='',offset=0,limit=100):
         from .history import game_page
@@ -588,11 +816,12 @@ class Store:
         self._backup_progress(phase='copying',percent=0,unchanged=False,started_at=now())
         try:
             directory=self.folder/'backups';directory.mkdir(exist_ok=True)
-            choices=[directory/f'recovery-{i}.sqlite3' for i in range(5)]
+            choices=[directory/f'recovery-{i}.sqlite3' for i in range(self.storage_settings['backup_copies'])]
             target=min(choices,key=lambda p:p.stat().st_mtime_ns if p.exists() else 0);temporary=directory/'backup.tmp'
             # A killed process may leave a partial SQLite image here. It is not
             # a verified backup; start a fresh copy without touching the ring.
-            temporary.unlink(missing_ok=True)
+            from .deletion import discard_temporary
+            discard_temporary(temporary)
             source=sqlite3.connect(self.path.as_uri()+'?mode=ro',uri=True,timeout=30)
             try:
                 source.execute('BEGIN');source.execute('SELECT count(*) FROM sqlite_master').fetchone()
@@ -613,9 +842,11 @@ class Store:
             self._backup_progress(phase='flushing',percent=None)
             with open(temporary,'r+b') as f:f.flush();os.fsync(f.fileno())
             os.replace(temporary,target)
+            from .storage import prune,snapshots
+            prune(self)
             stat=target.stat();self.backup_file=target;self.backup_signature=(stat.st_size,stat.st_mtime_ns)
             self.backup_revision=revision
-            files=[p.stat().st_size for p in choices if p.exists()]
+            files=[p.stat().st_size for p in snapshots(self.folder)]
             self._backup_progress(phase='ready',percent=None,completed_at=now(),duration_seconds=time.monotonic()-started,
                                   size_bytes=stat.st_size,backup_count=len(files),total_bytes=sum(files))
         except (OSError,sqlite3.Error) as e:
@@ -633,13 +864,24 @@ class Store:
                     path=Path(str(self.path)+suffix)
                     if path.exists():os.replace(path,self.folder/(path.name+'.damaged-'+stamp))
                 shutil.copy2(candidate,self.path)
+                from .report_cache import clear
+                clear(self.folder)
                 self.warning=f'Restored verified backup {candidate.name} from {time.ctime(candidate.stat().st_mtime)} after database corruption. Damaged files retained. Results newer than this backup may be unavailable; inspect before resuming.'
                 return
             except (OSError,sqlite3.Error):continue
         raise SavingError('Database damaged and no verified backup available. Original files preserved; recovery requires repair, not tournament reset.')
 
     def close(self):
+        current_backup=self.backup_revision==self.revision
+        if current_backup and self.backup_file:
+            try:
+                stat=self.backup_file.stat()
+                current_backup=(stat.st_size,stat.st_mtime_ns)==self.backup_signature
+            except OSError:current_backup=False
         self.db.close()
+        from .clean_shutdown import save
+        try:save(self,current_backup)
+        except OSError:pass # Optional acceleration never prevents releasing the writer lock.
         if os.name=='nt':
             import msvcrt
             self.lock.seek(0);msvcrt.locking(self.lock.fileno(),msvcrt.LK_UNLCK,1)

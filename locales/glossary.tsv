@@ -1,0 +1,153 @@
+English	Spanish	French	German	Portuguese	Italian	Dutch	Polish
+Language	Idioma	Langue	Sprache	Idioma	Lingua	Taal	Język
+Interface language	Idioma de la interfaz	Langue de l’interface	Sprache der Oberfläche	Idioma da interface	Lingua dell’interfaccia	Interfacetaal	Język interfejsu
+Apply language	Aplicar idioma	Appliquer la langue	Sprache anwenden	Aplicar idioma	Applica lingua	Taal toepassen	Zastosuj język
+Tournaments	Torneos	Tournois	Turniere	Torneios	Tornei	Toernooien	Turnieje
+Tournament workspace	Área del torneo	Espace du tournoi	Turnierübersicht	Área do torneio	Area del torneo	Toernooioverzicht	Obszar turnieju
+Engine library	Biblioteca de motores	Bibliothèque de moteurs	Engine-Bibliothek	Biblioteca de motores	Libreria dei motori	Enginebibliotheek	Biblioteka silników
+Engine profiles	Perfiles de motores	Profils des moteurs	Engine-Profile	Perfis de motores	Profili dei motori	Engineprofielen	Profile silników
+Time controls & presets	Controles de tiempo y preajustes	Cadences et préréglages	Bedenkzeiten und Vorlagen	Controles de tempo e predefinições	Cadenze e preimpostazioni	Speeltempo’s en voorinstellingen	Kontrole czasu i ustawienia wstępne
+Test conditions	Condiciones de prueba	Conditions du test	Testbedingungen	Condições de teste	Condizioni di prova	Testomstandigheden	Warunki testu
+Worker & recovery	Ejecución y recuperación	Exécution et récupération	Ausführung und Wiederherstellung	Execução e recuperação	Esecuzione e ripristino	Uitvoering en herstel	Wykonywanie i odzyskiwanie
+Worker, storage & recovery	Ejecución, almacenamiento y recuperación	Exécution, stockage et récupération	Ausführung, Speicher und Wiederherstellung	Execução, armazenamento e recuperação	Esecuzione, archiviazione e ripristino	Uitvoering, opslag en herstel	Wykonywanie, pamięć i odzyskiwanie
+Suites & benchmarks	Baterías de pruebas y rendimiento	Suites de tests et performances	Testsammlungen und Benchmarks	Conjuntos de testes e desempenho	Suite di test e benchmark	Testsuites en benchmarks	Zestawy testów i testy wydajności
+New tournament	Nuevo torneo	Nouveau tournoi	Neues Turnier	Novo torneio	Nuovo torneo	Nieuw toernooi	Nowy turniej
+Start / resume	Iniciar / reanudar	Démarrer / reprendre	Starten / fortsetzen	Iniciar / retomar	Avvia / riprendi	Starten / hervatten	Uruchom / wznów
+Pause & drain	Pausar al terminar las partidas activas	Suspendre après les parties en cours	Nach laufenden Partien pausieren	Pausar após as partidas em curso	Pausa al termine delle partite in corso	Pauzeren na de lopende partijen	Wstrzymaj po zakończeniu trwających partii
+Stop active games	Detener las partidas activas	Arrêter les parties en cours	Laufende Partien stoppen	Parar as partidas em curso	Ferma le partite in corso	Lopende partijen stoppen	Zatrzymaj trwające partie
+Live standings	Clasificación en directo	Classement en direct	Live-Tabelle	Classificação ao vivo	Classifica in tempo reale	Liveklassement	Klasyfikacja na żywo
+Live boards	Tableros en directo	Échiquiers en direct	Live-Bretter	Tabuleiros ao vivo	Scacchiere in tempo reale	Liveborden	Szachownice na żywo
+Focused game	Partida seleccionada	Partie sélectionnée	Ausgewählte Partie	Partida selecionada	Partita selezionata	Geselecteerde partij	Wybrana partia
+Engine search	Búsqueda del motor	Recherche du moteur	Engine-Suche	Pesquisa do motor	Ricerca del motore	Zoekproces van de engine	Wyszukiwanie silnika
+Games & attempt history	Partidas e historial de intentos	Parties et historique des tentatives	Partien und Versuchshistorie	Partidas e histórico de tentativas	Partite e cronologia dei tentativi	Partijen en pogingengeschiedenis	Partie i historia prób
+Best-move history	Historial de mejores jugadas	Historique des meilleurs coups	Verlauf der besten Züge	Histórico dos melhores lances	Cronologia delle mosse migliori	Geschiedenis van beste zetten	Historia najlepszych ruchów
+Current PV	Variante principal actual	Variante principale actuelle	Aktuelle Hauptvariante	Variante principal atual	Variante principale attuale	Huidige hoofdvariant	Bieżący wariant główny
+Head-to-head	Enfrentamientos directos	Confrontations directes	Direkter Vergleich	Confrontos diretos	Scontri diretti	Onderlinge resultaten	Bezpośrednie wyniki
+Crosstable	Tabla cruzada	Tableau croisé	Kreuztabelle	Tabela cruzada	Tabella incrociata	Kruistabel	Tabela wyników
+Anchored pool ratings	Elo del grupo con referencia fija	Classement du groupe à référence fixe	Gruppenwertung mit festem Referenzwert	Elo do grupo com referência fixa	Rating del gruppo con riferimento fisso	Groepsratings met vaste referentie	Rankingi grupy ze stałym punktem odniesienia
+Pool ratings	Elo del grupo	Classement du groupe	Gruppenwertung	Elo do grupo	Rating del gruppo	Groepsratings	Rankingi grupy
+Participant ID	ID del participante	ID du participant	Teilnehmer-ID	ID do participante	ID del partecipante	Deelnemer-ID	ID uczestnika
+Results & exports	Resultados y exportaciones	Résultats et exports	Ergebnisse und Exporte	Resultados e exportações	Risultati ed esportazioni	Resultaten en export	Wyniki i eksport
+Tournament report	Informe del torneo	Rapport du tournoi	Turnierbericht	Relatório do torneio	Resoconto del torneo	Toernooirapport	Raport turnieju
+Opening & color results	Resultados por apertura y color	Résultats par ouverture et couleur	Ergebnisse nach Eröffnung und Farbe	Resultados por abertura e cor	Risultati per apertura e colore	Resultaten per opening en kleur	Wyniki według debiutu i koloru
+Pairings & tiebreaks	Emparejamientos y desempates	Appariements et départages	Paarungen und Stichkämpfe	Emparelhamentos e desempates	Abbinamenti e spareggi	Indelingen en beslissingspartijen	Kojarzenia i dogrywki
+Draw	Tablas	Nulle	Remis	Empate	Patta	Remise	Remis
+Draws	Tablas	Nulles	Remis	Empates	Patte	Remises	Remisy
+Wins	Victorias	Victoires	Siege	Vitórias	Vittorie	Overwinningen	Wygrane
+Losses	Derrotas	Défaites	Niederlagen	Derrotas	Sconfitte	Nederlagen	Przegrane
+Points	Puntos	Points	Punkte	Pontos	Punti	Punten	Punkty
+Score	Puntuación	Score	Punktquote	Pontuação	Punteggio	Score	Wynik
+Games	Partidas	Parties	Partien	Partidas	Partite	Partijen	Partie
+Game	Partida	Partie	Partie	Partida	Partita	Partij	Partia
+Engine	Motor	Moteur	Engine	Motor	Motore	Engine	Silnik
+Engines	Motores	Moteurs	Engines	Motores	Motori	Engines	Silniki
+White	Blancas	Blancs	Weiß	Brancas	Bianco	Wit	Białe
+Black	Negras	Noirs	Schwarz	Pretas	Nero	Zwart	Czarne
+Depth	Profundidad	Profondeur	Suchtiefe	Profundidade	Profondità	Zoekdiepte	Głębokość
+Nodes	Nodos	Nœuds	Knoten	Nós	Nodi	Knopen	Węzły
+Opening	Apertura	Ouverture	Eröffnung	Abertura	Apertura	Opening	Debiut
+Openings	Aperturas	Ouvertures	Eröffnungen	Aberturas	Aperture	Openingen	Debiuty
+Opening pairs	Pares de apertura	Paires d’ouverture	Eröffnungspaare	Pares de abertura	Coppie di apertura	Openingsparen	Pary debiutowe
+Paired openings	Aperturas emparejadas	Ouvertures appariées	Gepaarte Eröffnungen	Aberturas emparelhadas	Aperture abbinate	Gepaarde openingen	Sparowane debiuty
+Single games	Partidas individuales	Parties individuelles	Einzelpartien	Partidas individuais	Partite singole	Afzonderlijke partijen	Pojedyncze partie
+Time control	Control de tiempo	Cadence	Bedenkzeit	Controle de tempo	Cadenza	Speeltempo	Kontrola czasu
+Fischer increment	Incremento Fischer	Incrément Fischer	Fischer-Inkrement	Incremento Fischer	Incremento Fischer	Fischer-increment	Dodatek Fischera
+Sudden death	Tiempo único	Mort subite	Gesamtbedenkzeit	Tempo único	Tempo unico	Totale bedenktijd	Cała partia w określonym czasie
+Fixed time per move	Tiempo fijo por jugada	Temps fixe par coup	Feste Zeit pro Zug	Tempo fixo por lance	Tempo fisso per mossa	Vaste tijd per zet	Stały czas na ruch
+Fixed depth	Profundidad fija	Profondeur fixe	Feste Suchtiefe	Profundidade fixa	Profondità fissa	Vaste zoekdiepte	Stała głębokość
+Fixed nodes	Nodos fijos	Nombre fixe de nœuds	Feste Knotenzahl	Número fixo de nós	Numero fisso di nodi	Vast aantal knopen	Stała liczba węzłów
+Round robin	Todos contra todos	Toutes rondes	Jeder gegen jeden	Todos contra todos	Girone all’italiana	Iedereen tegen iedereen	Każdy z każdym
+Rounds (Swiss / ladder)	Rondas (suizo / escalera)	Rondes (suisse / classement évolutif)	Runden (Schweizer System / Rangliste)	Rodadas (suíço / classificação)	Turni (svizzero / classifica)	Ronden (Zwitsers / ladder)	Rundy (szwajcarski / drabinka)
+Knockout (KO — single elimination)	Eliminación directa (KO)	Élimination directe (KO)	K.-o.-Turnier (einfache Ausscheidung)	Eliminação simples (KO)	Eliminazione diretta (KO)	Knock-out (enkele eliminatie)	System pucharowy (pojedyncza eliminacja)
+Knockout (KO — double elimination)	Doble eliminación (KO)	Double élimination (KO)	K.-o.-Turnier (doppelte Ausscheidung)	Dupla eliminação (KO)	Doppia eliminazione (KO)	Knock-out (dubbele eliminatie)	System pucharowy (podwójna eliminacja)
+Byes	Descansos	Exemptions	Freilose	Folgas	Turni di riposo	Byes	Wolne losy
+Tiebreak	Desempate	Départage	Stichkampf	Desempate	Spareggio	Beslissingspartij	Dogrywka
+Games per match	Partidas por encuentro	Parties par match	Partien pro Match	Partidas por confronto	Partite per incontro	Partijen per match	Partie na mecz
+Storage & backup settings	Almacenamiento y copias de seguridad	Stockage et sauvegardes	Speicher- und Sicherungseinstellungen	Armazenamento e cópias de segurança	Archiviazione e backup	Opslag- en back-upinstellingen	Ustawienia pamięci i kopii zapasowych
+Reclaim disk space	Liberar espacio en disco	Libérer de l’espace disque	Speicherplatz freigeben	Liberar espaço em disco	Libera spazio su disco	Schijfruimte vrijmaken	Zwolnij miejsce na dysku
+Recovery copies	Copias de recuperación	Copies de récupération	Wiederherstellungskopien	Cópias de recuperação	Copie di ripristino	Herstelkopieën	Kopie odzyskiwania
+Database	Base de datos	Base de données	Datenbank	Base de dados	Database	Database	Baza danych
+Retry saving	Reintentar el guardado	Réessayer l’enregistrement	Speichern erneut versuchen	Tentar salvar novamente	Riprova il salvataggio	Opslaan opnieuw proberen	Ponów zapis
+Display & layout	Apariencia y disposición	Affichage et disposition	Anzeige und Anordnung	Aparência e disposição	Aspetto e disposizione	Weergave en indeling	Wygląd i układ
+Font size	Tamaño de letra	Taille du texte	Schriftgröße	Tamanho da fonte	Dimensione del testo	Tekstgrootte	Rozmiar czcionki
+Board finish	Acabado del tablero	Finition de l’échiquier	Brettoberfläche	Acabamento do tabuleiro	Finitura della scacchiera	Bordafwerking	Wykończenie szachownicy
+Dark	Oscuro	Sombre	Dunkel	Escuro	Scuro	Donker	Ciemny
+Light	Claro	Clair	Hell	Claro	Chiaro	Licht	Jasny
+Save	Guardar	Enregistrer	Speichern	Salvar	Salva	Opslaan	Zapisz
+Cancel	Cancelar	Annuler	Abbrechen	Cancelar	Annulla	Annuleren	Anuluj
+Close	Cerrar	Fermer	Schließen	Fechar	Chiudi	Sluiten	Zamknij
+Apply	Aplicar	Appliquer	Anwenden	Aplicar	Applica	Toepassen	Zastosuj
+Delete	Eliminar	Supprimer	Löschen	Excluir	Elimina	Verwijderen	Usuń
+Delete…	Eliminar…	Supprimer…	Löschen…	Excluir…	Elimina…	Verwijderen…	Usuń…
+Edit	Editar	Modifier	Bearbeiten	Editar	Modifica	Bewerken	Edytuj
+Copy	Copiar	Copier	Kopieren	Copiar	Copia	Kopiëren	Kopiuj
+Refresh	Actualizar	Actualiser	Aktualisieren	Atualizar	Aggiorna	Vernieuwen	Odśwież
+Settings	Configuración	Paramètres	Einstellungen	Configurações	Impostazioni	Instellingen	Ustawienia
+Name	Nombre	Nom	Name	Nome	Nome	Naam	Nazwa
+Value	Valor	Valeur	Wert	Valor	Valore	Waarde	Wartość
+Status	Estado	État	Status	Estado	Stato	Status	Stan
+Result	Resultado	Résultat	Ergebnis	Resultado	Risultato	Resultaat	Wynik
+Results	Resultados	Résultats	Ergebnisse	Resultados	Risultati	Resultaten	Wyniki
+Running	En curso	En cours	Läuft	Em curso	In corso	Actief	W toku
+Paused	En pausa	En pause	Pausiert	Pausado	In pausa	Gepauzeerd	Wstrzymany
+Pending	Pendiente	En attente	Ausstehend	Pendente	In attesa	In afwachting	Oczekujący
+Completed	Completado	Terminé	Abgeschlossen	Concluído	Completato	Voltooid	Zakończony
+Interrupted	Interrumpido	Interrompu	Unterbrochen	Interrompido	Interrotto	Onderbroken	Przerwany
+Unavailable	No disponible	Indisponible	Nicht verfügbar	Indisponível	Non disponibile	Niet beschikbaar	Niedostępne
+Timeouts	Pérdidas por tiempo	Dépassements de temps	Zeitüberschreitungen	Derrotas por tempo	Sconfitte per tempo	Tijdsoverschrijdingen	Przekroczenia czasu
+Crashes	Cierres inesperados	Plantages	Abstürze	Falhas	Arresti anomali	Crashes	Awarie
+Hangs	Bloqueos	Blocages	Hänger	Travamentos	Blocchi	Vastlopers	Zawieszenia
+Illegal moves	Jugadas ilegales	Coups illégaux	Ungültige Züge	Lances ilegais	Mosse illegali	Ongeldige zetten	Nielegalne ruchy
+Diagnostic replay	Repetición de diagnóstico	Rejeu de diagnostic	Diagnosewiederholung	Repetição de diagnóstico	Ripetizione diagnostica	Diagnostische herhaling	Powtórka diagnostyczna
+Replace official result	Sustituir el resultado oficial	Remplacer le résultat officiel	Offizielles Ergebnis ersetzen	Substituir o resultado oficial	Sostituisci il risultato ufficiale	Officieel resultaat vervangen	Zastąp oficjalny wynik
+Yes	Sí	Oui	Ja	Sim	Sì	Ja	Tak
+No	No	Non	Nein	Não	No	Nee	Nie
+Back	Atrás	Retour	Zurück	Voltar	Indietro	Terug	Wstecz
+Next	Siguiente	Suivant	Weiter	Seguinte	Avanti	Volgende	Dalej
+First	Primero	Premier	Erste	Primeiro	Primo	Eerste	Pierwsza
+Last	Último	Dernier	Letzte	Último	Ultimo	Laatste	Ostatnia
+Round	Ronda	Ronde	Runde	Rodada	Turno	Ronde	Runda
+Rounds	Rondas	Rondes	Runden	Rodadas	Turni	Ronden	Rundy
+Match	Encuentro	Match	Match	Confronto	Match	Match	Mecz
+Matches	Encuentros	Matchs	Matches	Confrontos	Match	Matches	Mecze
+Engine comparison	Comparación de motores	Comparaison de moteurs	Engine-Vergleich	Comparação de motores	Confronto tra motori	Enginevergelijking	Porównanie silników
+Draw & resignation policies	Reglas de tablas y abandono	Règles de nulle et d’abandon	Remis- und Aufgaberegeln	Regras de empate e abandono	Regole di patta e abbandono	Regels voor remise en opgave	Zasady remisów i poddania
+DRAW & RESIGNATION POLICIES	REGLAS DE TABLAS Y ABANDONO	RÈGLES DE NULLE ET D’ABANDON	REMIS- UND AUFGABEREGELN	REGRAS DE EMPATE E ABANDONO	REGOLE DI PATTA E ABBANDONO	REGELS VOOR REMISE EN OPGAVE	ZASADY REMISÓW I PODDANIA
+Resource budget	Presupuesto de recursos	Budget de ressources	Ressourcenbudget	Orçamento de recursos	Budget delle risorse	Resourcebudget	Budżet zasobów
+Clocks & failure handling	Relojes y gestión de fallos	Pendules et gestion des erreurs	Uhren und Fehlerbehandlung	Relógios e gestão de falhas	Orologi e gestione degli errori	Klokken en foutafhandeling	Zegary i obsługa błędów
+Knockout (KO) matches & tiebreaks	Encuentros y desempates de eliminación directa (KO)	Matchs et départages à élimination directe (KO)	K.-o.-Matches und Stichkämpfe	Confrontos e desempates eliminatórios (KO)	Match e spareggi a eliminazione diretta (KO)	Knock-outmatches en tiebreaks (KO)	Mecze pucharowe (KO) i dogrywki
+Tied matches: keep playing until a winner	Encuentros empatados: seguir hasta tener un ganador	Matchs à égalité : continuer jusqu’à un vainqueur	Unentschiedene Matches: bis zum Sieger weiterspielen	Confrontos empatados: continuar até haver um vencedor	Match pari: continuare fino a un vincitore	Gelijke matches: doorspelen tot er een winnaar is	Remis w meczu: graj do wyłonienia zwycięzcy
+Games per match, for each round	Partidas por encuentro en cada ronda	Parties par match, pour chaque ronde	Partien je Match pro Runde	Partidas por confronto em cada rodada	Partite per match in ogni turno	Partijen per match per ronde	Partie w meczu w każdej rundzie
+Games per match	Partidas por encuentro	Parties par match	Partien je Match	Partidas por confronto	Partite per match	Partijen per match	Partie w meczu
+Games per tiebreak stage	Partidas por fase de desempate	Parties par phase de départage	Partien je Stichkampfstufe	Partidas por etapa de desempate	Partite per fase di spareggio	Partijen per tiebreakfase	Partie w etapie dogrywki
+Tiebreak time controls	Controles de tiempo de desempate	Cadences de départage	Bedenkzeiten für Stichkämpfe	Controles de tempo dos desempates	Cadenze degli spareggi	Speeltempo’s voor tiebreaks	Tempo gry w dogrywkach
+Solid color	Color sólido	Couleur unie	Einfarbig	Cor sólida	Tinta unita	Effen kleur	Jednolity kolor
+Solid colors	Colores sólidos	Couleurs unies	Einfarbig	Cores sólidas	Tinte unite	Effen kleuren	Jednolite kolory
+Maple	Arce	Érable	Ahorn	Bordo	Acero	Esdoorn	Klon
+Ash	Fresno	Frêne	Esche	Freixo	Frassino	Essen	Jesion
+Golden oak	Roble dorado	Chêne doré	Goldene Eiche	Carvalho dourado	Rovere dorato	Gouden eik	Złoty dąb
+Walnut	Nogal	Noyer	Walnuss	Nogueira	Noce	Walnoot	Orzech
+Rosewood	Palisandro	Palissandre	Palisander	Jacarandá	Palissandro	Palissander	Palisander
+Ebony	Ébano	Ébène	Ebenholz	Ébano	Ebano	Ebbenhout	Heban
+Maple & walnut	Arce y nogal	Érable et noyer	Ahorn und Walnuss	Bordo e nogueira	Acero e noce	Esdoorn en walnoot	Klon i orzech
+Oak & rosewood	Roble y palisandro	Chêne et palissandre	Eiche und Palisander	Carvalho e jacarandá	Rovere e palissandro	Eik en palissander	Dąb i palisander
+Ash & ebony	Fresno y ébano	Frêne et ébène	Esche und Ebenholz	Freixo e ébano	Frassino ed ebano	Essen en ebbenhout	Jesion i heban
+Standings	Clasificación	Classement	Tabelle	Classificação	Classifica	Stand	Klasyfikacja
+Pair	Par	Paire	Paar	Par	Coppia	Paar	Para
+Pairs	Pares	Paires	Paare	Pares	Coppie	Paren	Pary
+Complete pairs	Pares completos	Paires complètes	Vollständige Paare	Pares completos	Coppie complete	Volledige paren	Pełne pary
+Pairing & ranking policies	Reglas de emparejamiento y clasificación	Règles d’appariement et de classement	Paarungs- und Rangfolgeregeln	Regras de emparelhamento e classificação	Regole di abbinamento e classifica	Regels voor indeling en rangschikking	Zasady kojarzenia i klasyfikacji
+Resignation threshold (cp; 0 = disabled)	Umbral de abandono (cp; 0 = desactivado)	Seuil d’abandon (cp ; 0 = désactivé)	Aufgabeschwelle (cp; 0 = aus)	Limite de abandono (cp; 0 = desativado)	Soglia di abbandono (cp; 0 = disattivato)	Opgavedrempel (cp; 0 = uit)	Próg poddania (cp; 0 = wyłączony)
+Resign adjudication	Adjudicación por abandono	Adjudication par abandon	Aufgabeadjudikation	Adjudicação por abandono	Aggiudicazione per abbandono	Arbitrage door opgave	Orzekanie przegranej
+Choose your pieces	Elige tus piezas	Choisissez vos pièces	Schachfiguren auswählen	Escolha as peças	Scegli i pezzi	Kies je stukken	Wybierz bierki
+Apply appearance	Aplicar apariencia	Appliquer l’apparence	Darstellung übernehmen	Aplicar aparência	Applica aspetto	Vormgeving toepassen	Zastosuj wygląd
+Chess piece design	Diseño de piezas	Style des pièces	Schachfigurendesign	Estilo das peças	Stile dei pezzi	Schaakstukkenstijl	Styl bierek
+Board finish	Acabado del tablero	Finition de l’échiquier	Brettoberfläche	Acabamento do tabuleiro	Finitura della scacchiera	Bordafwerking	Wykończenie szachownicy
+Engine profile	Perfil del motor	Profil du moteur	Engine-Profil	Perfil do motor	Profilo del motore	Engineprofiel	Profil silnika
+Official games	Partidas oficiales	Parties officielles	Offizielle Partien	Partidas oficiais	Partite ufficiali	Officiële partijen	Oficjalne partie
+Regular games	Partidas regulares	Parties normales	Reguläre Partien	Partidas regulares	Partite regolari	Reguliere partijen	Partie regulaminowe
+Tiebreaks	Desempates	Départages	Stichkämpfe	Desempates	Spareggi	Tiebreaks	Dogrywki
+Profile engine	Motor del perfil	Moteur du profil	Profil-Engine	Motor do perfil	Motore del profilo	Profielengine	Silnik profilu
+official games / {1} scheduled	partidas oficiales / {1} programadas	parties officielles / {1} prévues	offizielle Partien / {1} geplant	partidas oficiais / {1} agendadas	partite ufficiali / {1} previste	officiële partijen / {1} gepland	oficjalne partie / {1} zaplanowanych
+completed opening pairs	pares de aperturas completos	paires d’ouvertures complètes	vollständige Eröffnungspaare	pares de aberturas completos	coppie di aperture complete	voltooide openingsparen	ukończone pary debiutowe
+Profile	Perfil	Profil	Profil	Perfil	Profilo	Profiel	Profil

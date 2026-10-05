@@ -35,7 +35,7 @@ def test_reports_agree_after_official_replacement(tmp_path):
             assert exported['ci_method']=='Conservative Hoeffding'
             html=render(store.path,tid,confidence)
             assert f'Normal {confidence:g}% CI' in html
-            assert '<td>3</td><td>64</td>' in html
+            assert '<td>Search threads</td><td>3</td>' in html and '<td>Hash (MB)</td><td>64</td>' in html
         assert live['games']==20 and live['pairs']==10
     finally:store.close()
 

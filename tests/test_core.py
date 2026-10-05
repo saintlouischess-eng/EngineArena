@@ -126,6 +126,7 @@ def test_forced_termination_recovery(tmp_path):
 
 def test_rotating_backups_and_corrupt_restore(tmp_path):
     s=Store(tmp_path);t=tournament(s)
+    s.save_storage_settings({'backup_copies':5,'backup_minutes':5})
     for _ in range(7):s.backup()
     assert len(list((tmp_path/'backups').glob('recovery-*')))==5;s.close()
     (tmp_path/'arena.sqlite3').write_bytes(b'forced corruption')

@@ -7,7 +7,7 @@ if (-not $SkipTests) {
     & .\.venv\Scripts\python.exe -m pytest tests --basetemp test-output\pytest -q
     if ($LASTEXITCODE -ne 0) { throw 'Acceptance tests failed' }
 }
-& .\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --name ArenaWorker --add-data 'ui;ui' worker.py
+& .\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --name ArenaWorker --add-data 'ui;ui' --add-data 'locales;locales' worker.py
 if ($LASTEXITCODE -ne 0) { throw 'Worker packaging failed' }
 $taskReleaseTarget = [System.IO.Path]::GetFullPath((Join-Path $root 'release\EngineArena'))
 $taskExpectedRelease = [System.IO.Path]::GetFullPath($root).TrimEnd('\') + '\release\EngineArena'

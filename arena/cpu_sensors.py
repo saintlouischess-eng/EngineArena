@@ -8,6 +8,10 @@ import subprocess
 import sys
 
 def helper_path():
+    # The desktop supplies its own reader, including for source development builds.
+    # Do not silently substitute a stale release reader when that build is incomplete.
+    configured=os.environ.get('ARENA_CPU_SENSOR_HELPER')
+    if configured:return Path(configured)
     if getattr(sys,'frozen',False):return Path(sys.executable).resolve().parent.parent/'ArenaSensors.exe'
     return Path(__file__).resolve().parents[1]/'release/EngineArena/ArenaSensors.exe'
 

@@ -1,0 +1,3 @@
+.text-export-tools{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin:12px 0}.text-export-tools>label{font-size:.85rem}.text-export-tools label:has(input){display:flex;gap:8px;align-items:center}.text-export-tools select{width:auto;max-width:100%}
+.text-export-preview{display:block;width:100%;height:calc(90dvh - 325px);min-height:180px;max-height:65dvh;resize:vertical;white-space:pre;overflow:auto;tab-size:4;font: max(12px,.8125rem)/1.55 Consolas,'Courier New',monospace;padding:16px;background:var(--bg);color:var(--text);border:1px solid var(--border)}
+#textExportStatus{font-size:.8rem;color:var(--muted);line-height:1.5}

@@ -5,6 +5,22 @@ from types import SimpleNamespace
 
 from arena.cpu_sensors import read_cpu,select_temperature,fastest_clock
 
+def test_desktop_uses_matching_helper_and_reports_incomplete_build(tmp_path,monkeypatch):
+    from arena.cpu_sensors import helper_path
+    helper=tmp_path/'development'/'ArenaSensors.exe'
+    monkeypatch.setenv('ARENA_CPU_SENSOR_HELPER',str(helper))
+    assert helper_path()==helper
+    assert read_cpu()['status']=='helper_missing'
+
+def test_helper_paths_without_desktop_override(tmp_path,monkeypatch):
+    from arena.cpu_sensors import helper_path
+    monkeypatch.delenv('ARENA_CPU_SENSOR_HELPER',raising=False)
+    monkeypatch.setattr('arena.cpu_sensors.sys.frozen',False,raising=False)
+    assert helper_path()==Path(__file__).resolve().parents[1]/'release/EngineArena/ArenaSensors.exe'
+    monkeypatch.setattr('arena.cpu_sensors.sys.frozen',True)
+    monkeypatch.setattr('arena.cpu_sensors.sys.executable',str(tmp_path/'worker'/'ArenaWorker.exe'))
+    assert helper_path()==tmp_path/'ArenaSensors.exe'
+
 def sensor(name,value,id='sensor'):
     return {'id':id,'name':name,'hardware':'CPU fixture','celsius':value}
 

@@ -2,7 +2,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF>
     <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><AssemblyName>EngineArena</AssemblyName>
-    <Version>0.2.0-beta.2</Version><ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.2.14</Version><ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\ui\engine-arena.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup><PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" /></ItemGroup>
+  <ItemGroup><Resource Include="..\ui\engine-arena.ico" Link="assets\engine-arena.ico" /></ItemGroup>
+  <ItemGroup><Content Include="..\locales\*.json" Exclude="..\locales\sources.json" Link="locales\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
 </Project>

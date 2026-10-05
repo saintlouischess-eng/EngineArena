@@ -1,0 +1,64 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+(async()=>{
+ const ready=JSON.parse(fs.readFileSync('test-output/workflow-ready.json','utf8')),out='test-output/staunton1849-quality';fs.mkdirSync(out,{recursive:true});
+ const browser=await chromium.launch({headless:true,channel:'msedge',args:['--enable-unsafe-swiftshader']}),errors=[],messages=[];
+ try{
+  const page=await browser.newPage({viewport:{width:1600,height:1100}});page.on('pageerror',e=>errors.push(e.stack));page.on('console',m=>{if(m.type()==='error')messages.push(m.text());if(m.type()==='warning')console.log(m.text())});
+  assert(ready.folder.includes('test-output')&&path.basename(ready.folder).startsWith('workflow-'));
+  const prefsUrl=new URL('/api/preferences',ready.url).href,headers={'X-Arena-Token':'workflow-review'},prefs=await (await page.request.get(prefsUrl,{headers})).json();await page.request.post(prefsUrl,{headers,data:{...prefs,focus3d:false,camera3d:{}}});
+  await page.goto(ready.url);await page.waitForFunction(()=>state.snapshot&&moveSheet.rows.length>0);
+  assert.equal(await page.evaluate(()=>ArenaBoard3D.isReady()),false,'Sculpture must not load for 2D');
+  await page.evaluate(()=>{displayPrefs.focus3d=true;renderFocus()});
+  try{await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0)}catch(e){console.log({errors,messages,detail:await page.evaluate(()=>({failed:board3dFailed,loading:board3dAssetLoading,asset:ArenaBoard3D.isReady(),notice:document.querySelector('#notice')?.textContent}))});throw e}await page.waitForTimeout(700);
+  await page.screenshot({path:out+'/docked.png'});
+  const zoomIn=page.locator('[data-zoom=in]'),zoomOut=page.locator('[data-zoom=out]'),zoomReset=page.locator('[data-zoom=reset]');
+  await zoomIn.click();assert.equal(await zoomReset.textContent(),'110%');
+  await zoomOut.click();assert.equal(await zoomReset.textContent(),'100%');
+  const liftUp=page.locator('[data-lift=up]'),liftDown=page.locator('[data-lift=down]'),liftReset=page.locator('[data-lift=reset]');
+  const framingBefore=await page.evaluate(()=>({frames:Number(document.querySelector('.board-3d').dataset.frames),p:ArenaBoard3D.settings(displayPrefs.camera3d)}));
+  await liftUp.click();await page.waitForFunction(n=>Number(document.querySelector('.board-3d').dataset.frames)>n,framingBefore.frames);
+  assert.deepEqual(await page.evaluate(()=>{const {lift,...rest}=ArenaBoard3D.settings(displayPrefs.camera3d);return rest}),{angle:framingBefore.p.angle,orbit:framingBefore.p.orbit,zoom:framingBefore.p.zoom});
+  await liftDown.click();assert.equal(await page.locator('#board3dLift').inputValue(),'0');
+  await page.locator('.board-3d').focus();await page.keyboard.press('Shift+ArrowUp');assert.equal(await page.locator('#board3dLift').inputValue(),'5');
+  await page.keyboard.press('Shift+ArrowDown');assert.equal(await page.locator('#board3dLift').inputValue(),'0');
+  await page.locator('#board3dLift').focus();await page.keyboard.press('End');assert(await liftUp.isDisabled());await page.keyboard.press('Home');assert(await liftDown.isDisabled());await liftReset.click();
+  const dragBox=await page.locator('.board-3d').boundingBox();await page.mouse.move(dragBox.x+80,dragBox.y+160);await page.keyboard.down('Shift');await page.mouse.down();await page.mouse.move(dragBox.x+80,dragBox.y+100);await page.mouse.up();await page.keyboard.up('Shift');assert(Number(await page.locator('#board3dLift').inputValue())>0);await liftReset.click();
+  await page.locator('.board-3d').hover({position:{x:80,y:80}});
+  const scrollBefore=await page.evaluate(()=>[scrollY,document.querySelector('#focusContent').scrollTop]);
+  await page.mouse.wheel(0,-120);await page.waitForFunction(()=>displayPrefs.camera3d.zoom>1);
+  assert.deepEqual(await page.evaluate(()=>[scrollY,document.querySelector('#focusContent').scrollTop]),scrollBefore);
+  await page.mouse.wheel(0,120);await page.waitForFunction(()=>displayPrefs.camera3d.zoom<=1.01);
+  await page.locator('.board-3d').focus();await page.keyboard.press('+');assert(Number((await zoomReset.textContent()).replace('%',''))>100);
+  await page.keyboard.press('-');await page.keyboard.press('Home');assert.equal(await zoomReset.textContent(),'100%');
+  await page.locator('#board3dZoom').focus();await page.keyboard.press('End');assert.equal(await zoomReset.textContent(),'240%');assert(await zoomIn.isDisabled());
+  await page.keyboard.press('Home');assert.equal(await zoomReset.textContent(),'60%');assert(await zoomOut.isDisabled());
+  await zoomReset.click();await page.locator('[data-panel=focus] [data-float]').click();await zoomIn.click();assert.equal(await zoomReset.textContent(),'110%');
+  await page.locator('[data-panel=focus] [data-expand]').click();await zoomIn.click();assert.equal(await zoomReset.textContent(),'120%');
+  await page.evaluate(()=>boardViewDialog());assert.equal(await page.locator('#cameraZoom').inputValue(),'120');
+  await page.locator('#cameraZoom').fill('175');await page.locator('#cameraLift').fill('20');await page.locator('#applyBoardView').click();await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0);assert.equal(await zoomReset.textContent(),'175%');
+  await page.evaluate(()=>persistDisplay());await page.reload();await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0);assert.equal(await zoomReset.textContent(),'175%');
+  assert.equal(await page.locator('#board3dLift').inputValue(),'20');await liftReset.click();
+  await page.evaluate(()=>{moveSheet.review=moveSheet.rows[0];renderFocus()});await page.waitForFunction(()=>document.querySelector('.board-3d').dataset.crownCount==='4');
+  await page.evaluate(()=>boardViewDialog());await page.locator('#crownMarks3d').uncheck();await page.locator('#applyBoardView').click();await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.crownCount==='0');
+  await page.evaluate(()=>boardViewDialog());await page.locator('#crownMarks3d').check();await page.locator('#applyBoardView').click();await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.crownCount==='4');
+  await page.evaluate(()=>{moveSheet.review=null;renderFocus()});
+  await page.screenshot({path:out+'/zoom-expanded.png'});
+  await page.evaluate(()=>{displayPrefs.panels.focus={visible:true,height:740};applyDisplay()});await zoomReset.click();
+  await page.evaluate(()=>{displayPrefs.focus3d=false;renderFocus()});assert.equal(await page.locator('.board-3d-controls').count(),0);
+  await page.evaluate(()=>{displayPrefs.focus3d=true;renderFocus()});await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0);assert.equal(await page.locator('.board-3d-controls').count(),1);
+  // A large review canvas uses the exact renderer shipped in the app.
+  await page.evaluate(()=>{const c=document.createElement('canvas');c.id='qualityCanvas';c.style='position:fixed;inset:0;width:100vw;height:100vh;z-index:9999';document.body.append(c);window.qualityBoard=ArenaBoard3D.create(c,()=>{});window.qualityRender=(fen,p,light=false)=>qualityBoard.render(fen,false,p,light,'',fen.startsWith('rnbqkbnr/')?['g1','h1','g8','h8']:[]);});
+  const full='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const cases=[['full-dark',full,{angle:42,orbit:22,zoom:1},false],['full-light',full,{angle:50,orbit:0,zoom:1},true],['piece-detail','8/8/8/8/1rnbqk2/1RNBQK2/8/8 w - - 0 1',{angle:32,orbit:15,zoom:1.4},false],['flipped',full,{angle:45,orbit:180,zoom:1},false]];
+  for(const [name,fen,p,light] of cases){await page.evaluate(({fen,p,light})=>qualityRender(fen,p,light),{fen,p,light});await page.waitForTimeout(150);assert.equal(await page.evaluate(()=>document.querySelector('#qualityCanvas').getContext('webgl2').getError()),0);await page.screenshot({path:out+'/'+name+'.png'})}
+  await page.evaluate(()=>{qualityBoard.dispose();document.querySelector('#qualityCanvas').remove()});
+  const frames=await page.locator('.board-3d').getAttribute('data-frames');await page.waitForTimeout(2200);assert.equal(await page.locator('.board-3d').getAttribute('data-frames'),frames);
+  await page.locator('.board-3d').focus();await page.keyboard.press('ArrowLeft');await page.waitForFunction(n=>Number(document.querySelector('.board-3d').dataset.frames)>Number(n),frames);
+  await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(200);await page.screenshot({path:out+'/laptop.png'});
+  await page.evaluate(()=>{board3dCanvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()});await page.waitForFunction(()=>board3dFailed&&!document.querySelector('.board-3d'));assert.equal(await page.locator('.focus-board .board').isVisible(),true);
+  assert.equal(await page.locator('.board-3d-controls').count(),0);
+  assert.deepEqual(errors,[]);assert.deepEqual(messages,[]);fs.writeFileSync(out+'/result.json',JSON.stringify({passed:true,lazyLoaded:true,verticalFraming:true,liftBounds:[-50,50],shiftDragAndKeyboard:true,framingSavedAcrossReload:true,crownHistoryAndToggle:true,zoomControls:true,wheelAndKeyboardZoom:true,zoomBounds:[60,240],zoomSavedAcrossReload:true,dockedFloatingExpandedZoom:true,idleNoRedraw:true,contextLossFallback:true,webglErrors:errors,consoleErrors:messages},null,2));console.log('3D framing, crown stamps, zoom and lifecycle checks passed.');
+ }finally{await browser.close()}
+})().catch(e=>{console.error(e);process.exitCode=1});

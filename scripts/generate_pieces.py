@@ -1,7 +1,11 @@
-"""Generate bundled SVG assets from source; Studio/Outline paths are original."""
+"""Generate SVG assets; Classic/Walnut use python-chess, other paths are original."""
 from pathlib import Path
 import chess
 import chess.svg
+from piece_designs import DESIGNS
+from premium_pieces import generate as generate_premium
+from sculpted_pieces import generate as generate_sculpted
+from raised_classic_variations import generate as generate_raised_classic
 
 root=Path(__file__).resolve().parent.parent/'ui'/'pieces'
 shapes={
@@ -26,7 +30,7 @@ modern={
 'B':'<circle cx="22.5" cy="4.5" r="2"/><path d="M22.5 7 Q35 17 25 23 Q25 28 30 32 H15 Q20 28 20 23 Q10 17 22.5 7 Z"/><path d="M25 11 L20 18" fill="none"/><path d="M12 36 Q22.5 31 33 36 V39 H12 Z"/>',
 'Q':'<path d="M10 13 Q16 20 17 13 L22.5 20 L28 13 Q29 20 35 13 L28 25 Q27 29 30 32 H15 Q18 29 17 25 Z"/><circle cx="10" cy="10" r="2"/><circle cx="17" cy="10" r="2"/><circle cx="22.5" cy="6" r="2"/><circle cx="28" cy="10" r="2"/><circle cx="35" cy="10" r="2"/><path d="M12 36 Q22.5 31 33 36 V39 H12 Z"/>',
 'K':'<path d="M22.5 3 V15 M17 8 H28" fill="none" stroke-width="3"/><path d="M22.5 19 Q14 10 11 18 Q8 25 18 27 L15 32 H30 L27 27 Q37 25 34 18 Q31 10 22.5 19 Z"/><path d="M22.5 19 V27" fill="none"/><path d="M12 36 Q22.5 31 33 36 V39 H12 Z"/>'}
-for style in ('classic','studio','outline','geometric','modern','walnut'):
+for style in ('classic','studio','outline','geometric','modern','walnut',*DESIGNS):
     directory=root/style;directory.mkdir(parents=True,exist_ok=True)
     for side,color in (('w',chess.WHITE),('b',chess.BLACK)):
         for symbol in 'KQRBNP':
@@ -37,6 +41,12 @@ for style in ('classic','studio','outline','geometric','modern','walnut'):
             else:
                 fill='#f7f4e9' if color else '#17252c';stroke='#243c42' if color else '#e9f0ed'
                 if style=='outline':fill='#f5edcc' if color else '#415c69';stroke='#1f3540' if color else '#b1d0da'
-                paths=geometric if style=='geometric' else modern if style=='modern' else shapes
-                svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45"><g fill="{fill}" stroke="{stroke}" color="{stroke}" stroke-width="{1.6 if style!="outline" else 2.4}" stroke-linejoin="round" stroke-linecap="round">{paths[symbol]}</g></svg>'
+                paths=DESIGNS.get(style) or (geometric if style=='geometric' else modern if style=='modern' else shapes)
+                weight=2.4 if style in ('outline','line') else 1.6
+                join='miter' if style=='pixel' else 'round'
+                svg=f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45"><g fill="{fill}" stroke="{stroke}" color="{stroke}" stroke-width="{weight}" stroke-linejoin="{join}" stroke-linecap="round">{paths[symbol]}</g></svg>'
             (directory/(side+symbol+'.svg')).write_text(svg,encoding='utf-8')
+
+generate_premium(root)
+generate_sculpted(root)
+generate_raised_classic(root, previews=False)

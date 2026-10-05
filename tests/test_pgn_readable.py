@@ -130,7 +130,7 @@ def test_chess960_opening_root_and_castling(tmp_path):
 
 
 def test_readable_control_descriptions():
-    assert control({'kind': 'movetime', 'seconds': 2})[0] == '*2'
+    assert control({'kind': 'movetime', 'seconds': 2})[0] == '1/2'
     assert control({'kind': 'delay', 'seconds': 60, 'delay': 2}) == ('?', '60s with 2s simple delay')
     assert control({'kind': 'staged', 'stages': [{'moves': 40, 'seconds': 120}, {'moves': 0, 'seconds': 60, 'increment': 1}]})[0] == '40/120:60+1'
     assert 'repeat' in control({'kind': 'staged', 'repeat': True, 'stages': [{'moves': 40, 'seconds': 120}]})[1]
@@ -144,12 +144,16 @@ def test_http_export_options_and_invalid_requests(tmp_path):
         await db.call('set_state', t['id'], 'running'); await db.call('fill_queue', t['id'], 2)
         g = await db.call('claim', t['id']); await db.call('finish', g['aid'], '1-0', 'fixture')
         async with TestClient(TestServer(app), headers={'X-Arena-Token': 'pgn'}) as client:
-            for query in ('style=wrong', 'perspective=black', 'annotations=invalid'):
+            for query in ('style=wrong', 'perspective=black', 'annotations=invalid', 'filetype=wrong'):
                 response = await client.get(f'/api/export/{t["id"]}/pgn?{query}')
                 assert response.status == 400
             for style in ('compact', 'tagged', 'moves', 'archive'):
                 response = await client.get(f'/api/export/{t["id"]}/pgn?style={style}')
                 assert response.status == 200
                 assert parse(await response.text()).headers['AttemptId'] == g['aid']
+            pgn=await (await client.get(f'/api/export/{t["id"]}/pgn?style=compact')).text()
+            response=await client.get(f'/api/export/{t["id"]}/pgn?style=compact&filetype=txt')
+            assert response.status==200 and response.content_type=='text/plain'
+            assert '.txt' in response.headers['Content-Disposition'] and await response.text()==pgn
             assert (await client.get('/assets/pgn.js')).status == 200
     asyncio.run(run())

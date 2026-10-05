@@ -1,0 +1,16 @@
+'use strict';
+function engineBookEditor(profile){
+ const b=profile.move_book;
+ return ArenaI18n.h`<div class="section-label">Engine move book</div><div id="engineBook"><p class="caption">This profile chooses moves from its own book on its turns. At the first missing position or depth limit it switches to engine search for the rest of the game. Import while games are paused.</p><div class="fields"><label>Saved book<select id="eBook"><option value="">No engine move book</option>${b?`<option value="${esc(b.id)}" selected>${esc(b.name)}</option>`:''}</select></label><div class="book-actions"><button type="button" id="importEngineBook">Import PGN / BIN…</button><button type="button" id="removeEngineBook">Delete unused book</button></div><label>Move selection<select id="eBookPolicy"><option value="weighted">Weighted by book frequency</option><option value="uniform">Equal chance per move</option><option value="best">Highest book weight</option></select></label>${field('eBookDepth',ArenaI18n.t('Maximum book plies from start (0 = unlimited)'),b?.max_plies??16,'number','min="0" step="1"')}</div><p id="eBookSummary" class="caption" role="status"></p><p class="caption">Two plies = one full move. PGN mainlines supply moves and frequency weights; BIN uses Polyglot weights. Imported books are saved with recovery data. Book moves earn increment but use no search time or move overhead. Cloned profiles can use different books.</p></div>`;
+}
+function wireEngineBook(profile){
+ const select=$('#eBook'),summary=$('#eBookSummary');let books=profile.move_book?[profile.move_book]:[],busy=false;
+ $('#eBookPolicy').value=profile.move_book?.policy||'weighted';
+ const refresh=()=>{const b=books.find(b=>b.id===select.value);summary.textContent=b?`${b.name} · ${b.positions.toLocaleString(ArenaI18n.locale)} ${ArenaI18n.t('positions')} · ${b.moves.toLocaleString(ArenaI18n.locale)} ${ArenaI18n.t('moves')}`:ArenaI18n.t('Engine searches every turn.');};
+ select.onchange=refresh;refresh();
+ $('#removeEngineBook').onclick=safely(async()=>{if(!select.value)return;await api('move-books',{delete:select.value});await load('');notify(ArenaI18n.t('Unused book deleted. Storage optimization can reclaim free database space.'));});
+ const load=async(id=select.value)=>{const result=await api('move-books');if(!select.isConnected)return;books=result;select.innerHTML=`<option value="">${ArenaI18n.t('No engine move book')}</option>`+books.map(b=>`<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');select.value=id;refresh();};
+ safely(load)();
+ $('#importEngineBook').onclick=safely(async()=>{const paths=await browse(false,false,'Opening books|*.pgn;*.bin');if(!paths[0])return;busy=true;$('#importEngineBook').disabled=true;summary.textContent=ArenaI18n.t('Importing and indexing book…');try{const b=await api('move-books',{path:paths[0]});await load(b.id);}finally{busy=false;if(select.isConnected)$('#importEngineBook').disabled=false;}});
+ return ()=>{if(busy)throw Error(ArenaI18n.t('Wait for the book import to finish.'));const b=books.find(b=>b.id===select.value);if(!b)return null;const max_plies=Number($('#eBookDepth').value);if(!Number.isSafeInteger(max_plies)||max_plies<0)throw Error(ArenaI18n.t('Book depth must be a nonnegative whole number of plies'));return {...b,policy:$('#eBookPolicy').value,max_plies};};
+}

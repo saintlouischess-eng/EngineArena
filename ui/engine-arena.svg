@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- Original Engine Arena artwork. Small-scale silhouette with machined brass facets. -->
+  <defs>
+    <linearGradient id="tile" x1="16" y1="5" x2="111" y2="128" gradientUnits="userSpaceOnUse"><stop stop-color="#29323c"/><stop offset="1" stop-color="#10151c"/></linearGradient>
+    <linearGradient id="rim" x1="10" y1="0" x2="113" y2="125" gradientUnits="userSpaceOnUse"><stop stop-color="#8a8372"/><stop offset=".4" stop-color="#42474d"/><stop offset="1" stop-color="#242c34"/></linearGradient>
+    <linearGradient id="metal" x1="38" y1="21" x2="91" y2="101" gradientUnits="userSpaceOnUse"><stop stop-color="#fff1c9"/><stop offset=".32" stop-color="#e6c887"/><stop offset=".65" stop-color="#b6965c"/><stop offset="1" stop-color="#ebd6a6"/></linearGradient>
+    <linearGradient id="edge" x1="56" y1="33" x2="87" y2="94" gradientUnits="userSpaceOnUse"><stop stop-color="#a98a52"/><stop offset="1" stop-color="#5c4931"/></linearGradient>
+    <linearGradient id="base" x1="43" y1="100" x2="90" y2="111" gradientUnits="userSpaceOnUse"><stop stop-color="#f3dfad"/><stop offset=".6" stop-color="#c1a371"/><stop offset="1" stop-color="#806644"/></linearGradient>
+  </defs>
+  <rect x="2" y="2" width="124" height="124" rx="28" fill="url(#tile)" stroke="url(#rim)" stroke-width="2"/>
+  <path d="M28 103h72" stroke="#05090d" stroke-width="12" stroke-linecap="round" opacity=".35"/>
+  <path d="M43 95c1-12 12-19 15-28l-9 6-14-1-8-11 12-16 10-8 3-18 13 11 9-8 1 14c23 12 30 33 24 59H43Z" fill="url(#metal)" stroke="#1a1e21" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="m65 30 9-8 1 14c23 12 30 33 24 59H83c11-32 0-52-18-65Z" fill="url(#edge)"/>
+  <path d="M58 67c16-8 21-15 19-25 8 13 2 23-10 34-8 7-11 12-12 19H43c1-12 12-19 15-28Z" fill="#b3935e"/>
+  <path d="m52 22-1 16-11 9-11 15 7 9 12 1" stroke="#fff3d2" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+  <path d="m58 37 5 3-12 9 2-8 5-4Z" fill="#20262d"/>
+  <path d="m57 39 3 1-7 5" stroke="#fff3d2" stroke-linejoin="round" opacity=".8"/>
+  <path d="m36 58 3-1" stroke="#655138" stroke-width="3" stroke-linecap="round"/>
+  <path d="m30 64 13 1 4-3M75 38c17 13 22 33 17 52" stroke="#f7dfa9" stroke-linecap="round" stroke-width="1.5" opacity=".7"/>
+  <path d="M44 96h54l3 6H40l4-6Z" fill="url(#metal)" stroke="#1a1e21" stroke-width="2"/>
+  <path d="M39 102h62l4 7H35l4-7Z" fill="url(#base)" stroke="#1a1e21" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M42 103h56M46 97h49" stroke="#fff0c9" stroke-linecap="round"/>
+</svg>

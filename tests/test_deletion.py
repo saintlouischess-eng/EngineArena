@@ -70,6 +70,25 @@ def test_delete_preserves_other_tournaments_and_removes_all_attempts_and_backups
     finally:s.close()
 
 
+def test_deletion_reclaims_orphan_snapshot_sidecars_and_known_scratch(tmp_path):
+    from arena.storage import scratch_files
+    s=Store(tmp_path)
+    try:
+        tid=tournament(s,'Delete me');finish(s,tid);s.export_pending();s.backup()
+        folder=tmp_path/'backups'
+        abandoned=['recovery-99.sqlite3-wal','recovery-99.sqlite3-shm','recovery-99.sqlite3-journal',
+                   'recovery-98.delete.tmp','recovery-98.delete.tmp-journal','recovery-97.compact.tmp']
+        for name in abandoned:(folder/name).write_bytes(b'abandoned cleanup data')
+        (folder/'unrelated.tmp').write_text('Preserve me')
+        assert {p.name for p in scratch_files(tmp_path)}==set(abandoned)
+        s.delete_tournament(tid,'Delete me')
+        assert not scratch_files(tmp_path)
+        assert (folder/'unrelated.tmp').read_text()=='Preserve me'
+        assert s.backup_file.exists()
+        assert s.db.execute('PRAGMA freelist_count').fetchone()[0]==0
+    finally:s.close()
+
+
 @pytest.mark.parametrize('failure_point',['replace','fsync'])
 def test_failed_pgn_cleanup_finishes_after_restart(tmp_path,failure_point):
     s=Store(tmp_path);tid=tournament(s,'Delete me');finish(s,tid);s.export_pending()

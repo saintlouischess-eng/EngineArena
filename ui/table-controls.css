@@ -1,0 +1,4 @@
+.sortable-table th button{padding:4px 0;border:0;background:transparent;color:inherit;font:inherit;white-space:nowrap;text-transform:inherit;cursor:pointer}
+.sortable-table th[aria-sort]:not([aria-sort="none"]){color:var(--results-accent)}
+.sortable-table th button:focus-visible{outline:2px solid var(--results-accent);outline-offset:4px}
+#games [data-adjudicate]{display:block;margin-top:7px;font-size:.8rem}

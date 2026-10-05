@@ -1,0 +1,18 @@
+ENGINE ARENA 1.2.14
+Designed by Mark Young
+
+Windows 11, 64-bit Intel/AMD.
+
+This setup includes Engine Arena, its Python and .NET runtimes, and Microsoft's full offline WebView2 installer. WebView2 is installed only when missing, unless you select the optional runtime setup. No separate runtime downloads are needed during setup.
+
+Chess engines, neural-network files, opening books and tablebases are not included. Add your own UCI engines after installation.
+
+CPU temperature and fastest-core readings are optional. The included signed PawnIO driver setup can be opened after installation or from Hardware display. It requires Windows administrator approval. Choose its signed edition. Engine Arena and chess engines run with normal user permissions.
+
+Close all Engine Arena windows before updating. Install over the previous version in the same program folder. Tournament databases, PGNs and settings live outside that folder; updates and uninstall preserve them. Shared WebView2 and PawnIO components are not removed by uninstall.
+
+The Engine Arena installer is unsigned. The Microsoft and PawnIO prerequisite installers retain their original verified digital signatures.
+
+Version 1.2.14 preserves saved UCI thread and hash options regardless of capitalization, keeping engine settings and resource budgets consistent. Import previews convert automatic (zero) thread counts to an explicit one thread with a visible explanation; review before importing. Includes the upright, depth-correct 3D coordinates from 1.2.13.
+
+Corrects Windows CPU-usage polling that could delay engine replies and charge that delay to chess clocks. CPU display readings now use a cached background sample through a native call that releases Python's interpreter lock. Best moves are timestamped before fairness yields.

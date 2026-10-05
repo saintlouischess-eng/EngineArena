@@ -1,0 +1,12 @@
+.event-editor .fields>label,#customEditor .fields>label,.event-editor>label,#customEditor>label{display:flex;flex-direction:column;gap:.45rem;min-width:0;margin-bottom:.9rem;font-size:.95rem}
+.event-editor input,.event-editor select,.event-editor textarea,#customEditor input,#customEditor textarea{width:100%;font-size:1rem}
+.event-editor>button,#customEditor>button{margin:.65rem 0}
+.event-editor .fields{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));margin-bottom:1rem}
+.event-editor textarea,#customPairs{resize:vertical;min-height:6rem;max-height:40vh}
+.event-editor details,#customEditor details{margin:.8rem 0;padding:.8rem;border:1px solid var(--border);border-radius:7px}
+#eventNames,#customNames{max-height:28vh;overflow:auto;line-height:1.8;margin-top:.6rem}
+.event-editor .preview-total small{display:block;margin-top:.45rem}
+.event-editor .caption{margin:.75rem 0;font-size:.9rem}
+#eventDecisions .table-scroll{max-height:38vh}
+#eventContext{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
+.event-editor [hidden],#customEditor [hidden],#eventContext[hidden]{display:none!important}

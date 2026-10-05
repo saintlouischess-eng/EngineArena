@@ -59,7 +59,7 @@ def test_manual_swiss_recovers_impossible_rematch_free_round(tmp_path):
 
 @pytest.mark.parametrize('n',[2,3,5,8,9])
 def test_seeded_single_elimination_and_totals(tmp_path,n):
-    s=Store(tmp_path);t=s.create_tournament('KO',profiles(n),{'format':'knockout','cycles':1,'paired':False});tid=t['id'];s.set_state(tid,'running');games=[]
+    s=Store(tmp_path);t=s.create_tournament('KO',profiles(n),{'format':'knockout','cycles':1,'paired':False,'knockout_tiebreak':'seed'});tid=t['id'];s.set_state(tid,'running');games=[]
     for _ in range(12):
         games+=finish_window(s,tid)
         if s.tournament(tid)['state']=='completed':break

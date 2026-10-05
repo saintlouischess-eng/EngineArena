@@ -4,10 +4,18 @@ import heapq
 import psutil
 
 def option(profile,name,default):
-    return next((v for k,v in profile.get('options',{}).items() if k.casefold()==name.casefold()),profile.get(name.lower(),default))
+    from .engine_options import find_name
+    options=profile.get('options',{});key=find_name(options,name)
+    return options[key] if key else profile.get(name.lower(),default)
+
+def thread_count(profile):
+    # Legacy snapshots can predate explicit-count validation. Reserve the whole
+    # host for an automatic count rather than silently admitting unlimited work.
+    count=int(option(profile,'Threads',1))
+    return count if count>0 else (os.cpu_count() or 1)
 
 def game_cost(white,black,ponder=False):
-    threads=[int(option(p,'Threads',1)) for p in (white,black)]
+    threads=[thread_count(p) for p in (white,black)]
     memory=sum(int(option(p,'Hash',1024))+int(p.get('extra_memory_mb',256)) for p in (white,black))
     groups={}
     for p in (white,black):
@@ -17,17 +25,20 @@ def game_cost(white,black,ponder=False):
 def fits(cost,used,settings):
     cpu=settings.get('cpu_budget') or os.cpu_count() or 1
     memory=settings.get('memory_budget_mb') or int(psutil.virtual_memory().available/2**20*.85)
+    reserved=settings.get('_reservation_cost',{'threads':0,'memory_mb':0,'gpu':{}})
+    cpu-=reserved['threads'];memory-=reserved['memory_mb']
     if used['threads']+cost['threads']>cpu:return False,f'CPU budget {cpu} threads'
     if used['memory_mb']+cost['memory_mb']>memory:return False,f'Estimated engine memory exceeds {memory:,} MB budget'
     for group,count in cost['gpu'].items():
-        limit=settings.get('gpu_limits',{}).get(group,2)
+        limit=settings.get('gpu_limits',{}).get(group,settings.get('gpu_default_limit',2))
+        limit-=reserved['gpu'].get(group,0)
         if used['gpu'].get(group,0)+count>limit:return False,f'GPU group {group} exceeds {limit} simultaneous engine processes'
     return True,''
 
 def usage(views,ponder=False):
     total={'threads':0,'memory_mb':0,'gpu':{}}
     for v in views:
-        cost=game_cost(v['white'],v['black'],ponder)
+        cost=v.get('resource_cost') or game_cost(v['white'],v['black'],v.get('ponder',ponder))
         total['threads']+=cost['threads'];total['memory_mb']+=cost['memory_mb']
         for g,n in cost['gpu'].items():total['gpu'][g]=total['gpu'].get(g,0)+n
     return total
@@ -41,7 +52,7 @@ def recommend(profiles,settings,available_mb=None,logical_cpus=None):
     memory_budget=settings.get('memory_budget_mb') or int(available_mb*.85)
     if not profiles:return {'recommended':None,'logical_cpus':cpu,'available_mb':available_mb,'note':'Select engine profiles to estimate concurrency.'}
     selfplay=settings.get('format')=='self_play' or len(profiles)==1
-    threads=[int(option(p,'Threads',1)) for p in profiles]
+    threads=[thread_count(p) for p in profiles]
     memory=[int(option(p,'Hash',1024))+int(p.get('extra_memory_mb',256)) for p in profiles]
     per_cpu=(2*max(threads) if selfplay else sum(heapq.nlargest(2,threads))) if settings.get('ponder') else max(threads)
     per_memory=2*max(memory) if selfplay else sum(heapq.nlargest(2,memory))

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title">
+<title id="title">Classic Refined Raised — Black pawn</title>
+<desc>Raised vector artwork of the Classic family, GPL-3.0-or-later. Burnett design reference. Static gradients, bevels and engraved details; no raster images or filters.</desc>
+<defs><linearGradient id="face" x1="0" y1="0" x2="1" y2=".2">
+<stop stop-color="#46515a"/><stop offset=".28" stop-color="#73818a"/><stop offset=".61" stop-color="#303b45"/><stop offset=".9" stop-color="#101921"/><stop offset="1" stop-color="#35434d"/>
+</linearGradient>
+<radialGradient id="round" cx=".31" cy=".23" r=".78">
+<stop stop-color="#73818a"/><stop offset=".32" stop-color="#303b45"/><stop offset=".78" stop-color="#101921"/><stop offset="1" stop-color="#46515a"/>
+</radialGradient>
+<linearGradient id="bevel" x1=".15" y1="0" x2=".8" y2="1">
+<stop stop-color="#b1bec6"/><stop offset=".36" stop-color="#73818a"/><stop offset=".62" stop-color="#303b45"/><stop offset="1" stop-color="#080e14"/>
+</linearGradient>
+<linearGradient id="engraving" x1="0" y1="0" x2="0" y2="1">
+<stop stop-color="#b5c2c7"/><stop offset=".5" stop-color="#768993"/><stop offset="1" stop-color="#506571"/>
+</linearGradient>
+<radialGradient id="glaze" cx=".34" cy=".22" r=".73">
+<stop stop-color="#ffffff" stop-opacity=".24"/><stop offset=".46" stop-color="#ffffff" stop-opacity=".12"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+</radialGradient><clipPath id="silhouette"><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" /></clipPath><clipPath id="face-0"><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" /></clipPath></defs><g stroke-linecap="round" stroke-linejoin="round"><g transform="translate(1.5 2.3499999999999996)" opacity=".14"><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" fill="#071019" stroke="#071019" stroke-width="1.85" /></g><g transform="translate(1.0 1.65)" opacity=".9"><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" fill="#071019" stroke="#071019" stroke-width="1.85" /></g><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" fill="url(#face)" stroke="#080e14" stroke-width="1.85" /><g clip-path="url(#face-0)"><path d="M50 29 C44 29 40 34 40 40 C40 43 41 45 43 47 C35 50 32 56 33 63 C34 68 36 71 41 74 C30 80 26 87 26 92 H74 C74 87 70 80 59 74 C64 71 66 68 67 63 C68 56 65 50 57 47 C59 45 60 43 60 40 C60 34 56 29 50 29 Z" fill="none" stroke="url(#bevel)" stroke-width="3.1" /></g><g clip-path="url(#silhouette)"><circle cx="50" cy="39" r="10" fill="url(#round)"/><ellipse cx="50" cy="61" rx="17" ry="14" fill="url(#round)"/><path d="M44 33 Q47 31 51 32 M38 54 Q42 51 46 52 M33 87 Q43 83 56 84" fill="none" stroke="#c5d4da" stroke-width="1.1" opacity=".72" /></g><path d="M34 84 Q50 80 66 84" fill="none" stroke="#bdcbd0" stroke-width="2.354" transform="translate(0 .68)" opacity=".23" /><path d="M34 84 Q50 80 66 84" fill="none" stroke="url(#engraving)" stroke-width="1.704" /></g>
+</svg>

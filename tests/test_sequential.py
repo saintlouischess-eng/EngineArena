@@ -4,7 +4,7 @@ from arena.store import Store
 from arena.stats import sprt_llr
 
 def make(store,extra=None):
-    return store.create_tournament('SPRT',[{'name':'A'},{'name':'B'}],{'format':'sprt','cycles':100,'sprt':{'elo0':-100,'elo1':100,'alpha':.1,'beta':.1},**(extra or {})})
+    return store.create_tournament('SPRT',[{'name':'A'},{'name':'B'}],{'format':'sprt','cycles':100,'sprt_order':'completion','sprt':{'elo0':-100,'elo1':100,'alpha':.1,'beta':.1},**(extra or {})})
 
 def complete_pair(s,tid,win=True):
     s.fill_queue(tid,4)

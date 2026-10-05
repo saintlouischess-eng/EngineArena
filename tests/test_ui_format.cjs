@@ -14,3 +14,14 @@ test('incomplete and degenerate paired estimates explain missing uncertainty',()
  assert.match(f.uncertainty({pairs:20,games:40,ci:null}),/Conservative/);
  assert.match(f.uncertainty({pairs:20,games:40,ci:null},'conservative'),/20 completed opening pairs/);
 });
+test('estimated LOS bounds never display false certainty while exact scores stay exact',()=>{
+ assert.equal(f.los(0),'<0.1%');assert.equal(f.los(100),'>99.9%');
+ assert.equal(f.los(99.96),'>99.9%');assert.equal(f.los(.001),'<0.1%');
+ assert.equal(f.los(50),'50.0%');assert.equal(f.los(null),'—');
+ assert.equal(f.percent(0),'0.0%');assert.equal(f.percent(100),'100.0%');
+});
+test('legacy search-thread aliases match resource precedence',()=>{
+ for(const key of ['Threads','Number of Threads','MaxThreads','Max CPUs'])assert.equal(f.resourceOption({[key]:4},'threads'),key);
+ assert.equal(f.resourceOption({'CPU Usage':100},'threads'),undefined);
+ assert.equal(f.resourceOption({'Max CPUs':4,Threads:2},'threads'),'Threads');
+});

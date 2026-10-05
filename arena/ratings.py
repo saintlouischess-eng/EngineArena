@@ -15,6 +15,7 @@ import time
 
 SCALE=400/math.log(10)
 _cache=OrderedDict()
+STATUS_LABELS={'fixed_anchor':'Fixed reference','estimated':'Estimated','disconnected':'No comparison path to reference','no_comparisons':'No completed comparisons','no_finite_fit':'No finite fit: separated results','not_converged':'Fit did not converge','uncertainty_unavailable':'Uncertainty unavailable','uncertainty_not_converged':'Uncertainty did not converge'}
 
 
 def background_priority():
@@ -138,10 +139,11 @@ def estimate(fit,slot,anchor_slot,anchor_rating,confidence=95):
                   'los':50*math.erfc(-delta/(se*math.sqrt(2))),'status':'estimated'}
 
 
-def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95):
+def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95,sort='slot',direction='asc'):
     from .stats import confidence_level
     confidence=confidence_level(confidence)
     if offset<0 or limit<1:raise ValueError('Invalid rating page')
+    if sort not in ('slot','name','rating','delta','ci','los','samples','status') or direction not in ('asc','desc'):raise ValueError('Invalid rating sort')
     started=time.monotonic();db=sqlite3.connect(Path(path).as_uri()+'?mode=ro',uri=True,timeout=30);db.row_factory=sqlite3.Row
     try:
         db.execute('BEGIN')
@@ -168,19 +170,50 @@ def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95):
     else:_cache.move_to_end(key)
     anchor['name']=profiles[anchor['slot']]['name'];query=search.casefold()
     matching=[p for p in profiles if query in p['name'].casefold()]
-    # Stable participant order avoids page shifts when live estimates change.
-    selected=matching if export else matching[offset:offset+limit]
-    rows=[p|estimate(cached,p['slot'],anchor['slot'],anchor['rating'],confidence) for p in selected]
+    # Cache uncertainty solves by report revision/reference/confidence. Simple
+    # sorts need only the fitted strengths, not an expensive solve for every row.
+    signature=(anchor['rating'],confidence)
+    if cached.get('row_signature')!=signature:
+        cached.update(row_signature=signature,rows={})
+    def row(p):
+        slot=p['slot']
+        if slot not in cached['rows']:cached['rows'][slot]=p|estimate(cached,slot,anchor['slot'],anchor['rating'],confidence)
+        return cached['rows'][slot]
+    def value(p):
+        slot=p['slot']
+        if sort=='slot':return slot
+        if sort=='name':return p['name'].casefold()
+        if sort=='samples':return cached['participant_samples'][slot]
+        if sort in ('rating','delta'):
+            if slot==anchor['slot']:return anchor['rating'] if sort=='rating' else 0.
+            if cached['status']!='ok' or slot not in cached['index']:return None
+            delta=cached['theta'][cached['index'][slot]]*SCALE
+            return delta+(anchor['rating'] if sort=='rating' else 0)
+        item=row(p)
+        if sort=='ci':return item['ci'][1]-item['ci'][0] if item['ci'] else None
+        if sort=='status':return STATUS_LABELS.get(item['status'],item['status']).casefold()
+        return item[sort]
+    values={p['slot']:value(p) for p in matching}
+    available=[p for p in matching if values[p['slot']] is not None]
+    missing=[p for p in matching if values[p['slot']] is None]
+    # Python's stable sort retains participant order for ties in both directions.
+    available.sort(key=lambda p:values[p['slot']],reverse=direction=='desc')
+    ordered=available+missing
+    selected=ordered if export else ordered[offset:offset+limit]
+    rows=[row(p) for p in selected]
     result={'tournament':tid,'name':tournament['name'],'revision':revision,'anchor':anchor,'paired':paired,'sample_unit':'completed opening pairs' if paired else 'games',
       'samples':cached['samples'],'connected_participants':len(cached['members']),'participant_count':len(profiles),'total':len(matching),'offset':offset,'items':rows,'status':cached['status'],
-      'confidence':confidence,'model':f'Logistic expected-score pool fit; fixed reference rating; {"paired" if paired else "game"}-score sandwich normal {confidence:g}% intervals',
+      'confidence':confidence,'sort':sort,'direction':direction,'model':f'Logistic expected-score pool fit; fixed reference rating; {"paired" if paired else "game"}-score sandwich normal {confidence:g}% intervals',
       'assumptions':'Independent fixed samples, stable transitive strengths; intervals and LOS are approximate and conditional on the supplied anchor. No anchor-rating uncertainty or color parameter is estimated.',
       'elapsed_ms':1000*(time.monotonic()-started)}
+    from .knockout import sample_note
+    if sample_note(settings):result['model']+='; '+sample_note(settings)
     if export=='csv':
-        output=io.StringIO();writer=csv.DictWriter(output,fieldnames=['slot','name','rating','delta','ci_lower','ci_upper','confidence','los','samples','status','anchor','anchor_rating','model'],extrasaction='ignore');writer.writeheader()
+        output=io.StringIO();writer=csv.DictWriter(output,fieldnames=['slot','participant_id','name','rating','delta','ci_lower','ci_upper','confidence','los','los_display','samples','status','anchor','anchor_rating','model'],extrasaction='ignore');writer.writeheader()
         for row in rows:
             interval=row['ci']
-            writer.writerow(row|{'ci_lower':interval[0] if interval else None,'ci_upper':interval[1] if interval else None,
+            from .display import los_percent
+            writer.writerow(row|{'participant_id':row['slot']+1,'los_display':los_percent(row['los']),'ci_lower':interval[0] if interval else None,'ci_upper':interval[1] if interval else None,
                                  'anchor':anchor['name'],'anchor_rating':anchor['rating'],'model':result['model']})
         return output.getvalue()
     return result

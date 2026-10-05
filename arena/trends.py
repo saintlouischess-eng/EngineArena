@@ -45,12 +45,14 @@ def tournament_series(path,tid,slot=0,limit=600,confidence=95):
         sequential=[]
         if settings['format']=='sprt':
             total=db.execute('SELECT count(*) FROM sequential_samples WHERE tid=?',(tid,)).fetchone()[0];step=max(1,math.ceil(total/(limit-1)));hist=[0]*(5 if paired else 3)
-            for index,r in enumerate(db.execute("SELECT body FROM sequential_samples WHERE tid=? ORDER BY json_extract(body,'$.completed'),sample",(tid,)),1):
+            order='sample' if settings.get('sprt_order')=='scheduled' else "json_extract(body,'$.completed'),sample"
+            for index,r in enumerate(db.execute('SELECT body FROM sequential_samples WHERE tid=? ORDER BY '+order,(tid,)),1):
                 evidence=json.loads(r[0]);hist[round(2*evidence['score'])]+=1
                 if index==1 or index%step==0 or index==total:sequential.append({'x':index,**sprt_llr(hist,**settings['sprt'])})
         result={'name':t['name'],'confidence':confidence,'profile':profile[0],'slot':slot,'revision':revision,'paired':paired,'official_games':count,'stride':stride,'points':points,'sequential':sequential,'sequential_state':seq,
           'perspective':profile[0] if settings['format']!='self_play' else 'White side, self-play',
           'note':'Current official results ordered by completion; replacement and invalidation recompute history. Fixed-sample intervals are not stopping rules.'}
+        if settings['format']=='sprt':result['sequential_candidate']=json.loads(db.execute('SELECT profile FROM participants WHERE tid=? AND slot=?',(tid,settings.get('sprt_candidate',0))).fetchone()[0])['name']
         _cache[key]=result
         while len(_cache)>8:_cache.popitem(last=False)
         return result
@@ -71,7 +73,8 @@ def game_series(path,tid,number,limit=600):
             # Keep adjacent White/Black moves in every display bucket; sampling
             # every even ply alone would silently omit one engine's telemetry.
             if stride>1 and index%stride not in (0,1) and index!=total:continue
-            info=json.loads(r['info']);clocks=json.loads(r['clocks']);color='black' if r['fen'].split()[1]=='w' else 'white'
+            from .telemetry import clean
+            info=clean(json.loads(r['info']),r['elapsed']);clocks=json.loads(r['clocks']);color='black' if r['fen'].split()[1]=='w' else 'white'
             points.append({'x':r['ply'],'color':color,'elapsed':r['elapsed'],'clocks':clocks,**info})
         return {'number':number,'attempt':a['seq'],'mode':a['mode'],'state':g['state'] if a['ended'] is None else 'interrupted' if a['result']=='*' else 'completed','reason':a['reason'],'official':a['id']==g['official'],'invalidated':bool(g['invalid']),
           'names':names,'points':points,'moves':total,'stride':stride,'note':'Latest preserved attempt. Evaluations, mate scores and reported WDL use White perspective; other telemetry belongs to the moving engine.'}
