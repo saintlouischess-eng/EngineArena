@@ -82,6 +82,7 @@ class PgnContext:
         self.tid, self.name = tid, row[0]
         self.settings = json.loads(row[1])
         self.settings.pop('openings', None)
+        self.settings.pop('rr_extensions', None)  # Schedule audit metadata is not a playing condition.
         # Small cache only; exporting many participants does not retain all profiles.
         self.profile = lru_cache(maxsize=128)(self._profile)
 
@@ -126,6 +127,10 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
         'OpeningPair': str(g['pair_no']), 'OpeningLeg': str(g['leg']), 'Opening': opening.get('name', 'FEN'),
         'OpeningSeed': str(opening.get('seed', '')), 'BookPlyCount': str(len(book_moves)),
         'CompetitionStage': opening.get('competition_stage', 'regular')})
+    if s.get('event_context'):
+        event=s['event_context']
+        pgn.headers.update(EventId=event['id'],EventStage=event['label'])
+        if event['label'].startswith('Season '):pgn.headers['LeagueSeason']=str(event.get('season',event['stage']))
     if presentation:
         pgn.headers['GameNumber']=str(g['number']+1)
         pgn.headers['UTCDate']=time.strftime('%Y.%m.%d',time.gmtime(a['started']))

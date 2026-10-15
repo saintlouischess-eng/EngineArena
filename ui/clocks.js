@@ -25,6 +25,20 @@ const ArenaClocks=(()=>{
   if(stale)label=ArenaI18n.t('Waiting for update');
   return {text:seconds===null?'—':format(seconds),label,detail,active:active&&!stale,stale};
  }
- return {format,project};
+ // Read-only projection for the physical clock in the modeled room. Unknown
+ // clocks stay blank; node/depth searches are labeled elapsed, never a deadline.
+ function table(data,now=0){
+  if(!data)return null;
+  if(data.kind==='focus')return Object.fromEntries(['white','black'].map(side=>{const value=project(data.game,side,Math.max(0,now-data.receivedAt));const kind=data.game.clocks?.[side]?.control?.kind;return [side,{...value,mode:['nodes','depth'].includes(kind)?'ELAPSED':''}]}));
+  if(data.kind!=='player')return null;
+  const g=data.game,review=data.review!==null,record=review?(data.review?g.moves[data.review-1]?.clocks:g.moves[0]?.before?.clocks):null;
+  return Object.fromEntries(['white','black'].map(side=>{const c=(record||g.clocks)?.[side],tc=c?.control||{},active=!review&&g.state==='playing'&&g.turn===side&&!data.viewing;
+   if(!c)return [side,{text:'—',active:false}];
+   const elapsed=active?Math.max(0,g.turn_elapsed||0)+Math.max(0,now-data.receivedAt)/1000:0,delay=['delay','bronstein'].includes(tc.kind)?tc.delay||0:0;
+   const fixed=['nodes','depth'].includes(tc.kind),seconds=fixed?elapsed:tc.kind==='movetime'?Math.max(0,tc.seconds-elapsed):c.remaining===null?null:Math.max(0,c.remaining-Math.max(0,elapsed-delay));
+   return [side,{text:seconds===null?'∞':format(seconds),active,mode:fixed?'ELAPSED':seconds===null?'UNTIMED':''}];
+  }));
+ }
+ return {format,project,table};
 })();
 if(typeof module!=='undefined')module.exports=ArenaClocks;

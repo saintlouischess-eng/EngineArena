@@ -26,15 +26,19 @@ def test_scoresheet_pages_opening_numbering_and_attempt_isolation(store):
     assert first['has_more'] and first['latest_ply']==3
     assert first['opening_moves'][-1]['crown_squares']==['h1','f3','g8','h8']
     assert first['items'][0]['crown_squares']==['h1','f3','g8','h8']
+    assert first['opening_knight_facings']=={'b1':1,'f3':-1,'b8':1,'g8':-1}
+    assert first['items'][0]['knight_facings']=={'b1':1,'f3':-1,'c6':1,'g8':-1}
     tail=read_moves(store.path,g['id'],after=2,limit=2)
     assert not tail['opening_moves'] and tail['items'][0]['san']=='a6' and not tail['has_more']
     assert tail['items'][0]['info']['cp']==34
     assert tail['items'][0]['crown_squares']==first['items'][-1]['crown_squares']
+    assert tail['items'][0]['knight_facings']==first['items'][-1]['knight_facings']
     store.finish(g['aid'],'0-1','timeout');store.set_state(t['id'],'paused')
     store.requeue(t['id'],[g['id']],mode='diagnostic');store.set_state(t['id'],'running');second=store.claim(t['id'])
     latest=read_moves(store.path,g['id'])
     assert latest['attempt']['mode']=='diagnostic' and not latest['attempt']['official'] and latest['items']==[]
     assert latest['opening_crown_squares']==['h1','f3','g8','h8']
+    assert latest['opening_knight_facings']==first['opening_knight_facings']
     old=read_moves(store.path,g['id'],aid=g['aid'])
     assert old['attempt']['official'] and len(old['items'])==3
     with pytest.raises(ValueError,match='does not belong'):read_moves(store.path,g['id'],aid='other')
@@ -47,6 +51,7 @@ def test_scoresheet_does_not_invent_fen_history(store):
     t=store.create_tournament('FEN',[profile('A'),profile('B')],{'cycles':1},[{'fen':board.fen()}]);g=run_claim(store,t)
     data=read_moves(store.path,g['id']);assert data['opening_moves']==[] and data['opening']['fen']==board.fen()
     assert data['opening_crown_squares']==[]
+    assert data['opening_knight_facings']=={}
 
 
 def test_import_formats_paths_and_transaction(store,tmp_path):

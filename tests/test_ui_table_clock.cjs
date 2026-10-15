@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict'),C=require('../ui/clocks.js');
+const clock=(remaining,control={kind:'fischer',increment:2})=>({remaining,control});
+assert.equal(C.table(null),null);
+const g={clocks:{white:clock(180),black:clock(179)},clock_active:'white',search_elapsed:1};
+const snapshot=JSON.stringify(g),data={kind:'focus',game:g,receivedAt:1000};
+assert.equal(C.table(data,1500).white.text,'02:58.5');assert.equal(C.table(data,1500).black.text,'02:59.0');
+assert.equal(C.table(data,4000).white.active,false);assert.equal(C.table(data,4000).white.stale,true);
+assert.equal(JSON.stringify(g),snapshot,'Clock display cannot mutate authoritative time');
+g.clocks.white=clock(null,{kind:'nodes',nodes:100000});assert.equal(C.table(data,1500).white.mode,'ELAPSED');assert.equal(C.table(data,1500).white.text,'00:01.5');
+const player={kind:'player',receivedAt:1000,review:null,game:{state:'playing',turn:'black',turn_elapsed:2,clocks:{white:clock(null),black:clock(10,{kind:'delay',delay:3})},moves:[{clocks:{white:clock(50),black:clock(49)}}]}};
+assert.equal(C.table(player,2000).black.text,'00:10.0');assert.equal(C.table(player,3000).black.text,'00:09.0');assert.equal(C.table(player,3000).white.text,'∞');
+player.review=1;assert.equal(C.table(player,5000).black.text,'00:49.0');assert.equal(C.table(player,5000).black.active,false);
+console.log('Physical table clock projection passed: actual clocks, delay, review, no-clock modes and stale updates');

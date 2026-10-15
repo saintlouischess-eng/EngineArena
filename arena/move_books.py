@@ -102,9 +102,9 @@ def candidates(store,bid,position):
     return store.rows('SELECT uci,weight FROM book_moves WHERE book_id=? AND position=? ORDER BY uci',(bid,position))
 
 def remove(store,bid):
-    for table,column in (('profiles','body'),('participants','profile'),('experiments','profiles'),('events','body')):
+    for table,column in (('profiles','body'),('participants','profile'),('experiments','profiles'),('events','body'),('player_games','body'),('player_series','body')):
         if store.one(f'SELECT 1 FROM {table},json_tree({column}) j WHERE j.value=? LIMIT 1',(bid,)):
-            raise ValueError('This book is used by a saved profile, tournament or experiment. Remove those references before deleting the book.')
+            raise ValueError('This book is used by a saved profile, tournament, experiment or Player Arena game/series. Remove those references before deleting the book.')
     with store.tx():
         store.db.execute('DELETE FROM book_moves WHERE book_id=?',(bid,))
         store.db.execute('DELETE FROM move_books WHERE id=?',(bid,))

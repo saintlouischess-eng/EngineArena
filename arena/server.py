@@ -14,7 +14,7 @@ from aiohttp import web
 import chess
 from .store import DEFAULTS,encode
 from .runner import Database,Runner
-from .uci import discover,validated_options
+from .uci import discover,validated_options,UciEngine
 from .openings import inspect_openings
 from .models import scheduled_pairs
 
@@ -39,6 +39,8 @@ async def create_app(folder,token):
         except Exception as e:return web.json_response({'error':str(e)},status=500)
     app=web.Application(middlewares=[guard],client_max_size=64*1024*1024)
     app['db']=db;app['runner']=runner
+    from .player import PlayerArena
+    player=PlayerArena(db,runner);app['player']=player
     from .report_jobs import ReportJobs
     report_jobs=ReportJobs()
     from .stats import confidence_level
@@ -97,7 +99,7 @@ async def create_app(folder,token):
         return web.Response(text=source,content_type='text/html',headers={'Cache-Control':'no-cache'})
     async def static(request):
         name=request.match_info['name']
-        if name not in ('workflow.css','workflow.js','board3d.js','board3d-studio.js','board3d-crowns.js','staunton1849.glb','three.core.js','three.module.js','three-gltf.js','three-geometry-utils.js','three-room.js','three-skeleton-utils.js','board3d-ui.js','game-moves.js','studio.css','studio.js','engine-arena.svg','sprt.js','events.css','events.js','custom-matchups.js','tournament-queue.js','tournament-queue.css','tournament-edit.js','engine-books.js','reliability.js','focus-layout.js','focus-layout.css','concurrency.js','i18n.js','language.js','storage.js','knockout.js','text-format.js','text-exports.js','text-exports.css','search.js','board-materials.js','board-materials.css','adjudication.js','table-controls.css','format.js','review.js','review.css','hardware.js','hardware-model.js','hardware.css','results.js','results-model.js','pgn.js','pgn.css','evaluation.js','evaluation-ui.js','evaluation.css','opening-presets.js','focus.js','focus.css','polish.js','help.js','polish.css','clocks.js','app.js','workspace.js','formats.js','conditions.js','reports.js','ratings.js','comparisons.js','graphs.js','style.css'):raise web.HTTPNotFound()
+        if name not in ('tournament-extend.js','draw-rule.js','board3d-budget.js','board3d-club-motion.js','club-levy.glb','club-magnus.glb','club-fabiano.glb','club-hans.glb','club-bobby.glb','club-hikaru.glb','club-jonas.glb','club-nora.glb','board3d-club-room.js','board3d-club.js','club-arthur.glb','club-daniel.glb','club-elena.glb','club-mei.glb','club-staunton.glb','three-club-CopyShader.js','three-club-EffectComposer.js','three-club-MaskPass.js','three-club-OutputPass.js','three-club-OutputShader.js','three-club-Pass.js','three-club-RectAreaLightTexturesLib.js','three-club-RectAreaLightUniformsLib.js','three-club-RenderPass.js','three-club-SSAOPass.js','three-club-SSAOShader.js','three-club-ShaderPass.js','three-club-SimplexNoise.js','player-move-2.wav','player-move-3.wav','player-capture-2.wav','player-capture-3.wav','player-castle-2.wav','player-castle-3.wav','player-check-2.wav','player-check-3.wav','player-promotion-2.wav','player-promotion-3.wav','player-move.wav','player-capture.wav','player-castle.wav','player-check.wav','player-promotion.wav','player-win.wav','player-loss.wav','player-draw.wav','player-low.wav','player.js','player-workspace.js','player.css','player-board.js','player-sound.js','board3d-boards.js','board3d-model.js','board3d-environments.js','board3d-life.js','room-head.glb','board3d-photo.js','board3d-presentation.js','pgn-output.js','rating-center.js','rating-center.css','workflow.css','workflow.js','board3d.js','board3d-studio.js','board3d-recovery.js','board3d-crowns.js','staunton1849.glb','tal1962.glb','three.core.js','three.module.js','three-gltf.js','three-geometry-utils.js','three-room.js','three-hdr.js','three-grounded.js','three-skeleton-utils.js','board3d-ui.js','game-moves.js','studio.css','studio.js','profile-bulk.js','setup-workflow.js','setup-workflow.css','engine-arena.svg','sprt.js','events.css','events.js','seasons.js','circuits.js','circuits.css','season-insights.js','season-insights.css','custom-matchups.js','tournament-queue.js','tournament-queue.css','tournament-edit.js','schedule-order.js','engine-books.js','reliability.js','focus-layout.js','focus-layout.css','concurrency.js','i18n.js','language.js','storage.js','knockout.js','text-format.js','text-exports.js','text-exports.css','search.js','board-materials.js','board-materials.css','adjudication.js','table-controls.css','format.js','review.js','review.css','hardware.js','hardware-model.js','hardware.css','results.js','results-model.js','pgn.js','pgn.css','evaluation.js','evaluation-ui.js','evaluation.css','opening-presets.js','focus.js','focus.css','polish.js','help.js','polish.css','clocks.js','app.js','workspace.js','formats.js','conditions.js','reports.js','ratings.js','comparisons.js','graphs.js','style.css'):raise web.HTTPNotFound()
         return web.FileResponse(ROOT/'ui'/name,headers={'Cache-Control':'no-cache'})
     async def status(request):
         hardware.request()
@@ -120,6 +122,7 @@ async def create_app(folder,token):
         # a large index transaction must not hold up committed game moves.
         async with runner.lifecycle_lock:
             if runner.tasks or runner.experiment_task and not runner.experiment_task.done():raise ValueError('Pause and drain games before importing an engine move book')
+            if player.game and player.game['state'] in ('playing','starting'):raise ValueError('Pause your Player Arena game before importing or deleting a book')
             if body.get('delete'):return web.json_response(await db.call('remove_move_book',body['delete']))
             compiled=await asyncio.to_thread(compile_book,body['path'])
             try:return web.json_response(await db.call('install_move_book',compiled))
@@ -132,6 +135,9 @@ async def create_app(folder,token):
         from .profile_import import read_preview
         body=await request.json();checked=await asyncio.to_thread(read_preview,db.store.path,body)
         return web.json_response(checked if body.get('preview',True) else await db.call('commit_profile_import',checked,body.get('selected')))
+    async def game_presentation(request):
+        from .game_moves import presentation
+        return web.json_response(await asyncio.to_thread(presentation,db.store.path,request.match_info['gid']))
     async def game_moves(request):
         from .game_moves import read_moves
         return web.json_response(await asyncio.to_thread(read_moves,db.store.path,request.match_info['gid'],request.query.get('attempt'),request.query.get('after',0),request.query.get('limit',200)))
@@ -174,6 +180,8 @@ async def create_app(folder,token):
                 p=await db.call('one','SELECT body FROM profiles WHERE id=?',(pid,))
                 if not p:raise ValueError('Profile no longer exists')
                 profiles.append(json.loads(p['body']))
+        from .setup_draft import gauntlet_profiles
+        profiles=gauntlet_profiles(profiles,body.get('candidate_ids'),body['settings'])
         openings=body.get('openings')
         if body.get('common_control') is True:
             for p in profiles:p.pop('time_control',None)
@@ -204,17 +212,39 @@ async def create_app(folder,token):
             for p in profiles:
                 await asyncio.to_thread(verify,p)
                 p['fingerprints']=await asyncio.to_thread(capture,p)
+        output=await runner.pgn_outputs.run(runner.pgn_outputs.prepare,body['pgn_output']) if 'pgn_output' in body else None
         if tid:
             async with runner.lifecycle_lock:
-                result=await db.call('edit_tournament',tid,body['name'],body['settings'],body.get('setup_revision'),profiles,openings,keep_openings=body.get('keep_openings',True),backup=False)
+                result=await db.call('edit_tournament',tid,body['name'],body['settings'],body.get('setup_revision'),profiles,openings,keep_openings=body.get('keep_openings',True),backup=False,output=output)
                 progress.reset(tid);runner.memory_budgets.pop(tid,None)
         else:
-            result=await db.call('create_tournament',body['name'],profiles,body['settings'],openings,backup=False)
+            result=await db.call('create_tournament',body['name'],profiles,body['settings'],openings,backup=False,output=output)
         runner.request_backup()
         return web.json_response(result)
     async def tournament_setup(request):
         if request.method=='GET':return web.json_response(await db.call('tournament_setup',request.match_info['tid']))
         return await tournaments(request)
+    async def extend_tournament(request):
+        tid=request.match_info['tid']
+        if request.method=='GET':return web.json_response(await db.call('extension_call','info',tid))
+        body=await request.json();ids=body.get('profiles');profiles=[]
+        if not isinstance(ids,list) or not ids or any(not isinstance(v,str) for v in ids):
+            raise ValueError('Select at least one new engine profile.')
+        from .fingerprints import verify,capture
+        for pid in ids:
+            row=await db.call('one','SELECT body FROM profiles WHERE id=?',(pid,))
+            if not row:raise ValueError('Profile no longer exists')
+            p=json.loads(row['body']);await asyncio.to_thread(verify,p)
+            p['fingerprints']=await asyncio.to_thread(capture,p);profiles.append(p)
+        if body.get('preview') is True:return web.json_response(await db.call('extension_call','preview',tid,profiles))
+        # Continuing an old result set with a replaced executable would silently mix versions.
+        for row in await db.call('rows','SELECT profile FROM participants WHERE tid=?',(tid,)):
+            await asyncio.to_thread(verify,json.loads(row['profile']))
+        async with runner.lifecycle_lock:
+            result=await db.call('extension_call','extend',tid,profiles,body.get('expected'))
+            progress.reset(tid);runner.memory_budgets.pop(tid,None)
+        runner.request_backup()
+        return web.json_response(result)
     async def tournament(request):
         from .standings import read_snapshot
         tid=request.match_info['tid']
@@ -235,23 +265,63 @@ async def create_app(folder,token):
     async def events_api(request):
         eid=request.match_info.get('eid')
         if request.method=='GET':
+            if not eid and request.query.get('view')=='templates':return web.json_response(await db.call('event_call','circuit_call','templates'))
             offset=int(request.query.get('offset',0))
+            if eid and request.query.get('view')=='insights':
+                return web.json_response(await db.call('event_call','insights',eid,request.query.get('season'),offset,request.query.get('export')=='1',json.loads(request.query.get('entry_offsets','{}'))))
+            if eid and request.query.get('view')=='careers':
+                return web.json_response(await db.call('event_call','careers',eid,request.query.get('search',''),offset,request.query.get('identity'),int(request.query.get('rival_offset',0))))
             return web.json_response(await db.call('event_call','detail',eid,offset,request.query.get('export')=='1') if eid else await db.call('event_call','listing',offset))
         b=await request.json()
+        if not eid and b.get('action')=='template':
+            return web.json_response(await db.call('event_call','circuit_call','templates',b['template']))
+        if not eid and b.get('action')=='delete_preview':
+            return web.json_response(await db.call('event_call','delete_preview',b.get('ids')))
+        if not eid and b.get('action')=='delete':
+            if b.get('confirmed') is not True:raise ValueError('Confirm event deletion first.')
+            async with report_lock:
+                async with rating_lock:
+                    result=await runner.delete_events(b.get('ids'),b.get('expected'),b.get('keep_ratings') is not False);report_cache.clear()
+            return web.json_response(result)
         async with runner.lifecycle_lock:
             if eid:
                 if b['action']=='run' and (runner.error or db.store.failure):raise ValueError(runner.error or db.store.failure)
-                result=await db.call('event_call','command',eid,b['action'],b.get('revision'))
+                if b['action']=='circuit_approve':result=await db.call('event_call','circuit_call','approve',eid,b.get('revision'))
+                elif b['action']=='circuit_edit':result=await db.call('event_call','circuit_call','edit',eid,b.get('revision'),b['definition'],b.get('preview',False))
+                elif b['action']=='review':
+                    await db.call('event_call','review_roster',eid,b.get('revision'),b.get('replacements'),b.get('groups'),b.get('approve',False),True,b.get('candidates'))
+                    # Test changed versions sequentially before committing the
+                    # roster. Discovery validates advertised UCI options/readiness.
+                    for item in b.get('replacements',[]):
+                        row=await db.call('one','SELECT body FROM profiles WHERE id=?',(item.get('profile_id'),))
+                        if not row:raise ValueError('Select a registered engine version.')
+                        profile=json.loads(row['body'])
+                        from .fingerprints import verify
+                        await asyncio.to_thread(verify,profile)
+                        await discover(profile,DEFAULTS)
+                    result=await db.call('event_call','review_roster',eid,b.get('revision'),b.get('replacements'),b.get('groups'),b.get('approve',False),False,b.get('candidates'))
+                elif b['action']=='fresh':result=await db.call('event_call','fresh',eid,b.get('name',''))
+                elif b['action']=='resources':
+                    result=await db.call('event_call','set_resources',eid,b.get('revision'),b.get('resources'))
+                    runner.fair_share.reservation=None
+                    for tid in list(runner.runtime.sessions):
+                        if await db.call('one','SELECT 1 FROM event_children WHERE tid=? AND eid=?',(tid,eid)):
+                            await runner.runtime.shared_changed(tid,result['resources']|{'gpu_default_limit':1},2)
+                else:result=await db.call('event_call','command',eid,b['action'],b.get('revision'))
             elif b.get('preview'):
                 body,total=await db.call('event_call','prepare',b['source_tid'],b['definition'])
-                return web.json_response({'regular_games':total,'participants':len(body['profiles'])})
+                from . import season_admission
+                return web.json_response({'regular_games':total,'participants':len(body['profiles']),
+                    'admission':season_admission.summary(body) if season_admission.enabled(body['definition']) else None,
+                    'championship_games':body['definition'].get('championship',{}).get('games',0)*body['definition'].get('seasons',1) if body['definition'].get('championship',{}).get('enabled') else 0,
+                    'opening_positions':len(body['settings']['openings']),'opening_plan':body.get('opening_plan'),'preview':body.get('preview')})
             else:result=await db.call('event_call','create',b['name'],b['source_tid'],b['definition'])
-        if not eid:await db.call('backup')
+        if not eid:runner.request_backup()
         return web.json_response(result)
     async def tournament_queue(request):
         if request.method=='GET':
             if request.query.get('configuration')=='1':return web.json_response(await db.call('queue_call','configuration'))
-            return web.json_response(await db.call('queue_call','page',int(request.query.get('offset',0)),request.query.get('search',''),request.query.get('filter',''),request.query.get('sort','position'),request.query.get('direction','asc')))
+            return web.json_response(await db.call('queue_call','page',int(request.query.get('offset',0)),request.query.get('search',''),request.query.get('filter',''),request.query.get('sort','position'),request.query.get('direction','asc'),request.query.get('scope')))
         b=await request.json();action=b['action']
         async with runner.lifecycle_lock:
             if action in ('run','resume_selected') and (runner.error or db.store.failure):raise ValueError(runner.error or db.store.failure)
@@ -270,6 +340,7 @@ async def create_app(folder,token):
                     if t['state'] in ('running','draining'):await runner.pause(t['id'])
             if action in ('configure','set_limits') and db.store.queue_status['execution_mode']=='parallel':
                 for tid in list(runner.runtime.sessions):
+                    if await db.call('one','SELECT 1 FROM event_children WHERE tid=?',(tid,)):continue
                     priority=await db.call('one','SELECT priority FROM tournament_queue WHERE tid=?',(tid,))
                     await runner.runtime.shared_changed(tid,db.store.queue_status['resources']|{'gpu_default_limit':1},priority['priority'] if priority else 2)
         return web.json_response(result)
@@ -286,7 +357,7 @@ async def create_app(folder,token):
         if body.get('confirmed') is not True:raise ValueError('Confirm tournament deletion first')
         async with report_lock:
             async with rating_lock:
-                result=await runner.delete_tournament(tid,body.get('name'))
+                result=await runner.delete_tournament(tid,body.get('name'),body.get('keep_ratings') is not False)
                 report_cache.clear()
         return web.json_response(result)
     async def engine_failures(request):
@@ -325,6 +396,30 @@ async def create_app(folder,token):
         async with rating_lock:
             if rating_executor is None:rating_executor=ProcessPoolExecutor(max_workers=1,mp_context=multiprocessing.get_context('spawn'),initializer=background_priority)
             return await asyncio.get_running_loop().run_in_executor(rating_executor,function,*args)
+    async def rating_center(request):
+        if request.method=='POST':
+            body=await request.json()
+            if body.get('action') in ('reset','remove_source','remove_entry','delete_pool'):
+                async with rating_lock:
+                    async with runner.lifecycle_lock:
+                        if runner.tasks or (runner.experiment_task and not runner.experiment_task.done()):raise ValueError('Pause and drain all games before deleting rating records')
+                        runner.maintenance=True
+                        try:
+                            if runner.backup_task:await runner.backup_task;runner.backup_task=None
+                            result=await db.call('rating_center_call','command',body)
+                        finally:runner.maintenance=False
+                return web.json_response(result)
+            return web.json_response(await db.call('rating_center_call','command',body))
+        q=dict(request.query)
+        if q.get('view')=='lists':return web.json_response(await db.call('rating_center_call','listing'))
+        if q.get('view')=='exclusions':return web.json_response(await db.call('rating_center_call','exclusions',q.get('pool','main'),int(q.get('offset',0))))
+        if q.get('view')=='sources':return web.json_response(await db.call('rating_center_call','sources',q.get('pool','main'),q.get('q',''),int(q.get('offset',0))))
+        from .rating_center_report import report,history
+        result=await calculate_in_background(history if q.get('view')=='history' else report,str(db.store.path),q)
+        if q.get('export') in ('txt','csv'):
+            kind=q['export'];return web.Response(text=result,content_type='text/plain' if kind=='txt' else 'text/csv',headers={'Content-Disposition':f'attachment; filename="engine-arena-ratings.{kind}"'})
+        return web.json_response(result)
+
     async def pool_ratings(request):
         tid=request.match_info['tid']
         if request.method=='POST':
@@ -372,16 +467,29 @@ async def create_app(folder,token):
                     while len(report_cache)>8:report_cache.popitem(last=False)
         if export=='csv':return web.Response(text=result,content_type='text/csv',headers={'Content-Disposition':'attachment; filename="opening-results.csv"'})
         return web.json_response(result)
+    async def participant_picker(request):
+        b=await request.json();offset=max(0,int(b.get('offset',0)));q='%'+str(b.get('q',''))+'%'
+        if b.get('recorded_participants'):
+            sql="SELECT slot,json_extract(profile,'$.id') id,json_extract(profile,'$.name') name FROM participants WHERE tid=? AND json_extract(profile,'$.name') LIKE ?"
+            args=(b['recorded_participants'],q);order='slot'
+        elif b.get('all_profiles'):
+            sql='SELECT id,name FROM profiles WHERE name LIKE ?';args=(q,);order='name,id'
+        else:
+            sql='SELECT CAST(j.key AS INTEGER) slot,p.id,p.name FROM json_each(?) j JOIN profiles p ON p.id=j.value WHERE p.name LIKE ?'
+            args=(encode(b.get('profiles',[])),q);order='slot'
+        count=await db.call('one','SELECT count(*) n FROM ('+sql+')',args)
+        rows=await db.call('rows',sql+' ORDER BY '+order+' LIMIT 50 OFFSET ?',args+(offset,))
+        return web.json_response({'items':rows,'total':count['n']})
     async def selected_participants(request):
         b=await request.json();offset=max(0,int(b.get('offset',0)))
         if b.get('recorded_participants'):
-            rows=await db.call('rows',"SELECT slot,json_extract(profile,'$.name') name FROM participants WHERE tid=? ORDER BY slot LIMIT 50 OFFSET ?",(b['recorded_participants'],offset))
+            rows=await db.call('rows',"SELECT slot,json_extract(profile,'$.id') id,json_extract(profile,'$.name') name FROM participants WHERE tid=? ORDER BY slot LIMIT 50 OFFSET ?",(b['recorded_participants'],offset))
         elif b.get('all_profiles'):
-            rows=await db.call('rows','SELECT name FROM profiles ORDER BY name,id LIMIT 50 OFFSET ?',(offset,))
+            rows=await db.call('rows','SELECT id,name FROM profiles ORDER BY name,id LIMIT 50 OFFSET ?',(offset,))
             rows=[dict(r,slot=i+offset) for i,r in enumerate(rows)]
         else:
             ids=b.get('profiles',[])
-            rows=await db.call('rows',"SELECT CAST(j.key AS INTEGER) slot,p.name FROM json_each(?) j JOIN profiles p ON p.id=j.value ORDER BY CAST(j.key AS INTEGER) LIMIT 50 OFFSET ?",(encode(ids),offset))
+            rows=await db.call('rows',"SELECT CAST(j.key AS INTEGER) slot,p.id,p.name FROM json_each(?) j JOIN profiles p ON p.id=j.value ORDER BY CAST(j.key AS INTEGER) LIMIT 50 OFFSET ?",(encode(ids),offset))
         return web.json_response(rows)
     async def schedule_preview(request):
         b=await request.json();s=DEFAULTS|b['settings'];n=int(b['participants']);legs=2 if s['paired'] else 1
@@ -478,6 +586,27 @@ async def create_app(folder,token):
         await db.call('retry_saving');runner.error='';return web.json_response({'ok':True})
     async def shutdown(request):
         asyncio.get_running_loop().call_later(.5,lambda:app['stop'].set());return web.json_response({'ok':True})
+    async def bulk_profiles(request):
+        return web.json_response(await db.call('bulk_profiles',await request.json()))
+    async def inspect_profile_options(request):
+        body=await request.json();pid=body['id']
+        async with runner.lifecycle_lock:
+            if runner.tasks or runner.experiment_task and not runner.experiment_task.done():raise ValueError('Pause and drain games before discovering engine options.')
+            row=await db.call('one','SELECT body FROM profiles WHERE id=?',(pid,))
+            if not row:raise ValueError('Profile no longer exists')
+            # One bounded handshake, no search. Do not apply potentially stale
+            # imported options or accept changed executable fingerprints here.
+            p=json.loads(row['body']);probe=p|{'options':{},'threads':1,'hash':16}
+            engine=UciEngine(probe,DEFAULTS)
+            try:
+                await engine.start()
+                return web.json_response(await db.call('save_option_discovery',pid,row['body'],engine.options,engine.identity))
+            finally:await engine.close()
+    async def profile_selection(request):
+        rows=await db.call('rows','SELECT id FROM profiles WHERE name LIKE ? ORDER BY name,id',('%'+request.query.get('q','')+'%',))
+        return web.json_response([r['id'] for r in rows])
+    async def setup_draft(request):
+        return web.json_response(await db.call('setup_draft',await request.json() if request.method=='POST' else None))
     async def preferences(request):
         if request.method=='GET':
             row=await db.call('one',"SELECT body FROM preferences WHERE name='ui'")
@@ -530,12 +659,21 @@ async def create_app(folder,token):
         if file not in {name+ext for name in ('maple','ash','oak','walnut','rosewood','ebony') for ext in ('.svg','.png')}:raise web.HTTPNotFound()
         return web.FileResponse(ROOT/'ui'/'textures'/file)
     app.router.add_get('/textures/{file}',texture_file)
+    async def scene_asset(request):
+        file=request.match_info['file']
+        allowed={f'{room}-{size}.jpg' for room in ('club','hall','study','studio') for size in (2048,4096,8192)}
+        allowed.update(f'{room}-light.hdr' for room in ('club','hall','study','studio'))
+        allowed.update(f'{surface}-{kind}.jpg' for surface in ('wood','leather') for kind in ('color','normal','rough'))
+        if file not in allowed:raise web.HTTPNotFound()
+        return web.FileResponse(ROOT/'ui'/'scene-assets'/file)
+    app.router.add_get('/scene-assets/{file}',scene_asset)
     app.router.add_get('/',index);app.router.add_get('/assets/{name}',static)
     app.router.add_route('*','/api/move-books',move_books);app.router.add_get('/api/status',status);app.router.add_route('*','/api/profiles',profiles)
     app.router.add_get('/api/search/{aid}',search_detail)
     app.router.add_get('/api/hardware',hardware_probe)
     app.router.add_post('/api/profiles/import',import_profiles);app.router.add_post('/api/scan',scan)
     app.router.add_post('/api/profiles/import-preview',external_profiles)
+    app.router.add_get('/api/games/{gid}/presentation',game_presentation)
     app.router.add_get('/api/games/{gid}/moves',game_moves)
     app.router.add_get('/api/tournaments/{tid}/completion',completed_tournament)
     app.router.add_post('/api/profiles/discover',discover_profile)
@@ -546,15 +684,18 @@ async def create_app(folder,token):
     app.router.add_get('/api/tournament-queue',tournament_queue);app.router.add_post('/api/tournament-queue',tournament_queue)
     app.router.add_route('*','/api/tournaments/{tid}/delete',delete_tournament)
     app.router.add_get('/api/tournaments/{tid}/setup',tournament_setup);app.router.add_post('/api/tournaments/{tid}/setup',tournament_setup)
+    app.router.add_route('*','/api/tournaments/{tid}/extend',extend_tournament)
     app.router.add_post('/api/tournaments/{tid}/action',action);app.router.add_get('/api/tournaments/{tid}/games',games)
     app.router.add_get('/api/games/{gid}',game);app.router.add_get('/api/tournaments/{tid}/h2h/{slot}',h2h)
     app.router.add_get('/api/tournaments/{tid}/game-number/{number}',numbered_game)
     app.router.add_post('/api/schedule-preview',schedule_preview)
     app.router.add_post('/api/selected-participants',selected_participants)
+    app.router.add_post('/api/participant-picker',participant_picker)
     app.router.add_post('/api/opening-preview',opening_preview)
     app.router.add_post('/api/resource-preview',resource_preview)
     app.router.add_get('/api/tournaments/{tid}/participants',participants);app.router.add_get('/api/tournaments/{tid}/openings',opening_report)
     app.router.add_route('*','/api/tournaments/{tid}/ratings',pool_ratings)
+    app.router.add_route('*','/api/rating-center',rating_center)
     app.router.add_post('/api/tournaments/{tid}/games/{gid}/adjudicate',adjudicate)
     app.router.add_get('/api/tournaments/{tid}/crosstable',crosstable)
     app.router.add_get('/api/tournaments/{tid}/series',chart_series)
@@ -565,6 +706,52 @@ async def create_app(folder,token):
     async def pgn_options(request):
         from .pgn_options import schema
         return web.json_response(schema())
+    async def player_api(request):
+        action=request.match_info['action']
+        if request.method=='GET':
+            if action=='state':
+                async with player.lock:return web.json_response(player.view())
+            if action=='overview':return web.json_response(await db.call('player_call','overview',int(request.query.get('offset',0))))
+            if action=='game':
+                saved=await db.call('player_call','get',request.query['id'])
+                return web.json_response(saved)
+            if action=='pgn':
+                from .player_pgn import stream
+                return await stream(request,db.store.path)
+        else:
+            b=await request.json()
+            if action=='create':return web.json_response(await player.create(b))
+            if action=='next':return web.json_response(await player.create({},b['series']))
+            if action=='action':return web.json_response(await player.action(b))
+            if action in ('settings','series','reset_ratings','retry_exports'):
+                async with player.lock:
+                    args=[] if action=='retry_exports' else [b['name']] if action=='reset_ratings' else [b]
+                    return web.json_response(await db.call('player_call',action,*args))
+            if action=='pgn-preview':
+                import re
+                from .player_pgn import selection
+                where,args=selection(request.query['id']);row=await db.call('one','SELECT g.id FROM player_games g '+where+' ORDER BY created LIMIT 1',args)
+                if not row:return web.json_response({'pgn':'','game_number':None,'headers':[],'truncated':False})
+                text=await db.call('player_call','export',row['id'],b)
+                return web.json_response({'pgn':text[:100000],'game_number':1,'headers':re.findall(r'^\[(\w+) ',text,re.M),'truncated':len(text)>100000})
+        raise ValueError('Unknown Player Arena request')
+    app.router.add_route('*','/api/player/{action}',player_api)
+    async def pgn_output(request):
+        service=runner.pgn_outputs
+        if request.method=='POST':
+            b=await request.json()
+            if b.get('action')=='retry':
+                known=await db.call('one','SELECT path FROM pgn_targets WHERE path=?',(b.get('path'),))
+                if not known:raise ValueError('Unknown PGN output file.')
+                await service.run(service.retry,known['path'])
+            else:
+                await db.call('tournament',b['tid'])
+                prepared=await service.run(service.prepare,b)
+                await db.call('pgn_output_configure',b['tid'],prepared)
+                runner.request_backup()
+        rows=await db.call('rows','SELECT * FROM pgn_targets ORDER BY path')
+        links=await db.call('rows','SELECT * FROM pgn_links')
+        return web.json_response({'targets':[r|service.status.get(r['path'],{}) for r in rows],'links':links})
     async def pgn_preview(request):
         from .pgn_export import preview
         settings=await request.json()
@@ -572,24 +759,31 @@ async def create_app(folder,token):
     app.router.add_post('/api/tournaments/{tid}/concurrency',concurrency)
     app.router.add_get('/api/tournaments/{tid}/failures/{slot}',engine_failures)
     app.router.add_get('/api/pgn-options',pgn_options)
+    app.router.add_route('*','/api/pgn-output',pgn_output)
     app.router.add_post('/api/tournaments/{tid}/pgn-preview',pgn_preview)
     app.router.add_get('/api/export/{tid}/{fmt}',export);app.router.add_route('*','/api/presets',presets)
     app.router.add_route('*','/api/positions',positions);app.router.add_post('/api/position-preview',position_preview)
     app.router.add_post('/api/retry-saving',retry_saving);app.router.add_post('/api/shutdown',shutdown)
     app.router.add_route('*','/api/experiments',experiments);app.router.add_get('/api/experiments/{eid}',experiment)
     app.router.add_post('/api/experiments/{eid}/action',experiment_action)
+    app.router.add_post('/api/profiles/bulk',bulk_profiles)
+    app.router.add_post('/api/profiles/inspect-options',inspect_profile_options)
+    app.router.add_get('/api/profiles/selection',profile_selection)
+    app.router.add_route('*','/api/setup-draft',setup_draft)
     app.router.add_route('*','/api/preferences',preferences);app.router.add_post('/api/ui-metrics',ui_metrics)
     app.router.add_route('*','/api/storage',storage)
     app.router.add_route('*','/api/pieces',pieces);app.router.add_get('/pieces/{group}/{file}',piece_file)
     async def shutdown_reports(app):await report_jobs.close()
     app.on_shutdown.append(shutdown_reports)
     async def cleanup(app):
+        await player.close()
         await report_jobs.close()
         await hardware.close()
         await runner.close()
         if rating_executor is not None:await asyncio.to_thread(rating_executor.shutdown,wait=True,cancel_futures=True)
     app.on_cleanup.append(cleanup)
     await runner.start()
+    await player.start()
     return app
 
 async def main_async(args):

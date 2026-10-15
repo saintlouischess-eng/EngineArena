@@ -11,7 +11,7 @@ const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtime
   await page.goto(ready.url);await page.waitForFunction(()=>state.snapshot&&moveSheet.rows.length>0);
   assert.equal(await page.evaluate(()=>ArenaBoard3D.isReady()),false,'Sculpture must not load for 2D');
   await page.evaluate(()=>{displayPrefs.focus3d=true;renderFocus()});
-  try{await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0)}catch(e){console.log({errors,messages,detail:await page.evaluate(()=>({failed:board3dFailed,loading:board3dAssetLoading,asset:ArenaBoard3D.isReady(),notice:document.querySelector('#notice')?.textContent}))});throw e}await page.waitForTimeout(700);
+  try{await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0)}catch(e){console.log({errors,messages,detail:await page.evaluate(()=>({failed:board3dRecovery.failed,loading:board3dAssetLoading,asset:ArenaBoard3D.isReady(),notice:document.querySelector('#notice')?.textContent}))});throw e}await page.waitForTimeout(700);
   await page.screenshot({path:out+'/docked.png'});
   const zoomIn=page.locator('[data-zoom=in]'),zoomOut=page.locator('[data-zoom=out]'),zoomReset=page.locator('[data-zoom=reset]');
   await zoomIn.click();assert.equal(await zoomReset.textContent(),'110%');
@@ -57,7 +57,7 @@ const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtime
   const frames=await page.locator('.board-3d').getAttribute('data-frames');await page.waitForTimeout(2200);assert.equal(await page.locator('.board-3d').getAttribute('data-frames'),frames);
   await page.locator('.board-3d').focus();await page.keyboard.press('ArrowLeft');await page.waitForFunction(n=>Number(document.querySelector('.board-3d').dataset.frames)>Number(n),frames);
   await page.setViewportSize({width:1280,height:800});await page.waitForTimeout(200);await page.screenshot({path:out+'/laptop.png'});
-  await page.evaluate(()=>{board3dCanvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()});await page.waitForFunction(()=>board3dFailed&&!document.querySelector('.board-3d'));assert.equal(await page.locator('.focus-board .board').isVisible(),true);
+  await page.evaluate(()=>{board3dCanvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()});await page.waitForFunction(()=>board3dRecovery.failed&&!document.querySelector('.board-3d'));assert.equal(await page.locator('.focus-board .board').isVisible(),true);
   assert.equal(await page.locator('.board-3d-controls').count(),0);
   assert.deepEqual(errors,[]);assert.deepEqual(messages,[]);fs.writeFileSync(out+'/result.json',JSON.stringify({passed:true,lazyLoaded:true,verticalFraming:true,liftBounds:[-50,50],shiftDragAndKeyboard:true,framingSavedAcrossReload:true,crownHistoryAndToggle:true,zoomControls:true,wheelAndKeyboardZoom:true,zoomBounds:[60,240],zoomSavedAcrossReload:true,dockedFloatingExpandedZoom:true,idleNoRedraw:true,contextLossFallback:true,webglErrors:errors,consoleErrors:messages},null,2));console.log('3D framing, crown stamps, zoom and lifecycle checks passed.');
  }finally{await browser.close()}

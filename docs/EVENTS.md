@@ -1,3 +1,7 @@
+> Version 1.3.0 adds optional season finals, parallel divisions, strength-based
+> assignment and advancing season openings. See [league update](V1_3_LEAGUES.md).
+> Sequential behavior described below remains the default for previously saved events.
+
 # Custom matchups, multi-stage events and league seasons
 
 These features are in the local development build. The previously delivered

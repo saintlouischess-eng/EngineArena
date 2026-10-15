@@ -42,7 +42,7 @@ public sealed class ArenaWindow : Window
     public ArenaWindow()
     {
         L.LoadFromArguments();
-        Title = L.T("Engine Arena — 1.2.14"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
+        Title = L.T("Engine Arena — 1.9.7"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 19, 24));
         Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/assets/engine-arena.ico", UriKind.Absolute));
@@ -81,7 +81,7 @@ public sealed class ArenaWindow : Window
         var args = Environment.GetCommandLineArgs();
         var dataIndex = Array.IndexOf(args, "--data");
         var data = dataIndex >= 0 && dataIndex + 1 < args.Length ? Path.GetFullPath(args[dataIndex + 1]) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EngineArena", "Data");
-        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.2.14";
+        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.9.7";
         workspaceFolder = data; L.Load(data);
         // Claim the workspace before touching its readiness file. A second desktop
         // must not erase the live worker's connection record or launch a rival worker.
@@ -133,6 +133,8 @@ public sealed class ArenaWindow : Window
         browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
         browser.CoreWebView2.Settings.IsStatusBarEnabled = false;
         browser.CoreWebView2.WebMessageReceived += MessageReceived;
+        browser.CoreWebView2.ProcessFailed += (_, e) => GraphicsDiagnostics.Write(workspaceFolder,
+            new { source = "WebView2", kind = e.ProcessFailedKind.ToString(), reason = e.Reason.ToString(), exitCode = e.ExitCode, runtime = env.BrowserVersionString });
         browser.CoreWebView2.DownloadStarting += (_, e) =>
         {
             // Other export links use WebView downloads; always let the user choose.
@@ -195,6 +197,24 @@ public sealed class ArenaWindow : Window
         catch (IOException) { }
         catch (ObjectDisposedException) { }
     }
+    string PhotoFolder()
+    {
+        var preference = Path.Combine(workspaceFolder, "photo-folder.txt");
+        if (File.Exists(preference))
+        {
+            var chosen = File.ReadAllText(preference).Trim();
+            if (Path.IsPathFullyQualified(chosen) && Directory.Exists(chosen)) return chosen;
+        }
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Engine Arena");
+        Directory.CreateDirectory(folder);
+        return folder;
+    }
+    async Task SavePhotoFolder(string folder)
+    {
+        var preference = Path.Combine(workspaceFolder, "photo-folder.txt");
+        await File.WriteAllTextAsync(preference + ".tmp", folder);
+        File.Move(preference + ".tmp", preference, true);
+    }
     async void MessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         if (!e.Source.StartsWith(origin + "/", StringComparison.Ordinal)) return;
@@ -202,6 +222,12 @@ public sealed class ArenaWindow : Window
         {
             using var doc = JsonDocument.Parse(e.WebMessageAsJson); var m = doc.RootElement;
             var type = m.GetProperty("type").GetString();
+            if (type == "graphicsDiagnostic")
+            {
+                if (e.WebMessageAsJson.Length <= 4096 && m.TryGetProperty("entry", out var entry) && entry.ValueKind == JsonValueKind.Object)
+                    GraphicsDiagnostics.Write(workspaceFolder, new { source = "3D", detail = entry });
+                return;
+            }
             if (type == "language") { L.Save(workspaceFolder, m.GetProperty("language").GetString() ?? "en"); return; }
             if (type == "enableCpuSensors")
             {
@@ -249,10 +275,10 @@ public sealed class ArenaWindow : Window
                 try
                 {
                     var url = new Uri(new Uri(origin), m.GetProperty("url").GetString()!);
-                    if (url.GetLeftPart(UriPartial.Authority) != origin || !System.Text.RegularExpressions.Regex.IsMatch(url.AbsolutePath, @"^/api/export/[a-f0-9]{32}/pgn$"))
+                    if (url.GetLeftPart(UriPartial.Authority) != origin || !(System.Text.RegularExpressions.Regex.IsMatch(url.AbsolutePath, @"^/api/export/[a-f0-9]{32}/pgn$") || url.AbsolutePath == "/api/player/pgn"))
                         throw new InvalidOperationException(L.T("Invalid local PGN export URL."));
                     var textExport = Array.Exists(url.Query.TrimStart('?').Split('&'), part => part == "filetype=txt");
-                    var save = new SaveFileDialog { Title = L.T(textExport ? "Save text as" : "Save tournament PGN as"), FileName = Path.GetFileName(m.GetProperty("name").GetString() ?? (textExport ? "tournament.txt" : "tournament.pgn")), DefaultExt = textExport ? ".txt" : ".pgn", Filter = (textExport ? L.T("Text files") + " (*.txt)|*.txt|" : L.T("Chess games") + " (*.pgn)|*.pgn|") + L.T("All files") + " (*.*)|*.*", AddExtension = true, OverwritePrompt = true };
+                    var save = new SaveFileDialog { Title = L.T(textExport ? "Save text as" : "Save PGN as…"), FileName = Path.GetFileName(m.GetProperty("name").GetString() ?? (textExport ? "tournament.txt" : "tournament.pgn")), DefaultExt = textExport ? ".txt" : ".pgn", Filter = (textExport ? L.T("Text files") + " (*.txt)|*.txt|" : L.T("Chess games") + " (*.pgn)|*.pgn|") + L.T("All files") + " (*.*)|*.*", AddExtension = true, OverwritePrompt = true };
                     if (save.ShowDialog(this) != true)
                     {
                         browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "pgnSaved", id = exportId, cancelled = true }));
@@ -298,6 +324,48 @@ public sealed class ArenaWindow : Window
                     await File.WriteAllTextAsync(save.FileName, m.GetProperty("text").GetString() ?? "", new System.Text.UTF8Encoding(false));
                     browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { type = "downloaded", name = Path.GetFileName(save.FileName) }));
                 }
+                return;
+            }
+            if (type == "photoFolder")
+            {
+                var folderId = m.GetProperty("id").GetInt32();
+                try
+                {
+                    var folder = PhotoFolder();
+                    if (m.TryGetProperty("choose", out var choose) && choose.GetBoolean())
+                    {
+                        var dialog = new OpenFolderDialog { Title = L.T("Photo folder"), InitialDirectory = folder };
+                        if (dialog.ShowDialog(this) == true) { folder = dialog.FolderName; await SavePhotoFolder(folder); }
+                    }
+                    browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id = folderId, saved = true, folder }));
+                }
+                catch (Exception ex) { browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id = folderId, error = ex.Message })); }
+                return;
+            }
+            if (type == "imageExport")
+            {
+                var exportId = m.GetProperty("id").GetInt32();
+                try
+                {
+                    var data = m.GetProperty("data").GetString() ?? "";
+                    const string prefix = "data:image/png;base64,";
+                    if (!data.StartsWith(prefix) || data.Length > 64 * 1024 * 1024) throw new InvalidOperationException("Invalid PNG image.");
+                    var bytes = Convert.FromBase64String(data[prefix.Length..]);
+                    if (bytes.Length < 8 || !bytes.AsSpan(0, 8).SequenceEqual(new byte[] {137,80,78,71,13,10,26,10})) throw new InvalidOperationException("Invalid PNG image.");
+                    var picker = new SaveFileDialog { Title = L.T("Save board photo"), InitialDirectory = PhotoFolder(), ClientGuid = new Guid("d61832aa-17ae-4dfb-a6dd-7db8e289c94d"), FileName = Path.GetFileName(m.GetProperty("name").GetString() ?? "EngineArena-board.png"), DefaultExt = ".png", Filter = "PNG|*.png", AddExtension = true, OverwritePrompt = true };
+                    var saved = picker.ShowDialog(this) == true;
+                    if (saved) { await File.WriteAllBytesAsync(picker.FileName, bytes); await SavePhotoFolder(Path.GetDirectoryName(picker.FileName)!); }
+                    browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id = exportId, saved, folder = PhotoFolder(), path = saved ? picker.FileName : null }));
+                }
+                catch (Exception ex) { browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id = exportId, error = ex.Message })); }
+                return;
+            }
+            if (type == "pgnOutputPath")
+            {
+                var picker = new SaveFileDialog { Title = L.T("Automatic PGN file"), DefaultExt = ".pgn", Filter = L.T("Chess games") + "|*.pgn", AddExtension = true, OverwritePrompt = false };
+                // Select a path only. The worker separately enforces New versus Append.
+                var chosen = picker.ShowDialog(this) == true ? new[] { picker.FileName } : Array.Empty<string>();
+                browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { id = m.GetProperty("id").GetInt32(), paths = chosen }));
                 return;
             }
             if (type != "browse") return;

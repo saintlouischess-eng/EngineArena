@@ -1,10 +1,71 @@
-# Engine Arena 1.2.14
+# Engine Arena 1.9.7 — user guide
+
+## Extend a completed round robin
+
+Select a completed standalone round robin in Tournament workspace and choose
+**Add engines…**. Search and select new profiles across pages, preview the added
+and total game counts, then **Save extension paused**. Start/resume when ready.
+Earlier games, attempts, engine snapshots and ratings are retained. Only new
+versus existing and new versus new matchups are added. Tournament conditions and
+cycles stay fixed; new profiles keep their own resource/time overrides. Existing
+profiles cannot be selected twice. Event stages, Swiss and knockout are excluded.
+
+**Focused game → Board & clocks → Show draw-rule counter** toggles the new
+counter (on by default). It counts half-moves since the last pawn move or capture;
+two half-moves equal one full move. Claims enabled: 100 plies (50 moves). Claims
+disabled: the automatic 150-ply (75-move) limit. It follows the displayed position,
+including move review. It is not a time estimate or a guarantee of the ending.
+
+See [1.9.4 notes](V1_9_4_TOURNAMENT_EXTENSIONS.md) for opening and recovery details.
+
+
+## Mouse camera controls
+
+Right-drag up, down, left or right to look around. Continue dragging upward
+past the table-level view to look above the board; no extra key is required.
+Drag downward to return to the board. The camera stays above the table and
+does not flip upside down. Alt + left-drag offers the same control. Shift +
+right-drag still adjusts height, and the wheel zooms. Both workspaces share
+these controls and remember the view. See [1.9.2 notes](V1_9_2_MOUSE_CAMERA.md).
+
+## Room, camera and library update
+
+**Room motion** in Appearance offers **Follow Windows**, **Animate** and **Still**.
+Choose Animate to keep the room moving even when Windows Animation effects are
+off. Follow Windows respects that preference and explains a pause on screen.
+Still freezes room activity deliberately; clocks and actual games continue.
+Animation limits are now **15 or 30 FPS**. Older 60 FPS preferences load as 30.
+
+**Tilt** aims the camera up or down without changing zoom or vertical framing.
+Use Appearance → Camera views → **Low angle** for a table-level starting view.
+Positive tilt looks upward; negative tilt looks down. Sliders are available in
+both board workspaces and numeric tilt in both photo dialogs. Photo adjustments
+do not change the saved watching view. Home / Reset camera restores all axes.
+
+Engine-library checkbox choices take priority over old draft participants while
+keeping the other draft conditions. **Delete selected (count)…** is beside the
+selection count and works across pages. Deleting keeps the current filter, page
+and scroll; an emptied final page moves to the previous valid page. Engine files
+and recorded tournament snapshots remain intact.
+
+See [1.9.1 notes](V1_9_1_ROOM_LIBRARY.md) for testing and limitations.
+
+
+New: [Custom competitions](V1_9_CUSTOM_COMPETITIONS.md) lets you arrange stages, choose advancement, review the complete schedule, save templates and edit future stages. Open **Events & leagues → Custom competition…**.
+
+Ratings Center now has **Version display → Best version per engine family**, retaining separate thread/GPU configurations and every version’s underlying rating evidence.
+
+Also included: [Adjudication controls](V1_8_9_ADJUDICATION.md) expose resignation and draw windows and the minimum played plies before a draw. Open **New tournament → Adjudication & SPRT**, or **Edit setup…** before the first start. Defaults are 6 / 12 / 80 plies. Two plies equal one full move; the minimum draw length excludes the imported opening history.
+
+Previously added: [Live environment](V1_7_1_LIVE_ENVIRONMENT.md) adds optional background players, chess-club furnishings, animated games and quiet room sounds to both 3D boards.
+
+Also included: [Player Arena, sounds and photo folders](V1_7_PLAYER_ARENA.md) lets you play your installed engines in 2D or 3D with clocks, saved PGNs and separate personal ratings.
 
 Engine Arena includes a live Game moves scoresheet, optional wooden 3D board,
 Quick match, Cute Chess/Banksia UCI imports and a tournament completion summary.
 See [the new workflow guide](V1_2_WORKFLOWS.md) for controls and limitations.
 It also includes the [simultaneous tournament manager](SIMULTANEOUS_TOURNAMENTS.md).
-Stable release 1.2.14. Designed by Mark Young; coding and implementation by OpenAI Codex. The owner confirmed successful laptop installation and operation.
+Private candidate 1.9.2. Designed by Mark Young; coding and implementation by OpenAI Codex. The public release remains 1.2.14. This candidate still needs owner and laptop acceptance.
 
 Version 1.2.14 keeps 3D board letters and rank numbers upright from the current
 viewing direction, including after rotation and board flip. They remain on the
@@ -44,18 +105,21 @@ buttons or slider, scroll over the board, or focus it and press +/−. Zoom rang
 from 60% to 240%. Click the percentage to restore 100%, or press Home to reset
 the complete camera. The view is saved across restarts and works in docked,
 floating and expanded windows. The 2D / 3D dialog also accepts a zoom percentage.
-Select 3D · 1849 Staunton there to enable the wooden set.
+Select **3D board**, then choose **1849 Staunton** or **Tal 1962 · Soviet
+Championship** under **3D piece set**. The set is saved for both Focused Game
+and Player Arena. In Player Arena, use **Appearance…** while in 3D mode to
+change it. Red kingside crown marks apply only to 1849 Staunton.
 
 ## Install or update
 
-1. Copy `EngineArenaSetup-1.2.14-win-x64.exe` to your Windows 11 x64 laptop.
+1. Copy `EngineArenaSetup-1.9.2-win-x64.exe` to your Windows 11 x64 laptop.
 2. Close every Engine Arena window, letting saving finish. Run the installer and
    keep the existing installation folder to upgrade. Saved tournaments, profiles,
    settings and PGNs are preserved outside the program folder.
 3. Leave **Run Microsoft WebView2 setup again** unchecked for a normal update.
    Setup detects an existing runtime and installs its bundled offline runtime when
    needed. Python and .NET are also included.
-4. Launch Engine Arena from the Start menu. Check the **1.2.14** version in the
+4. Launch Engine Arena from the Start menu. Check the **1.9.2** version in the
    sidebar. Add your own UCI engines, networks, books and tablebases; these are not
    included.
 
@@ -104,6 +168,40 @@ Upgrades retain **One at a time** mode. Restart preserves results and settings a
 requires explicit resume. Separate application workspaces do not share budgets.
 Linked events and leagues keep their ordered stage controller; suites and benchmarks
 wait until the tournament worker is idle.
+
+## Continuing seasons and fresh starts
+
+In **Events & leagues**, choose **Create season competition…**. Start from a saved
+tournament's engine list and conditions, then choose qualification, independent
+divisions or a progressive championship. Division sizes, promotion/relegation,
+clocks, books, paired cycles and the final are configurable. Preview the schedule,
+save, review the roster and choose **Run event**. Individual stages appear in
+Tournament manager. Independent divisions share one event resource budget;
+progressive divisions wait for their qualifying engines.
+
+Choose review windows between seasons or stages to approve registered engine
+upgrades. Keep new binaries in separate version folders. Earlier results retain
+their original engine snapshots. At a season boundary, add or withdraw entrants,
+and review division assignments. Championship ties continue in opening pairs.
+See [the season-manager guide](V1_4_SEASONS.md) for policies and limits.
+
+**Fresh copy** starts an empty competition from its saved setup. **Delete event…**,
+**Delete selected…**, and **Delete all events…** preview the complete record set
+before confirmation. Pause and drain first. Cleanup includes linked stages,
+attempts, managed PGNs and recovery backups, then returns database space to disk.
+Engine installations, books, source templates and separately exported files remain.
+
+## Season overview, careers and sharing
+
+Open a competition in **Events & leagues**. The new **Season overview** follows
+live division races, championship scores and recorded promotion/relegation.
+Choose **Latest** to follow the current season or select an earlier season.
+**Engine careers** follows entrant identities across approved version upgrades,
+showing titles, stage conditions and rivalry results without combining Elo across
+incompatible conditions. **Season summary** produces a short forum recap or full
+season tables, with plain-text, forum-code and Markdown copying and Save TXT as.
+Existing records remain accessible under **Stages & records**. See the
+[competition desk guide](V1_4_2_COMPETITION_DESK.md) for scope and interpretation.
 
 ## Books, clocks and results
 
@@ -162,3 +260,8 @@ private paths or settings. The app sends no feedback automatically.
 ### Explicit engine CPU budgets
 
 Engine profiles use explicit positive thread counts. Importing an automatic thread setting (zero) proposes one thread and explains the change in the preview before you import. Review the proposed setting and assign the GPU group for GPU engines. Saved option names are matched without regard to capitalization. Old automatic-count tournament snapshots conservatively reserve all logical CPUs; their original settings are preserved.
+
+
+## Setup and bulk editing (1.4.1)
+
+See [Setup and bulk engine settings](V1_4_1_SETUP.md) for named gauntlet candidates, durable unsaved setups, bulk UCI/book options, clock tolerance and tablebase configuration.

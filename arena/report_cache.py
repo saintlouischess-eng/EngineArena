@@ -12,7 +12,7 @@ import uuid
 # Numerical-summary version. Bump when measurements or their structure change.
 VERSION = 2
 # Presentation changes must refresh HTML without forcing another move scan.
-RENDER_VERSION = 11
+RENDER_VERSION = 12
 
 
 def key(view, tid, confidence, all_engines, technical):

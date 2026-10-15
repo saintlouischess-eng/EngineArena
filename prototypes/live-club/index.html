@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Engine Arena · Live room study</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#202724;color:#eee6d4;font:14px system-ui,sans-serif}canvas{display:block;width:100%;height:100%;touch-action:none}header{position:absolute;left:32px;top:28px;pointer-events:none;text-shadow:0 2px 12px #000}header small{font-size:11px;letter-spacing:.22em;color:#cabc98}h1{font:36px Georgia,serif;font-weight:400;margin:8px 0}header p{margin:0;color:#d5d0c7;font-size:13px}nav{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:7px;align-items:center;background:#15201eeb;padding:10px;border:1px solid #c5ad7450;border-radius:12px;box-shadow:0 12px 35px #0005;white-space:nowrap}button{background:transparent;color:#e7ddc7;border:1px solid #ab997342;border-radius:6px;padding:10px 15px;font:inherit;cursor:pointer}button:hover{background:#ffffff16}button:focus-visible{outline:2px solid #d7b969;outline-offset:2px}button[aria-pressed=true]{background:#d2bc89;color:#12221d}#status{position:absolute;bottom:89px;left:50%;transform:translateX(-50%);padding:6px 12px;background:#14211eb8;border-radius:5px;font-size:12px;pointer-events:none}#loading{position:absolute;inset:0;display:grid;place-content:center;background:#1b2523;z-index:9}#loading[hidden]{display:none}.hidden{display:none!important}@media(max-width:650px){header{left:18px;top:18px}h1{font-size:26px}nav{flex-wrap:wrap;width:calc(100% - 24px);justify-content:center;bottom:12px}button{padding:8px 10px}#status{display:none}}
+</style>
+<canvas id="view" aria-label="Interactive fully modeled chess club room"></canvas>
+<header><small>ENGINE ARENA / DESIGN STUDY</small><h1>The Chess Club</h1><p>A living chess club · individual players and visitors</p></header>
+<nav aria-label="Room preview controls">
+<button data-view="board" aria-pressed="true">Board</button><button data-view="room" aria-pressed="false">Room</button><button data-view="library" aria-pressed="false">Library</button><button data-view="players" aria-pressed="false">Players</button><button data-view="entrance" aria-pressed="false">Entrance</button><button id="tour" aria-pressed="false">Camera tour</button><button id="motion" aria-pressed="true">Room motion</button><button id="capture">Save 4K photo</button>
+</nav>
+<div id="status">Drag to look around · Scroll to zoom · H to hide controls</div>
+<div id="loading">Building the room…</div>
+<script type="importmap">{"imports":{"three":"/ui/three.module.js"}}</script>
+<script type="module" src="./preview.js"></script>
+</html>

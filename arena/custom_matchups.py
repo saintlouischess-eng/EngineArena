@@ -40,6 +40,9 @@ def decode(index,settings):
 
 
 def pair(index,n,settings):
+    if settings.get('rr_extensions'):
+        from .tournament_extend import pair as expanded
+        return expanded(index,n,settings)
     if settings['format']=='custom':return decode(index,settings)[:3]
     from .opening_policy import round_pair
     from .models import static_pair

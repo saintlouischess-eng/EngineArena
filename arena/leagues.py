@@ -18,6 +18,23 @@ def validate(d):
     names=[v.strip() for v in names]
     if len(set(names))!=n:raise ValueError('Division names must be different.')
     d.update(division_names=names,movement=moves,initial_format='round_robin',final_format='round_robin',advance=1)
+    if d.get('execution_mode','sequential') not in ('sequential','parallel'):raise ValueError('Choose one at a time or run together.')
+    if d.get('season_openings','reuse') not in ('reuse','advance'):raise ValueError('Choose how openings advance between seasons.')
+    final=d.get('championship',{})
+    if not isinstance(final,dict) or type(final.get('enabled',False)) is not bool:raise ValueError('Choose whether to play a championship final.')
+    if final.get('enabled'):
+        for key,default in (('games',8),('tiebreak_games',2)):
+            value=integer(final.get(key,default),'Championship games')
+            if value%2:raise ValueError('Championship and tiebreak game counts must be even for color-reversed opening pairs.')
+            final[key]=value
+        controls=final.get('controls',[])
+        if not isinstance(controls,list):raise ValueError('Playoff controls must be a list')
+        from .models import TimeControl
+        for control in controls:
+            if not isinstance(control,dict) or not control:raise ValueError('Each playoff stage needs a time control')
+            TimeControl.parse(control)
+        final['controls']=controls
+    d['championship']=final
     d.pop('final_time_control',None)
 
 
@@ -31,7 +48,9 @@ def movement(d,tables,stage):
             if destination!=i:changes.append({'slot':r['slot'],'name':r['name'],'from':i,'to':destination,'outcome':'Promoted' if destination<i else 'Relegated'})
     assert [len(g) for g in next_groups]==[len(g) for g in d['groups']]
     return {'stage':stage+1,'standings':tables,'qualified':[],'movement':changes,'next_groups':next_groups,
-            'champion':tables[0][0]['name'],'policy':'Game points, configured standings tiebreaks, then recorded initial seed. Movements apply after every division finishes.'}
+            'regular_winner':tables[0][0]['name'],'regular_winner_slot':tables[0][0]['slot'],
+            'champion':None if d.get('championship',{}).get('enabled') else tables[0][0]['name'],
+            'policy':'Game points, configured standings tiebreaks, then recorded initial seed. Movements apply after every division finishes. Championship games do not change division standings or movement.'}
 
 
 def extend(store,e):
@@ -44,6 +63,9 @@ def extend(store,e):
     import json
     decision=json.loads(decision['body']);one_season=e['body']['regular_games']//d['seasons']
     d['seasons']+=1;e['body']['regular_games']+=one_season
+    if e['body'].get('opening_plan'):
+        plan=e['body']['opening_plan'];plan['required_minimum']=plan['positions_per_season']*d['seasons']
+        plan['reuse_expected']=plan['required_minimum']>plan['available']
     if e['body']['regular_games']>9223372036854775807:raise ValueError('Event exceeds 64-bit game numbering capacity.')
     with store.tx():
         for i,g in enumerate(decision['next_groups']):child(store,e,g,e['stage']+1,i)

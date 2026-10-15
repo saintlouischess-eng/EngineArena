@@ -1,0 +1,359 @@
+[
+  {
+    "id": "magnus",
+    "cameo": "Magnus Carlsen",
+    "macro": "caucasian-male-young",
+    "body": "male-young",
+    "weight": 0.25,
+    "face": [
+      [
+        "head/head-square",
+        0.4
+      ],
+      [
+        "head/head-round",
+        0.2
+      ],
+      [
+        "chin/chin-width-incr",
+        0.5
+      ],
+      [
+        "chin/chin-prominent-incr",
+        0.2
+      ],
+      [
+        "nose/nose-scale-vert-decr",
+        0.15
+      ],
+      [
+        "mouth/mouth-scale-horiz-incr",
+        0.15
+      ],
+      [
+        "eyes/l-eye-height1-decr",
+        0.15
+      ],
+      [
+        "eyes/r-eye-height1-decr",
+        0.15
+      ]
+    ],
+    "clothes": "male_casualsuit01",
+    "hair": "short02",
+    "skin": "middleage_lightskinned_male",
+    "height": 33.5,
+    "standing": true,
+    "hair_color": [
+      0.42,
+      0.33,
+      0.185
+    ],
+    "hair_root_color": [
+      0.25,
+      0.19,
+      0.105
+    ],
+    "hair_strand_color": [
+      0.48,
+      0.4,
+      0.255
+    ],
+    "jacket": [
+      0.035,
+      0.065,
+      0.12
+    ],
+    "beard": 0.26
+  },
+  {
+    "id": "fabiano",
+    "cameo": "Fabiano Caruana",
+    "macro": "caucasian-male-young",
+    "body": "male-young",
+    "face": [
+      [
+        "head/head-oval",
+        0.45
+      ],
+      [
+        "head/head-scale-horiz-decr",
+        0.2
+      ],
+      [
+        "head/head-scale-vert-incr",
+        0.12
+      ],
+      [
+        "chin/chin-triangle",
+        0.22
+      ],
+      [
+        "nose/nose-curve-convex",
+        0.6
+      ],
+      [
+        "nose/nose-scale-depth-incr",
+        0.25
+      ],
+      [
+        "nose/nose-scale-horiz-decr",
+        0.15
+      ],
+      [
+        "mouth/mouth-scale-horiz-decr",
+        0.12
+      ]
+    ],
+    "clothes": "male_elegantsuit01",
+    "hair": "short04",
+    "skin": "middleage_lightskinned_male",
+    "height": 32.2,
+    "standing": true,
+    "glasses": true,
+    "hair_color": [
+      0.016,
+      0.01,
+      0.007
+    ],
+    "curls": 0.2,
+    "jacket": [
+      0.025,
+      0.027,
+      0.04
+    ]
+  },
+  {
+    "id": "hans",
+    "cameo": "Hans Niemann",
+    "macro": "caucasian-male-young",
+    "body": "male-young",
+    "face": [
+      [
+        "head/head-square",
+        0.25
+      ],
+      [
+        "head/head-scale-vert-incr",
+        0.2
+      ],
+      [
+        "chin/chin-width-incr",
+        0.25
+      ],
+      [
+        "chin/chin-height-incr",
+        0.18
+      ],
+      [
+        "nose/nose-point-down",
+        0.2
+      ],
+      [
+        "nose/nose-scale-depth-incr",
+        0.12
+      ],
+      [
+        "eyes/l-eye-height1-decr",
+        0.17
+      ],
+      [
+        "eyes/r-eye-height1-decr",
+        0.17
+      ]
+    ],
+    "clothes": "male_elegantsuit01",
+    "hair": "short04",
+    "skin": "middleage_lightskinned_male",
+    "height": 34.0,
+    "standing": true,
+    "hair_color": [
+      0.05,
+      0.026,
+      0.013
+    ],
+    "curls": 0.32,
+    "jacket": [
+      0.07,
+      0.08,
+      0.105
+    ],
+    "beard": 0.34
+  },
+  {
+    "id": "bobby",
+    "cameo": "Bobby Fischer (1972)",
+    "macro": "caucasian-male-young",
+    "body": "male-young",
+    "face": [
+      [
+        "head/head-oval",
+        0.4
+      ],
+      [
+        "head/head-scale-horiz-decr",
+        0.16
+      ],
+      [
+        "head/head-scale-vert-incr",
+        0.3
+      ],
+      [
+        "chin/chin-prominent-incr",
+        0.35
+      ],
+      [
+        "nose/nose-scale-depth-incr",
+        0.4
+      ],
+      [
+        "nose/nose-scale-vert-incr",
+        0.2
+      ],
+      [
+        "nose/nose-curve-convex",
+        0.25
+      ],
+      [
+        "mouth/mouth-scale-horiz-incr",
+        0.25
+      ],
+      [
+        "mouth/mouth-angles-up",
+        0.15
+      ]
+    ],
+    "clothes": "male_elegantsuit01",
+    "hair": "short03",
+    "skin": "middleage_lightskinned_male",
+    "height": 35.5,
+    "standing": true,
+    "hair_color": [
+      0.08,
+      0.043,
+      0.024
+    ],
+    "jacket": [
+      0.19,
+      0.15,
+      0.1
+    ]
+  },
+  {
+    "id": "hikaru",
+    "cameo": "Hikaru Nakamura",
+    "macro": "asian-male-young",
+    "macro_mix": "caucasian-male-young",
+    "mix": 0.35,
+    "body": "male-young",
+    "weight": 0.3,
+    "face": [
+      [
+        "head/head-round",
+        0.3
+      ],
+      [
+        "head/head-scale-horiz-incr",
+        0.16
+      ],
+      [
+        "chin/chin-width-incr",
+        0.15
+      ],
+      [
+        "nose/nose-scale-horiz-incr",
+        0.18
+      ],
+      [
+        "mouth/mouth-scale-horiz-incr",
+        0.16
+      ],
+      [
+        "mouth/mouth-angles-up",
+        0.15
+      ]
+    ],
+    "clothes": "male_casualsuit01",
+    "hair": "short01",
+    "skin": "middleage_lightskinned_male",
+    "height": 31.7,
+    "standing": true,
+    "hair_color": [
+      0.01,
+      0.009,
+      0.008
+    ],
+    "jacket": [
+      0.03,
+      0.04,
+      0.05
+    ],
+    "beard": 0.9,
+    "shirt_print": {
+      "file": "hikaru-pineapple-shirt.png",
+      "center_x": 1.65,
+      "center_height": 0.755,
+      "width": 1.55,
+      "height": 2.07,
+      "placement": "wearer left chest"
+    }
+  },
+  {
+    "id": "levy",
+    "cameo": "IM Levy Rozman",
+    "macro": "caucasian-male-young",
+    "body": "male-young",
+    "face": [
+      [
+        "head/head-oval",
+        0.4
+      ],
+      [
+        "head/head-scale-vert-incr",
+        0.24
+      ],
+      [
+        "head/head-scale-horiz-decr",
+        0.14
+      ],
+      [
+        "nose/nose-curve-convex",
+        0.35
+      ],
+      [
+        "nose/nose-scale-depth-incr",
+        0.22
+      ],
+      [
+        "chin/chin-triangle",
+        0.25
+      ]
+    ],
+    "clothes": "male_casualsuit04",
+    "hair": "short04",
+    "skin": "middleage_lightskinned_male",
+    "height": 32.6,
+    "standing": true,
+    "glasses": true,
+    "hair_color": [
+      0.029,
+      0.017,
+      0.009
+    ],
+    "curls": 0.27,
+    "jacket": [
+      0.055,
+      0.09,
+      0.075
+    ],
+    "beard": 0.7,
+    "shirt_print": {
+      "file": "levy-rook-shirt.png",
+      "center_x": 0,
+      "center_height": 0.712,
+      "width": 5.6,
+      "height": 5.6,
+      "placement": "center front"
+    }
+  }
+]

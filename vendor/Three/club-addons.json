@@ -1,0 +1,85 @@
+{
+  "version": "0.186.1",
+  "license": "MIT",
+  "adaptation": "Imports rewritten to the existing offline Three module and flat local filenames; implementation unchanged.",
+  "files": [
+    {
+      "original": "addons\\lights\\RectAreaLightTexturesLib.js",
+      "file": "three-club-RectAreaLightTexturesLib.js",
+      "source_sha256": "6dd4043bb052594357a5eeff13dc0519f0a80b100b97ec80c12808f887897bc1",
+      "sha256": "240256a183a60b0e4f86186bb8f8b2fe8f4a3add7718476ea26198b4a5927f8e"
+    },
+    {
+      "original": "addons\\lights\\RectAreaLightUniformsLib.js",
+      "file": "three-club-RectAreaLightUniformsLib.js",
+      "source_sha256": "494fef2d731ff1689050cc6040ad78d927c22b9125a12f532beb0374c2811c6e",
+      "sha256": "34666c24d4c1e82c0610437c25654f4fb6afa5f3cc66ce8c9f5bbec780586df1"
+    },
+    {
+      "original": "addons\\math\\SimplexNoise.js",
+      "file": "three-club-SimplexNoise.js",
+      "source_sha256": "4b1455617135e6b477de76244de07547d95570643379b72f4758e50161b06072",
+      "sha256": "6fe4396f7d3e99bb5f4b7cab3bb34bd33174e7b5acd39540c62e5353ec512ded"
+    },
+    {
+      "original": "addons\\postprocessing\\EffectComposer.js",
+      "file": "three-club-EffectComposer.js",
+      "source_sha256": "4e079a5886152d7e529a59aef644e968ab4d32c6a33ce016b36bf29b2eac26f7",
+      "sha256": "ec6a09dde6e7ecd5640ad12afd5ab3666a1846030f5517a6d875bd398b51ca04"
+    },
+    {
+      "original": "addons\\postprocessing\\MaskPass.js",
+      "file": "three-club-MaskPass.js",
+      "source_sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3",
+      "sha256": "ab5f30605364f548fc38fa71ff333474a94611371575144ad5d9404d75f07116"
+    },
+    {
+      "original": "addons\\postprocessing\\OutputPass.js",
+      "file": "three-club-OutputPass.js",
+      "source_sha256": "02e4a261af34de71338185e9e87f0cbe5cba9115608d984363e1269dec1d2272",
+      "sha256": "72926a929eee7e9b734f4bf63eb39ee0be2c0591f156f728b3c45fc0ba863c05"
+    },
+    {
+      "original": "addons\\postprocessing\\Pass.js",
+      "file": "three-club-Pass.js",
+      "source_sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5",
+      "sha256": "411d34c4117450ffb3d1e5ff1e392854ab9acbdc15c10fbd09bfb4c0cba6184f"
+    },
+    {
+      "original": "addons\\postprocessing\\RenderPass.js",
+      "file": "three-club-RenderPass.js",
+      "source_sha256": "817f6c3cdcd0fd41515d112359ea0532568eefb5aabd3b33903957ebca1b8a6a",
+      "sha256": "fcd5575e0318505ea343090d07fc6ae149c0d4bc07ebabeefe5484423cdbef4c"
+    },
+    {
+      "original": "addons\\postprocessing\\ShaderPass.js",
+      "file": "three-club-ShaderPass.js",
+      "source_sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d",
+      "sha256": "d91635e4456cfcaed816091d146ba9812695c0758d27a9e17aa5cd2717f3d8ef"
+    },
+    {
+      "original": "addons\\postprocessing\\SSAOPass.js",
+      "file": "three-club-SSAOPass.js",
+      "source_sha256": "2f9c02a53e09917d039c07c5bd7a110f1ce39bc5ab2affa316ea94f5198ec586",
+      "sha256": "9b608f364cb976cf506318a060fe003fe298d725bd5f82e641cdedb6b41c6dc6"
+    },
+    {
+      "original": "addons\\shaders\\CopyShader.js",
+      "file": "three-club-CopyShader.js",
+      "source_sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718",
+      "sha256": "f4e88ad7c973a1a4af9dca7a9b54fa44f69a821c4427de2bf53edd4c27f86041"
+    },
+    {
+      "original": "addons\\shaders\\OutputShader.js",
+      "file": "three-club-OutputShader.js",
+      "source_sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2",
+      "sha256": "61dc6766a951d2c747aca654dd9596688251f224b587cdda963e6b881052511d"
+    },
+    {
+      "original": "addons\\shaders\\SSAOShader.js",
+      "file": "three-club-SSAOShader.js",
+      "source_sha256": "034dad98927ed8f2677a19ce56d4da1212ce5070ed2666157106025dc260bb55",
+      "sha256": "954d3eb00cdc0489eb83afc8c507d1347f86b09542d774591d414cee4f786d4e"
+    }
+  ]
+}

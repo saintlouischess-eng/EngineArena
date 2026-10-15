@@ -153,11 +153,21 @@ def build_plan(ctx):
 
 def materialize(store,t,window):
     queued=store.one("SELECT count(*) n FROM games WHERE tid=? AND invalid=0 AND state IN ('pending','running')",(t['id'],))['n'];remaining=max(0,window-queued);s=t['settings'];legs=2 if s['paired'] else 1
+    if s.get('season_clinch'):
+        if queued:return
+        from .seasons import clinch
+        if clinch(store,t,store.rows('SELECT round,body FROM round_state WHERE tid=? ORDER BY round',(t['id'],))):return
+        remaining=min(remaining,2)
     if not remaining:return
     for row in store.rows('SELECT round,body FROM round_state WHERE tid=? ORDER BY round',(t['id'],)):
         state=json.loads(row['body']);changed=False
         if not any(c.get('materialized',c['count'])<c['count'] for c in state.get('chunks',[])):continue
         with store.tx():
+            if state.get('schedule_batches'):
+                from .schedule_order import materialize_round
+                remaining=materialize_round(store,t,row,state,remaining)
+                if remaining<=0:break
+                continue
             for c in state.get('chunks',[]):
                 done=c.get('materialized',c['count']);take=min(c['count']-done,(remaining+legs-1)//legs)
                 for j in range(take):
@@ -185,6 +195,7 @@ def apply_plan(store,plan,allow_paused=False):
         start=max(t['cursor'],store.one('SELECT coalesce(max(pair_no),-1)+1 n FROM games WHERE tid=?',(tid,))['n']);cursor=start
         if kind=='playoffs':state=current['states'][round_no];cycles=s.get('playoff_cycles',1)
         else:state={k:v for k,v in plan.items() if k not in ('signature','kind','tid')};state.update(chunks=[],regular_pairs={},playoffs={});cycles=round_cycles(s,round_no)
+        chunk_start=len(state['chunks'])
         for a,b in plan['matches']:
             key=match_key(a,b);chunk={'start':cursor,'count':cycles,'materialized':0,'a':a,'b':b,'phase':'playoff' if kind=='playoffs' else 'regular'}
             if kind=='playoffs':
@@ -197,6 +208,9 @@ def apply_plan(store,plan,allow_paused=False):
                 chunk['opening_start']=reserve_ko_suite(store,t,current['states'],round_no,chunk.get('playoff_stage',0),cycles)
             state['chunks'].append(chunk)
             cursor+=cycles
+        if s.get('schedule_order','legacy')!='legacy' and cursor>start:
+            state.setdefault('schedule_batches',[]).append({'start':start,'count':cursor-start,'done':0,
+                'chunks':[{'start':c['start'],'count':c['count']} for c in state['chunks'][chunk_start:]]})
         if kind!='playoffs':
             state['bye_awards']=[(a,cycles*(2 if s['paired'] else 1)*s.get('bye_score',1)) for a in plan['byes']] if s['format']=='swiss' else []
             for a,points in state['bye_awards']:point_delta(store,tid,a,points,'bye_points')

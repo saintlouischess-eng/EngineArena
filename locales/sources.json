@@ -766,7 +766,8 @@
   ],
   "Add tiebreak control": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Add UCI engine": [
     "ui\\app.js",
@@ -915,7 +916,8 @@
     "ui/results.js",
     "locales/glossary.tsv",
     "ui/concurrency.js",
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/player-workspace.js"
   ],
   "Apply & show statistics": [
     "ui\\focus.js",
@@ -1080,7 +1082,8 @@
     "locales/glossary.tsv",
     "arena\\pgn_options.py",
     "arena\\report_overview.py",
-    "ui/reliability.js"
+    "ui/reliability.js",
+    "ui/player.js"
   ],
   "BLACK": [
     "ui/index.html"
@@ -1144,7 +1147,10 @@
   ],
   "Browse…": [
     "ui\\app.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/profile-bulk.js",
+    "ui/pgn-output.js",
+    "ui/player.js"
   ],
   "Buchholz": [
     "ui\\formats.js",
@@ -1503,7 +1509,8 @@
     "ui/app.js",
     "ui/help.js",
     "locales/glossary.tsv",
-    "desktop\\Program.cs"
+    "desktop\\Program.cs",
+    "ui/seasons.js"
   ],
   "Close comparison": [
     "ui\\comparisons.js",
@@ -1660,7 +1667,8 @@
   ],
   "Confidence": [
     "ui\\text-format.js",
-    "ui/text-format.js"
+    "ui/text-format.js",
+    "arena\\rating_center_report.py"
   ],
   "Confidence interval": [
     "ui\\graphs.js",
@@ -1835,7 +1843,8 @@
   "CPU threads": [
     "ui\\app.js",
     "ui/app.js",
-    "arena\\report_sections.py"
+    "arena\\report_sections.py",
+    "ui/profile-bulk.js"
   ],
   "CPU threads requested per engine process. The matching advertised UCI Threads option stays synchronized.": [
     "ui\\help.js",
@@ -1926,7 +1935,8 @@
     "ui/graphs.js"
   ],
   "CSV ↗": [
-    "ui/index.html"
+    "ui/index.html",
+    "ui/rating-center.js"
   ],
   "Current best move": [
     "ui\\search.js",
@@ -1942,7 +1952,8 @@
   ],
   "Current principal variation": [
     "ui\\focus.js",
-    "ui/focus.js"
+    "ui/focus.js",
+    "ui/player.js"
   ],
   "Current review · Text…": [
     "ui\\formats.js",
@@ -1975,7 +1986,8 @@
   ],
   "Custom sequence / progressively shorter": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Custom width": [
     "ui\\focus.js",
@@ -2053,7 +2065,9 @@
     "ui/index.html"
   ],
   "Delete selected…": [
-    "ui/index.html"
+    "ui/index.html",
+    "ui/seasons.js",
+    "ui/app.js"
   ],
   "Delete tournament and data": [
     "ui\\app.js",
@@ -2242,7 +2256,8 @@
   ],
   "Draw threshold (cp; 0 = disabled)": [
     "ui\\app.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/circuits.js"
   ],
   "Draw-rate trend": [
     "ui\\graphs.js",
@@ -2251,7 +2266,8 @@
   "Draws": [
     "ui\\results.js",
     "ui/results.js",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "arena\\rating_center_report.py"
   ],
   "Drop UCI engine executables (.exe).": [
     "ui\\app.js",
@@ -2325,7 +2341,9 @@
     "ui\\graphs.js",
     "ui\\text-format.js",
     "ui/graphs.js",
-    "ui/text-format.js"
+    "ui/text-format.js",
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
   ],
   "Elo and uncertainty": [
     "ui\\review.js",
@@ -2390,7 +2408,14 @@
     "locales/glossary.tsv",
     "arena\\report_overview.py",
     "ui/events.js",
-    "arena\\profile_import.py"
+    "arena\\profile_import.py",
+    "ui/seasons.js",
+    "ui/profile-bulk.js",
+    "ui/setup-workflow.js",
+    "arena\\rating_center_report.py",
+    "arena\\player_pgn.py",
+    "ui/circuits.js",
+    "ui/tournament-extend.js"
   ],
   "Engine / case": [
     "ui\\text-format.js",
@@ -2517,7 +2542,8 @@
   ],
   "Engine testing": [
     "ui\\hardware.js",
-    "ui/hardware.js"
+    "ui/hardware.js",
+    "ui/pgn-output.js"
   ],
   "ENGINE TESTING /": [
     "ui/index.html"
@@ -2572,7 +2598,8 @@
   ],
   "Enter a finite reference rating": [
     "ui\\ratings.js",
-    "ui/ratings.js"
+    "ui/ratings.js",
+    "arena\\rating_center.py"
   ],
   "Enter a name for this layout.": [
     "ui\\polish.js",
@@ -2671,7 +2698,8 @@
   ],
   "Even game counts preserve complete color-reversed opening pairs.": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Every {0}s · sampled {1}s ago": [
     "ui\\hardware.js",
@@ -2740,7 +2768,8 @@
   ],
   "Expand": [
     "ui\\focus.js",
-    "ui/focus.js"
+    "ui/focus.js",
+    "ui/player-workspace.js"
   ],
   "Expand this choice for exact statistics and its full numbered PV. Earlier choices retain their final reported values.": [
     "ui\\search.js",
@@ -2796,7 +2825,8 @@
   ],
   "Export PGN…": [
     "ui\\pgn.js",
-    "ui/pgn.js"
+    "ui/pgn.js",
+    "ui/player.js"
   ],
   "Export profiles": [
     "ui/index.html"
@@ -2847,7 +2877,8 @@
   ],
   "FEN": [
     "ui\\conditions.js",
-    "ui/conditions.js"
+    "ui/conditions.js",
+    "ui/player.js"
   ],
   "FEN describes the board, side to move, castling rights, en passant square and move counters.": [
     "ui\\help.js",
@@ -2863,7 +2894,8 @@
   ],
   "File path": [
     "ui\\app.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/pgn-output.js"
   ],
   "File…": [
     "ui\\app.js",
@@ -2980,7 +3012,7 @@
     "ui/focus.js"
   ],
   "Fixed depth": [
-    "ui\\app.js",
+    "ui/rating-center.js",
     "ui/app.js",
     "locales/glossary.tsv"
   ],
@@ -3001,7 +3033,8 @@
   ],
   "Flip": [
     "ui\\focus.js",
-    "ui/focus.js"
+    "ui/focus.js",
+    "ui/player.js"
   ],
   "Flip all live boards": [
     "ui\\review.js",
@@ -3013,7 +3046,8 @@
   ],
   "Float": [
     "ui\\focus.js",
-    "ui/focus.js"
+    "ui/focus.js",
+    "ui/player-workspace.js"
   ],
   "Float this panel inside the app, with independent width and height. Drag its heading to move it.": [
     "ui\\focus.js",
@@ -3183,7 +3217,10 @@
     "arena\\report_sections.py",
     "arena\\tournament_report.py",
     "locales/glossary.tsv",
-    "arena\\report_overview.py"
+    "arena\\report_overview.py",
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py",
+    "ui/player.js"
   ],
   "GAMES": [
     "ui\\reports.js",
@@ -3217,7 +3254,9 @@
     "ui\\knockout.js",
     "ui/knockout.js",
     "arena\\tournament_report.py",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "games this session": [
     "ui\\polish.js",
@@ -3341,7 +3380,11 @@
     "arena\\pgn_format.py",
     "arena\\report_evidence.py",
     "arena\\resources.py",
-    "arena\\uci.py"
+    "arena\\uci.py",
+    "arena\\profile_import.py",
+    "arena\\rating_center.py",
+    "arena\\player.py",
+    "arena\\player_store.py"
   ],
   "HASH": [
     "ui/index.html"
@@ -3349,11 +3392,13 @@
   "Hash (MB)": [
     "ui\\text-format.js",
     "ui/text-format.js",
-    "arena\\report_evidence.py"
+    "arena\\report_evidence.py",
+    "ui/player.js"
   ],
   "Hash MB": [
     "ui\\app.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/profile-bulk.js"
   ],
   "Hash memory (MB per engine)": [
     "ui\\app.js",
@@ -3394,7 +3439,8 @@
   "Head-to-head": [
     "ui\\comparisons.js",
     "ui/comparisons.js",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/board3d-presentation.js"
   ],
   "Head-to-head · ": [
     "ui\\comparisons.js",
@@ -3422,7 +3468,8 @@
     "ui\\workspace.js",
     "ui/help.js",
     "ui/polish.js",
-    "ui/workspace.js"
+    "ui/workspace.js",
+    "ui/player-workspace.js"
   ],
   "Hide readings": [
     "ui\\hardware.js",
@@ -3503,7 +3550,8 @@
     "ui\\app.js",
     "ui/app.js",
     "arena\\tournament_report.py",
-    "ui/game-moves.js"
+    "ui/game-moves.js",
+    "arena\\player_store.py"
   ],
   "Include": [
     "ui\\review.js",
@@ -3558,7 +3606,11 @@
   "Initial position": [
     "ui\\conditions.js",
     "ui/conditions.js",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/events.js",
+    "ui/seasons.js",
+    "arena\\player_pgn.py",
+    "ui/circuits.js"
   ],
   "Initial seed": [
     "ui\\formats.js",
@@ -3618,7 +3670,8 @@
   ],
   "JSON ↗": [
     "ui\\reports.js",
-    "ui/reports.js"
+    "ui/reports.js",
+    "ui/rating-center.js"
   ],
   "Jump to ": [
     "ui\\polish.js",
@@ -3638,7 +3691,8 @@
   ],
   "Keep each engine’s normal control": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Keep each engine’s normal control, including handicaps, or define an ordered sequence for both engines. The last control repeats until a winner is decided.": [
     "ui\\knockout.js",
@@ -3826,7 +3880,8 @@
   ],
   "Live": [
     "ui\\focus.js",
-    "ui/focus.js"
+    "ui/focus.js",
+    "ui/player.js"
   ],
   "Live boards": [
     "ui/index.html",
@@ -3861,7 +3916,8 @@
   ],
   "Load shorter-control example": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Loading official results…": [
     "ui\\reports.js",
@@ -3877,7 +3933,8 @@
   ],
   "Loading…": [
     "ui\\comparisons.js",
-    "ui/comparisons.js"
+    "ui/comparisons.js",
+    "ui/rating-center.js"
   ],
   "Local time": [
     "ui\\graphs.js",
@@ -3909,7 +3966,8 @@
     "ui/comparisons.js",
     "ui/results.js",
     "ui/text-format.js",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "arena\\rating_center_report.py"
   ],
   "LOS ref.": [
     "ui\\text-format.js",
@@ -3922,7 +3980,8 @@
   "Losses": [
     "ui\\results.js",
     "ui/results.js",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "arena\\rating_center_report.py"
   ],
   "Losslessly compress older engine logs, compact the database and recovery backups, and return freed space to Windows. Games and experiments must be stopped. Every move, result and diagnostic line is retained.": [
     "ui\\storage.js",
@@ -4204,7 +4263,11 @@
     "locales/glossary.tsv",
     "ui/reliability.js",
     "ui/tournament-queue.js",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/rating-center.js",
+    "ui/player.js",
+    "ui/tournament-extend.js"
   ],
   "Next crosstable columns": [
     "ui\\review.js",
@@ -4227,7 +4290,8 @@
   ],
   "Next move": [
     "ui\\review.js",
-    "ui/review.js"
+    "ui/review.js",
+    "ui/player.js"
   ],
   "Next openings page": [
     "ui\\review.js",
@@ -4412,7 +4476,8 @@
     "arena\\engine_readout.py",
     "arena\\report_evidence.py",
     "arena\\report_sections.py",
-    "ui/pgn.js"
+    "ui/pgn.js",
+    "ui/rating-center.js"
   ],
   "Normal approximation": [
     "ui\\comparisons.js",
@@ -4505,7 +4570,8 @@
   ],
   "Off": [
     "ui\\app.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/board3d-presentation.js"
   ],
   "Official": [
     "ui\\text-format.js",
@@ -4518,7 +4584,9 @@
     "ui/graphs.js",
     "arena\\tournament_report.py",
     "locales/glossary.tsv",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/rating-center.js"
   ],
   "OFFICIAL GAMES": [
     "ui/index.html"
@@ -4660,7 +4728,9 @@
   "Opening random seed": [
     "ui\\app.js",
     "ui/app.js",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "OPENINGS": [
     "ui\\app.js",
@@ -4668,7 +4738,8 @@
   ],
   "Opponent": [
     "ui\\comparisons.js",
-    "ui/comparisons.js"
+    "ui/comparisons.js",
+    "ui/player.js"
   ],
   "OPPONENT": [
     "ui\\formats.js",
@@ -4706,7 +4777,9 @@
     "ui/knockout.js",
     "ui/text-format.js",
     "arena\\tournament_report.py",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Overall": [
     "ui\\text-format.js",
@@ -4812,7 +4885,8 @@
     "ui\\text-format.js",
     "ui/app.js",
     "ui/text-format.js",
-    "ui/tournament-edit.js"
+    "ui/tournament-edit.js",
+    "ui/seasons.js"
   ],
   "Participants ≠ processes": [
     "ui/index.html"
@@ -4926,7 +5000,9 @@
     "ui/text-format.js",
     "arena\\tournament_report.py",
     "locales/glossary.tsv",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "POINTS": [
     "ui/index.html"
@@ -5030,7 +5106,8 @@
   ],
   "Previous move": [
     "ui\\review.js",
-    "ui/review.js"
+    "ui/review.js",
+    "ui/player.js"
   ],
   "Previous openings page": [
     "ui\\review.js",
@@ -5110,7 +5187,9 @@
   ],
   "Rating": [
     "ui\\text-format.js",
-    "ui/text-format.js"
+    "ui/text-format.js",
+    "arena\\rating_center_report.py",
+    "ui/player.js"
   ],
   "Rating CI ": [
     "ui\\text-format.js",
@@ -5227,7 +5306,9 @@
   ],
   "Reference": [
     "ui\\text-format.js",
-    "ui/text-format.js"
+    "ui/text-format.js",
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
   ],
   "Reference engine": [
     "ui\\ratings.js",
@@ -5241,7 +5322,9 @@
     "locales/glossary.tsv",
     "ui/reliability.js",
     "ui/tournament-queue.js",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/rating-center.js",
+    "ui/player.js"
   ],
   "Refresh interval": [
     "ui\\hardware.js",
@@ -5278,7 +5361,8 @@
     "ui\\knockout.js",
     "ui/knockout.js",
     "arena\\knockout.py",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "ui/events.js"
   ],
   "Regular matches need": [
     "ui\\opening-presets.js",
@@ -5303,7 +5387,9 @@
   "Remove": [
     "ui\\graphs.js",
     "ui/graphs.js",
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/profile-bulk.js",
+    "ui/circuits.js"
   ],
   "Remove {0} engine {1} from the library?": [
     "ui\\results.js",
@@ -5311,7 +5397,8 @@
   ],
   "Remove control": [
     "ui\\knockout.js",
-    "ui/knockout.js"
+    "ui/knockout.js",
+    "ui/events.js"
   ],
   "Remove this graph from the workspace. Saved tournament data is unchanged.": [
     "ui\\help.js",
@@ -5415,7 +5502,8 @@
   "Resignation threshold (cp; 0 = disabled)": [
     "ui\\app.js",
     "ui/app.js",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/circuits.js"
   ],
   "Resize ": [
     "ui\\focus.js",
@@ -5427,7 +5515,8 @@
   ],
   "Resize workspace columns": [
     "ui\\workspace.js",
-    "ui/workspace.js"
+    "ui/workspace.js",
+    "ui/player-workspace.js"
   ],
   "Resource budget": [
     "ui\\polish.js",
@@ -5470,7 +5559,9 @@
     "ui\\adjudication.js",
     "ui/adjudication.js",
     "locales/glossary.tsv",
-    "arena\\pgn_options.py"
+    "arena\\pgn_options.py",
+    "arena\\pgn_output.py",
+    "ui/player.js"
   ],
   "RESULT": [
     "ui/index.html"
@@ -5487,7 +5578,8 @@
   ],
   "Retry saving": [
     "ui/index.html",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/pgn-output.js"
   ],
   "Return this window to its saved workspace column.": [
     "ui\\focus.js",
@@ -5544,7 +5636,8 @@
     "ui\\app.js",
     "ui/app.js",
     "locales/glossary.tsv",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Rounds (Swiss / ladder)": [
     "ui\\app.js",
@@ -5591,9 +5684,9 @@
     "ui/opening-presets.js"
   ],
   "Samples": [
-    "arena/report_sections.py",
-    "ui\\text-format.js",
+    "ui/rating-center.js",
     "ui/text-format.js",
+    "arena\\rating_center_report.py",
     "arena\\report_sections.py"
   ],
   "Save a copy": [
@@ -5842,7 +5935,8 @@
   ],
   "Search engine profiles…": [
     "ui/index.html",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/setup-workflow.js"
   ],
   "Search engines on both axes": [
     "ui\\comparisons.js",
@@ -5964,7 +6058,8 @@
     "arena/tournament_report.py",
     "ui\\text-exports.js",
     "ui/text-exports.js",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "arena\\circuits.py"
   ],
   "Seed used for reproducible opening selection and randomized seeding.": [
     "ui\\help.js",
@@ -5980,7 +6075,10 @@
   ],
   "Seeded shuffle": [
     "ui\\formats.js",
-    "ui/formats.js"
+    "ui/formats.js",
+    "ui/events.js",
+    "ui/schedule-order.js",
+    "ui/seasons.js"
   ],
   "Seeded shuffle, without repeats within the pool": [
     "ui\\opening-presets.js",
@@ -6185,7 +6283,10 @@
     "ui\\app.js",
     "ui/app.js",
     "ui/tournament-queue.js",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Show head-to-head results for this engine.": [
     "ui\\results.js",
@@ -6309,7 +6410,9 @@
     "ui/text-exports.js",
     "ui/text-format.js",
     "arena\\tournament_report.py",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Stage increment": [
     "ui\\app.js",
@@ -6365,7 +6468,8 @@
     "ui\\app.js",
     "ui/app.js",
     "locales/glossary.tsv",
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/player.js"
   ],
   "Start / resume begins play. Pause & drain finishes current games. Results & exports contains the reports and the official PGN Save As option.": [
     "ui\\review.js",
@@ -6436,7 +6540,10 @@
     "ui/reliability.js",
     "ui/tournament-queue.js",
     "ui/events.js",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/seasons.js",
+    "arena\\rating_center_report.py",
+    "ui/circuits.js"
   ],
   "STATUS": [
     "ui\\app.js",
@@ -6552,7 +6659,8 @@
   "Swiss (club pairing)": [
     "ui\\app.js",
     "ui/app.js",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Switch between light and dark themes and save the choice.": [
     "ui\\help.js",
@@ -6757,7 +6865,14 @@
     "arena\\resources.py",
     "arena\\uci.py",
     "arena\\engine_options.py",
-    "arena\\experiments.py"
+    "arena\\experiments.py",
+    "arena\\profile_import.py",
+    "arena\\store.py",
+    "ui/seasons.js",
+    "arena\\rating_center.py",
+    "arena\\rating_center_report.py",
+    "arena\\player_pgn.py",
+    "arena\\player_store.py"
   ],
   "THREADS": [
     "ui/index.html",
@@ -6792,7 +6907,9 @@
     "ui\\knockout.js",
     "ui/knockout.js",
     "arena\\tournament_report.py",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Tiebreaks have no fixed game maximum. They continue while stages are tied; you can pause and resume. Original attempts, openings, stage numbers and actual controls are saved.": [
     "ui\\knockout.js",
@@ -6829,7 +6946,10 @@
     "arena\\engine_readout.py",
     "arena\\tournament_report.py",
     "locales/glossary.tsv",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/profile-bulk.js",
+    "ui/circuits.js"
   ],
   "TIME CONTROL": [
     "ui/index.html",
@@ -7052,7 +7172,8 @@
   ],
   "Updating pool ratings…": [
     "ui\\ratings.js",
-    "ui/ratings.js"
+    "ui/ratings.js",
+    "ui/rating-center.js"
   ],
   "Use Add executable to select the engine path.": [
     "ui\\app.js",
@@ -7144,7 +7265,8 @@
     "arena\\engine_readout.py",
     "arena\\report_sections.py",
     "arena\\tournament_report.py",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/profile-bulk.js"
   ],
   "Variant": [
     "arena/tournament_report.py",
@@ -7230,7 +7352,8 @@
     "locales/glossary.tsv",
     "arena\\pgn_options.py",
     "arena\\report_overview.py",
-    "ui/reliability.js"
+    "ui/reliability.js",
+    "ui/player.js"
   ],
   "WHITE": [
     "ui/index.html"
@@ -7309,7 +7432,8 @@
     "ui\\results.js",
     "ui/formats.js",
     "ui/results.js",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "arena\\rating_center_report.py"
   ],
   "Wins with Black": [
     "ui\\formats.js",
@@ -7473,7 +7597,8 @@
     "arena/tournament_report.py",
     "arena\\report_sections.py",
     "arena\\tournament_report.py",
-    "ui/text-format.js"
+    "ui/text-format.js",
+    "arena\\rating_center_report.py"
   ],
   "Unavailable": [
     "ui\\hardware-model.js",
@@ -7510,7 +7635,9 @@
   "Opening book file": [
     "arena/tournament_report.py",
     "arena\\tournament_report.py",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Not recorded": [
     "arena/engine_readout.py",
@@ -7525,19 +7652,15 @@
   "Opening positions": [
     "arena/tournament_report.py",
     "arena\\tournament_report.py",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Opening order / seed": [
     "arena/tournament_report.py",
     "arena\\tournament_report.py"
   ],
   "Tiebreaks": [
-    "arena/engine_readout.py",
-    "arena/tournament_report.py",
-    "arena\\engine_readout.py",
-    "arena\\tournament_report.py",
-    "locales/glossary.tsv",
-    "ui/events.js"
+    "ui/season-insights.js"
   ],
   "Automatic retry limit": [
     "arena/tournament_report.py",
@@ -7894,7 +8017,8 @@
   ],
   "Attempts": [
     "arena/tournament_report.py",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "ui/seasons.js"
   ],
   "{0} interrupted attempts retained separately. Diagnostics do not enter official standings; replacements retain the original attempts.": [
     "arena/tournament_report.py",
@@ -7947,7 +8071,8 @@
   ],
   "Independent samples": [
     "arena/tournament_report.py",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "ui/rating-center.js"
   ],
   "Log likelihood ratio": [
     "arena/tournament_report.py",
@@ -7994,7 +8119,8 @@
     "arena\\tournament_report.py",
     "locales/glossary.tsv",
     "arena\\report_sections.py",
-    "ui/events.js"
+    "ui/events.js",
+    "arena\\player_pgn.py"
   ],
   "Recorded settings (first three opening records)": [
     "arena/tournament_report.py",
@@ -8113,7 +8239,10 @@
   "CPU thread budget": [
     "arena/report_sections.py",
     "arena\\report_sections.py",
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Automatic; resolved per recorded session": [
     "arena/report_sections.py",
@@ -8451,7 +8580,7 @@
     "arena\\report_evidence.py"
   ],
   "Engine configuration": [
-    "arena/engine_readout.py",
+    "ui/rating-center.js",
     "arena\\engine_readout.py"
   ],
   "Observed settings shown below": [
@@ -8502,7 +8631,8 @@
     "arena\\engine_readout.py",
     "arena\\pgn_format.py",
     "arena\\report_evidence.py",
-    "arena\\pgn_options.py"
+    "arena\\pgn_options.py",
+    "arena\\rating_center_report.py"
   ],
   "Network SHA-256": [
     "arena/engine_readout.py",
@@ -8740,7 +8870,8 @@
   " must be a positive integer": [
     "arena\\conditions.py",
     "arena\\server.py",
-    "arena\\store.py"
+    "arena\\store.py",
+    "arena\\player_store.py"
   ],
   " must be true or false": [
     "arena\\conditions.py"
@@ -8874,14 +9005,16 @@
   ],
   "Complete": [
     "arena\\deletion.py",
-    "arena\\storage.py"
+    "arena\\storage.py",
+    "arena\\rating_cleanup.py"
   ],
   "Failed": [
     "arena\\deletion.py",
     "arena\\runner.py",
     "arena\\server.py",
     "arena\\storage.py",
-    "application labels"
+    "application labels",
+    "arena\\rating_cleanup.py"
   ],
   "Tournament deletion cleanup failed: {0}. Scheduling stopped. Retry saving or reopen to finish cleanup.": [
     "arena\\deletion.py"
@@ -9046,10 +9179,13 @@
     "arena\\knockout.py"
   ],
   "Playoff controls must be a list": [
-    "arena\\knockout.py"
+    "arena\\knockout.py",
+    "arena\\leagues.py"
   ],
   "Each playoff stage needs a time control": [
-    "arena\\knockout.py"
+    "arena\\knockout.py",
+    "ui/events.js",
+    "arena\\leagues.py"
   ],
   "KO round {0} · ": [
     "arena\\knockout.py"
@@ -9059,7 +9195,8 @@
   ],
   "Tiebreak": [
     "arena\\knockout.py",
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/events.js"
   ],
   "KO order puts surviving engines first, then the latest round of elimination; engines eliminated in the same round are listed by initial seed, not awarded different places. W-D-L, game points, Elo, CI and LOS describe official games, including tiebreaks; they do not decide bracket advancement. Results at different time controls and against different opponents are pooled, not a single uniform strength test.": [
     "arena\\knockout_results.py"
@@ -9081,7 +9218,11 @@
     "arena\\knockout_results.py"
   ],
   "Champion": [
-    "arena\\knockout_results.py"
+    "arena\\knockout_results.py",
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js",
+    "arena\\event_insights.py"
   ],
   "Eliminated in round ": [
     "arena\\knockout_results.py"
@@ -9290,7 +9431,8 @@
   ],
   "Network": [
     "arena\\pgn_format.py",
-    "arena\\pgn_options.py"
+    "arena\\pgn_options.py",
+    "arena\\rating_center_report.py"
   ],
   "depth ": [
     "arena\\pgn_format.py"
@@ -9407,10 +9549,12 @@
     "arena\\ratings.py"
   ],
   "Invalid rating page": [
-    "arena\\ratings.py"
+    "arena\\ratings.py",
+    "arena\\rating_center_report.py"
   ],
   "Invalid rating sort": [
-    "arena\\ratings.py"
+    "arena\\ratings.py",
+    "arena\\rating_center_report.py"
   ],
   "Logistic expected-score pool fit; fixed reference rating; {0}-score sandwich normal {1}% intervals": [
     "arena\\ratings.py"
@@ -9876,7 +10020,8 @@
     "arena\\store.py"
   ],
   "An engine profile no longer exists; refresh the library": [
-    "arena\\store.py"
+    "arena\\store.py",
+    "arena\\profile_bulk.py"
   ],
   " must be finite and positive": [
     "arena\\store.py",
@@ -9910,7 +10055,8 @@
     "arena\\store.py"
   ],
   "Schedule exceeds SQLite 64-bit game numbering capacity": [
-    "arena\\store.py"
+    "arena\\store.py",
+    "arena\\tournament_extend.py"
   ],
   "Invalid opening FEN: ": [
     "arena\\store.py"
@@ -10072,14 +10218,17 @@
     "locales/glossary.tsv"
   ],
   "Fixed nodes": [
+    "ui/rating-center.js",
     "locales/glossary.tsv"
   ],
   "Save": [
     "locales/glossary.tsv",
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/events.js"
   ],
   "Cancel": [
-    "locales/glossary.tsv"
+    "locales/glossary.tsv",
+    "ui/seasons.js"
   ],
   "Delete": [
     "locales/glossary.tsv"
@@ -10093,7 +10242,10 @@
   ],
   "Back": [
     "locales/glossary.tsv",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/profile-bulk.js"
   ],
   "Timeout": [
     "application labels"
@@ -10105,7 +10257,8 @@
     "application labels"
   ],
   "Illegal move": [
-    "application labels"
+    "application labels",
+    "arena\\player.py"
   ],
   "Protocol error": [
     "application labels"
@@ -10695,7 +10848,8 @@
     "ui/pgn.js"
   ],
   "Export preset": [
-    "ui/pgn.js"
+    "ui/pgn.js",
+    "ui/pgn-output.js"
   ],
   "Presets set headers, move annotations and opening markers together. Custom changes are remembered after saving.": [
     "ui/pgn.js"
@@ -10839,13 +10993,15 @@
     "ui/pgn.js"
   ],
   "Clean games": [
-    "arena/pgn_options.py"
+    "arena/pgn_options.py",
+    "ui/pgn-output.js"
   ],
   "Essential headers and moves, ready to share or import.": [
     "arena/pgn_options.py"
   ],
   "Annotated games": [
-    "arena/pgn_options.py"
+    "arena/pgn_options.py",
+    "ui/pgn-output.js"
   ],
   "Readable evaluations, depth and move time with useful game headers.": [
     "arena/pgn_options.py"
@@ -10854,7 +11010,8 @@
     "arena/pgn_options.py"
   ],
   "Complete archive": [
-    "arena/pgn_options.py"
+    "arena/pgn_options.py",
+    "ui/pgn-output.js"
   ],
   "All headers and measurements, including large encoded settings and local paths.": [
     "arena/pgn_options.py"
@@ -10999,7 +11156,8 @@
     "ui/focus-layout.js"
   ],
   "Reset layout": [
-    "ui/focus-layout.js"
+    "ui/focus-layout.js",
+    "ui/player-workspace.js"
   ],
   "Minimum clock box height (px)": [
     "ui/focus-layout.js"
@@ -11062,7 +11220,8 @@
   "Engine move book": [
     "ui/app.js",
     "ui/engine-books.js",
-    "arena\\report_sections.py"
+    "arena\\report_sections.py",
+    "ui/profile-bulk.js"
   ],
   "Use each profile’s engine move book": [
     "ui/app.js",
@@ -11075,10 +11234,13 @@
     "ui/engine-books.js"
   ],
   "Saved book": [
-    "ui/engine-books.js"
+    "ui/engine-books.js",
+    "ui/profile-bulk.js"
   ],
   "No engine move book": [
-    "ui/engine-books.js"
+    "ui/engine-books.js",
+    "ui/profile-bulk.js",
+    "ui/player.js"
   ],
   "Import PGN / BIN…": [
     "ui/engine-books.js"
@@ -11088,16 +11250,20 @@
   ],
   "Move selection": [
     "ui/engine-books.js",
-    "arena\\report_sections.py"
+    "arena\\report_sections.py",
+    "ui/profile-bulk.js"
   ],
   "Weighted by book frequency": [
-    "ui/engine-books.js"
+    "ui/engine-books.js",
+    "ui/profile-bulk.js"
   ],
   "Equal chance per move": [
-    "ui/engine-books.js"
+    "ui/engine-books.js",
+    "ui/profile-bulk.js"
   ],
   "Highest book weight": [
-    "ui/engine-books.js"
+    "ui/engine-books.js",
+    "ui/profile-bulk.js"
   ],
   "Two plies = one full move. PGN mainlines supply moves and frequency weights; BIN uses Polyglot weights. Imported books are saved with recovery data. Book moves earn increment but use no search time or move overhead. Cloned profiles can use different books.": [
     "ui/engine-books.js"
@@ -11107,7 +11273,8 @@
   ],
   "positions": [
     "ui/engine-books.js",
-    "ui/tournament-edit.js"
+    "ui/tournament-edit.js",
+    "ui/circuits.js"
   ],
   "moves": [
     "ui/engine-books.js"
@@ -11150,7 +11317,11 @@
     "ui/reliability.js",
     "ui/tournament-queue.js",
     "ui/events.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/seasons.js",
+    "ui/rating-center.js",
+    "ui/player.js",
+    "ui/tournament-extend.js"
   ],
   "Official TF": [
     "ui/text-format.js",
@@ -11277,7 +11448,8 @@
     "ui/tournament-edit.js"
   ],
   "Save changes": [
-    "ui/tournament-edit.js"
+    "ui/tournament-edit.js",
+    "ui/seasons.js"
   ],
   "Recorded legacy opening assignment": [
     "ui/tournament-edit.js",
@@ -11308,7 +11480,8 @@
     "ui/tournament-edit.js"
   ],
   "{0} participants": [
-    "ui/tournament-edit.js"
+    "ui/tournament-edit.js",
+    "ui/setup-workflow.js"
   ],
   "Edit the saved setup before its first start. Started tournaments keep their recorded conditions.": [
     "ui/index.html"
@@ -11368,11 +11541,15 @@
   ],
   "Official / scheduled": [
     "ui/tournament-queue.js",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Actions": [
     "ui/tournament-queue.js",
-    "ui/events.js"
+    "ui/events.js",
+    "ui/rating-center.js",
+    "ui/player.js"
   ],
   "Append the selected paused tournament to the automatic queue. Adding it does not start it.": [
     "ui/tournament-queue.js"
@@ -11556,7 +11733,8 @@
   ],
   "Events & leagues": [
     "ui/events.js",
-    "ui/app.js"
+    "ui/app.js",
+    "ui/tournament-queue.js"
   ],
   "Link tournament stages with automatic qualification. Each stage keeps its own standings, ratings, opening pairs and PGN records.": [
     "ui/events.js"
@@ -11573,19 +11751,26 @@
     "arena\\tournament_report.py"
   ],
   "Open event": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/tournament-queue.js"
   ],
   "Save a tournament setup first, then use its engines and conditions for this event.": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Create event": [
     "ui/events.js"
   ],
   "Event name": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Source tournament": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Event type": [
     "ui/events.js"
@@ -11607,13 +11792,17 @@
     "arena\\events.py"
   ],
   "First-stage format": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "First-stage pairs per matchup": [
     "ui/events.js"
   ],
   "Swiss rounds": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "arena\\seasons.py",
+    "ui/circuits.js"
   ],
   "Final-stage format": [
     "ui/events.js"
@@ -11625,16 +11814,20 @@
     "ui/events.js"
   ],
   "Seasons to run": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Movement at each division boundary": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "One count per adjacent division boundary. Example: 2, 1 promotes and relegates two engines between divisions 1 and 2, and one between divisions 2 and 3. Counts cannot overlap inside a division.": [
     "ui/events.js"
   ],
   "Division names, highest first": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Every division plays a round robin each season. After all divisions finish, the top engines move up and the bottom engines move down. Division sizes stay fixed. Final-season movements are saved for an optional next season.": [
     "ui/events.js"
@@ -11664,40 +11857,59 @@
     "ui/events.js"
   ],
   "Preview schedule": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Engine championship": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Save event": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Preview required": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Choose a group count that leaves at least two engines per group.": [
     "ui/events.js"
   ],
   "Division": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Preview the current schedule before saving.": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Stage ratings describe their own opposition and conditions; ratings are not combined across stages.": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Season": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/rating-center.js",
+    "ui/circuits.js"
   ],
   "Group": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/circuits.js"
   ],
   "points": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/player.js"
   ],
   "Qualified": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js",
+    "arena\\event_insights.py"
   ],
   "Stage / group": [
     "ui/events.js"
@@ -11730,21 +11942,26 @@
     "ui/events.js"
   ],
   "Deleted stage": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Archived / superseded": [
     "ui/events.js",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "ui/tournament-queue.js",
+    "ui/seasons.js"
   ],
   "Open stage": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "First 50 places per group shown here; the text export includes every place.": [
     "ui/events.js"
   ],
   "Event stage": [
     "ui/events.js",
-    "arena\\tournament_report.py"
+    "arena\\tournament_report.py",
+    "ui/tournament-queue.js"
   ],
   "Use Run event to run this stage and continue automatically.": [
     "ui/events.js"
@@ -11796,7 +12013,9 @@
   ],
   "Event exceeds 64-bit game numbering capacity.": [
     "arena\\events.py",
-    "arena\\leagues.py"
+    "arena\\leagues.py",
+    "arena\\seasons.py",
+    "arena\\circuits.py"
   ],
   "Enter an event name.": [
     "arena\\events.py"
@@ -11811,7 +12030,9 @@
     "arena\\events.py"
   ],
   "This event changed. Refresh before trying again.": [
-    "arena\\events.py"
+    "arena\\events.py",
+    "arena\\seasons.py",
+    "arena\\circuits.py"
   ],
   "This event is retired. Create a new event to play again.": [
     "arena\\events.py"
@@ -11869,7 +12090,8 @@
     "arena\\events.py"
   ],
   "Current stage needs attention.": [
-    "arena\\events.py"
+    "arena\\events.py",
+    "arena\\seasons.py"
   ],
   "All scheduled league seasons completed. Next-season division placements are saved.": [
     "arena\\events.py"
@@ -11881,13 +12103,16 @@
     "arena\\leagues.py"
   ],
   "Seasons": [
-    "arena\\leagues.py"
+    "arena\\leagues.py",
+    "arena\\seasons.py",
+    "arena\\circuits.py"
   ],
   "Enter a positive promotion/relegation count for each adjacent division boundary.": [
     "arena\\leagues.py"
   ],
   "Promotion and relegation places overlap in a division. Reduce the movement counts.": [
-    "arena\\leagues.py"
+    "arena\\leagues.py",
+    "arena\\seasons.py"
   ],
   "Division {0}": [
     "arena\\leagues.py"
@@ -11899,10 +12124,14 @@
     "arena\\leagues.py"
   ],
   "Promoted": [
-    "arena\\leagues.py"
+    "arena\\leagues.py",
+    "arena\\seasons.py",
+    "arena\\event_insights.py"
   ],
   "Relegated": [
-    "arena\\leagues.py"
+    "arena\\leagues.py",
+    "arena\\seasons.py",
+    "arena\\event_insights.py"
   ],
   "Finish the current league season before adding another.": [
     "arena\\leagues.py"
@@ -11920,7 +12149,8 @@
   "Book": [
     "arena\\pgn_format.py",
     "arena\\pgn_options.py",
-    "ui/game-moves.js"
+    "ui/game-moves.js",
+    "ui/player.js"
   ],
   "End of opening book": [
     "arena\\pgn_format.py"
@@ -11932,7 +12162,8 @@
     "arena\\pgn_options.py"
   ],
   "Date": [
-    "arena\\pgn_options.py"
+    "arena\\pgn_options.py",
+    "ui/player.js"
   ],
   "Termination": [
     "arena\\pgn_options.py"
@@ -12010,7 +12241,8 @@
   ],
   "Scheduled games": [
     "arena\\tournament_report.py",
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/events.js"
   ],
   "Opponent lists and game counts can differ. Raw points and Elo relative to sampled opposition do not constitute a common-strength ranking.": [
     "arena\\tournament_report.py"
@@ -12028,7 +12260,8 @@
     "ui/events.js"
   ],
   "Pairs per matchup per season": [
-    "ui/events.js"
+    "ui/events.js",
+    "ui/seasons.js"
   ],
   "Total scheduled games across all divisions and seasons.": [
     "ui/events.js"
@@ -12080,7 +12313,8 @@
   ],
   "Completed opening pairs": [
     "arena\\tournament_report.py",
-    "ui/sprt.js"
+    "ui/sprt.js",
+    "ui/rating-center.js"
   ],
   "Individual games": [
     "arena\\tournament_report.py",
@@ -12386,7 +12620,8 @@
     "ui/tournament-queue.js"
   ],
   "Pause": [
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/player.js"
   ],
   "No tournaments match this view.": [
     "ui/tournament-queue.js"
@@ -12395,7 +12630,8 @@
     "ui/tournament-queue.js"
   ],
   "Execution mode": [
-    "ui/tournament-queue.js"
+    "ui/tournament-queue.js",
+    "ui/events.js"
   ],
   "One at a time": [
     "ui/tournament-queue.js"
@@ -12478,7 +12714,8 @@
     "arena\\runner.py"
   ],
   "Choose one at a time or run together.": [
-    "arena\\tournament_queue.py"
+    "arena\\tournament_queue.py",
+    "arena\\leagues.py"
   ],
   "Pause and drain all tournaments before changing execution mode.": [
     "arena\\tournament_queue.py"
@@ -12493,7 +12730,10 @@
     "arena\\tournament_queue.py"
   ],
   "GPU limits require a group name and a nonnegative whole number.": [
-    "arena\\tournament_queue.py"
+    "arena\\tournament_queue.py",
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
   ],
   "Unknown tournament filter": [
     "arena\\tournament_queue.py"
@@ -12559,7 +12799,9 @@
     "ui/app.js"
   ],
   "Saving…": [
-    "ui/app.js"
+    "ui/app.js",
+    "ui/events.js",
+    "ui/pgn-output.js"
   ],
   "Saved “{0}” — {1} games scheduled. Paused and ready to run.": [
     "ui/app.js"
@@ -12602,7 +12844,8 @@
   ],
   "3D is unavailable on this device. The 2D board remains available.": [
     "ui/board3d-ui.js",
-    "ui/board3d.js"
+    "ui/board3d.js",
+    "ui/player-board.js"
   ],
   "Focused board view": [
     "ui/board3d-ui.js"
@@ -12626,10 +12869,12 @@
     "ui/board3d-ui.js"
   ],
   "Zoom": [
-    "ui/board3d-ui.js"
+    "ui/board3d-ui.js",
+    "ui/player.js"
   ],
   "Reset camera": [
-    "ui/board3d-ui.js"
+    "ui/board3d-ui.js",
+    "ui/player.js"
   ],
   "Apply board view": [
     "ui/board3d-ui.js"
@@ -12692,7 +12937,8 @@
   ],
   "Game moves": [
     "ui/game-moves.js",
-    "ui/workspace.js"
+    "ui/workspace.js",
+    "ui/player.js"
   ],
   "Tournament completed": [
     "ui/workflow.js"
@@ -12812,7 +13058,9 @@
     "ui/workflow.js"
   ],
   "Clear selection": [
-    "ui/workflow.js"
+    "ui/workflow.js",
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js"
   ],
   "Select a JSON configuration file": [
     "ui/workflow.js"
@@ -12959,7 +13207,8 @@
     "ui/board3d-ui.js"
   ],
   "Height": [
-    "ui/board3d-ui.js"
+    "ui/board3d-ui.js",
+    "ui/player.js"
   ],
   "Lower board": [
     "ui/board3d-ui.js"
@@ -13021,24 +13270,3508 @@
     "arena/profile_import.py",
     "arena/store.py",
     "arena/uci.py",
-    "desktop/Program.cs"
+    "desktop/Program.cs",
+    "arena\\profile_import.py"
   ],
   "Choose an explicit positive thread count for CPU budgeting; automatic thread counts are not supported.": [
     "arena/profile_import.py",
     "arena/store.py",
     "arena/uci.py",
-    "desktop/Program.cs"
+    "desktop/Program.cs",
+    "arena\\store.py"
   ],
   "Conflicting values for option ": [
     "arena/profile_import.py",
     "arena/store.py",
     "arena/uci.py",
-    "desktop/Program.cs"
+    "desktop/Program.cs",
+    "arena\\uci.py"
   ],
   "Engine Arena — 1.2.14": [
     "arena/profile_import.py",
     "arena/store.py",
     "arena/uci.py",
+    "desktop/Program.cs"
+  ],
+  "Engines and conditions": [
+    "ui/events.js"
+  ],
+  "Season and divisions": [
+    "ui/events.js"
+  ],
+  "Initial assignment": [
+    "ui/events.js"
+  ],
+  "Use the participant order below as your seed order. Strength divisions keep consecutive seeds together; balanced groups spread them across groups. No external rating is fetched.": [
+    "ui/events.js"
+  ],
+  "Balanced groups · spread listed seeds": [
+    "ui/events.js"
+  ],
+  "Strength divisions · consecutive listed seeds": [
+    "ui/events.js"
+  ],
+  "Season openings": [
+    "ui/events.js"
+  ],
+  "Opening selection between seasons": [
+    "ui/events.js"
+  ],
+  "Advance through shuffled opening pairs": [
+    "ui/events.js"
+  ],
+  "Reuse the source opening selection each season": [
+    "ui/events.js"
+  ],
+  "Advance uses the source seed and a saved shuffled sequence. Divisions share the season's sequence, each matchup receives a new opening pair, and the championship continues after the divisions. The next season continues after the final, including tiebreaks. Positions repeat only when the pool is exhausted. Unpaired division games use one position per game.": [
+    "ui/events.js"
+  ],
+  "Season championship": [
+    "ui/events.js"
+  ],
+  "Play a championship final each season": [
+    "ui/events.js",
+    "ui/seasons.js"
+  ],
+  "First versus second in the highest division. Division standings decide promotion and relegation; the final decides the season champion. Both winners are recorded separately.": [
+    "ui/events.js"
+  ],
+  "Championship games": [
+    "ui/events.js",
+    "arena\\leagues.py",
+    "ui/seasons.js"
+  ],
+  "The last listed control repeats until a winner. Tiebreaks add games to the scheduled minimum; there is no fixed maximum.": [
+    "ui/events.js"
+  ],
+  "Division scheduling": [
+    "ui/events.js"
+  ],
+  "Run divisions together · shared resource budget": [
+    "ui/events.js"
+  ],
+  "One division at a time": [
+    "ui/events.js"
+  ],
+  "Memory budget MB": [
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Maximum concurrent games": [
+    "ui/events.js",
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "These limits apply to the whole event, not separately to each division. Each stage also respects its source tournament limits. All divisions finish before the championship or next season starts. Pause & drain applies to the whole event.": [
+    "ui/events.js"
+  ],
+  "Games per matchup per season": [
+    "ui/events.js"
+  ],
+  "First-stage games per matchup": [
+    "ui/events.js"
+  ],
+  "Scheduled minimum; championship and KO tiebreaks can add games.": [
+    "ui/events.js"
+  ],
+  "Division / group games": [
+    "ui/events.js"
+  ],
+  "Regular-season winner": [
+    "ui/events.js",
+    "ui/seasons.js"
+  ],
+  "Championship final": [
+    "ui/events.js",
+    "arena\\events.py",
+    "ui/seasons.js",
+    "arena\\event_insights.py"
+  ],
+  "Season {0} · Champion": [
+    "ui/events.js"
+  ],
+  "A division paused. Review the event before resuming.": [
+    "arena\\events.py"
+  ],
+  "Division standings complete. Championship final is ready.": [
+    "arena\\events.py"
+  ],
+  "Completed championship has no match winner.": [
+    "arena\\events.py"
+  ],
+  "Choose how openings advance between seasons.": [
+    "arena\\leagues.py"
+  ],
+  "Choose whether to play a championship final.": [
+    "arena\\leagues.py"
+  ],
+  "Championship and tiebreak game counts must be even for color-reversed opening pairs.": [
+    "arena\\leagues.py"
+  ],
+  "Engine Arena — 1.3.0": [
+    "desktop\\Program.cs"
+  ],
+  "The opening pool is smaller than the planned sequence; positions will repeat.": [
+    "ui/events.js"
+  ],
+  "Opening positions needed before tiebreaks": [
+    "ui/events.js"
+  ],
+  "These limits apply to the whole event. Lowering a limit allows active games to finish before new games start.": [
+    "ui/events.js"
+  ],
+  "Shared resources require a current parallel event.": [
+    "ui/events.js",
+    "arena\\events.py"
+  ],
+  "Resources…": [
+    "ui/events.js"
+  ],
+  "Independent tournament queue": [
+    "ui/tournament-queue.js"
+  ],
+  "Source": [
+    "ui/tournament-queue.js"
+  ],
+  "Independent queue": [
+    "ui/tournament-queue.js"
+  ],
+  "All current tournaments": [
+    "ui/tournament-queue.js"
+  ],
+  "League stages appear below. Use the event controls for shared resources, pausing and season progression.": [
+    "ui/tournament-queue.js"
+  ],
+  "Event resources…": [
+    "ui/tournament-queue.js"
+  ],
+  "The event manages its own execution mode and shared budget.": [
+    "ui/tournament-queue.js"
+  ],
+  "No tournaments queued.": [
+    "ui/tournament-queue.js"
+  ],
+  "Not queued": [
+    "ui/tournament-queue.js"
+  ],
+  "Select tournament {0}": [
+    "ui/tournament-queue.js"
+  ],
+  "Use the event controls to pause or manage linked stages.": [
+    "ui/tournament-queue.js",
+    "arena/tournament_queue.py",
+    "arena\\tournament_queue.py"
+  ],
+  "Unknown tournament scope": [
+    "ui/tournament-queue.js",
+    "arena/tournament_queue.py",
+    "arena\\tournament_queue.py"
+  ],
+  "Engine Arena — 1.3.1": [
+    "desktop/Program.cs"
+  ],
+  "Game scheduling": [
+    "ui/events.js",
+    "ui/schedule-order.js",
+    "ui/seasons.js",
+    "arena\\tournament_report.py",
+    "ui/circuits.js"
+  ],
+  "Use source tournament scheduling": [
+    "ui/events.js"
+  ],
+  "Balanced round order": [
+    "ui/events.js",
+    "ui/schedule-order.js",
+    "ui/seasons.js"
+  ],
+  "Matchup order": [
+    "ui/events.js",
+    "ui/schedule-order.js",
+    "ui/seasons.js"
+  ],
+  "Scheduling seed": [
+    "ui/events.js",
+    "ui/schedule-order.js",
+    "ui/seasons.js",
+    "arena\\tournament_report.py",
+    "ui/circuits.js"
+  ],
+  "Launch order applies inside every stage. Balanced order spreads matchups without waiting for round-robin rounds to finish. Result-dependent stages still wait for their required results.": [
+    "ui/events.js"
+  ],
+  "Not applicable": [
+    "ui/events.js",
+    "arena\\tournament_report.py"
+  ],
+  "Recorded schedule order": [
+    "ui/schedule-order.js"
+  ],
+  "GAME SCHEDULING": [
+    "ui/schedule-order.js"
+  ],
+  "Controls which scheduled game starts next. It does not change opponents, openings, color reversal or resource limits.": [
+    "ui/schedule-order.js"
+  ],
+  "The same seed and tournament setup reproduce the same shuffled launch order. This is separate from the opening seed.": [
+    "ui/schedule-order.js"
+  ],
+  "Spread matchups across the field before repeating them. New games start as resources become free; round-robin rounds may overlap. Finished game counts can still differ.": [
+    "ui/schedule-order.js"
+  ],
+  "Play the scheduled repetitions of each matchup together, in participant order.": [
+    "ui/schedule-order.js"
+  ],
+  "Shuffle opening pairs, or individual unpaired games, without repeats. Both colors retain the same opening. Shuffle varies the order; it does not guarantee even participation.": [
+    "ui/schedule-order.js"
+  ],
+  "Keep the recorded scheduling behavior, including any ordering linked to the opening preset.": [
+    "ui/schedule-order.js"
+  ],
+  "Applies within each committed round or tiebreak stage. Later rounds still wait for the results needed to determine their pairings.": [
+    "ui/schedule-order.js"
+  ],
+  "SPRT keeps its recorded statistical sampling order. Shuffled launches can delay a stopping decision until earlier samples finish.": [
+    "ui/schedule-order.js"
+  ],
+  "Standalone tournaments and event stages use the same choices. A gauntlet or custom matchup list may require some engines to play more often.": [
+    "ui/schedule-order.js"
+  ],
+  "Unknown game scheduling order": [
+    "ui/schedule-order.js",
+    "arena/schedule_order.py",
+    "arena\\schedule_order.py"
+  ],
+  "Scheduling seed must be a whole number from 0 to 2147483647": [
+    "ui/schedule-order.js",
+    "arena/schedule_order.py",
+    "arena\\schedule_order.py"
+  ],
+  "Game Scheduling": [
+    "ui/schedule-order.js",
+    "arena/schedule_order.py"
+  ],
+  "Engine Arena — 1.3.2": [
+    "desktop/Program.cs",
+    "desktop\\Program.cs"
+  ],
+  "Create season competition…": [
+    "ui/seasons.js"
+  ],
+  "Season manager": [
+    "ui/seasons.js"
+  ],
+  "SEASON MANAGER": [
+    "ui/seasons.js"
+  ],
+  "Build a continuing championship": [
+    "ui/seasons.js"
+  ],
+  "Qualify your field, earn division places and carry the competition forward with a recorded history.": [
+    "ui/seasons.js"
+  ],
+  "1. Competition and engines": [
+    "ui/seasons.js"
+  ],
+  "Season preset": [
+    "ui/seasons.js"
+  ],
+  "Qualification → League": [
+    "ui/seasons.js"
+  ],
+  "Division League": [
+    "ui/seasons.js"
+  ],
+  "Progressive Championship": [
+    "ui/seasons.js"
+  ],
+  "The source provides engines and default conditions. Each stage stores its own settings and engine versions.": [
+    "ui/seasons.js"
+  ],
+  "2. Divisions and advancement": [
+    "ui/seasons.js"
+  ],
+  "Division sizes, highest first": [
+    "ui/seasons.js"
+  ],
+  "Sizes must total the field. Use zero movement to keep a boundary closed. Unequal division sizes are supported.": [
+    "ui/seasons.js"
+  ],
+  "Manual initial assignments": [
+    "ui/seasons.js"
+  ],
+  "Optional participant numbers, one division per line. Leave blank to use source order. Qualification overrides initial placement.": [
+    "ui/seasons.js"
+  ],
+  "More participants": [
+    "ui/seasons.js"
+  ],
+  "Ties affecting placement": [
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Play additional opening pairs": [
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Use standings tiebreaks": [
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Pairs per placement playoff": [
+    "ui/seasons.js"
+  ],
+  "3. Qualification and stage conditions": [
+    "ui/seasons.js"
+  ],
+  "Play qualification before Season 1": [
+    "ui/seasons.js"
+  ],
+  "Qualification pairs per matchup": [
+    "ui/seasons.js"
+  ],
+  "Each pair uses the same opening with colors reversed. Stage conditions can inherit the source or use another saved tournament's clocks, book and adjudication settings.": [
+    "ui/seasons.js"
+  ],
+  "4. Championship and updates": [
+    "ui/seasons.js"
+  ],
+  "Play all scheduled championship games": [
+    "ui/seasons.js"
+  ],
+  "Championship ties continue in complete opening pairs until a winner. If early stopping is enabled, finish the current pair before declaring the winner.": [
+    "ui/seasons.js"
+  ],
+  "Use a different tiebreak control": [
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Engine update windows": [
+    "ui/seasons.js"
+  ],
+  "Between seasons": [
+    "ui/seasons.js"
+  ],
+  "Between stages": [
+    "ui/seasons.js"
+  ],
+  "Freeze all versions": [
+    "ui/seasons.js"
+  ],
+  "Review before continuing": [
+    "ui/seasons.js",
+    "ui/circuits.js"
+  ],
+  "Continue automatically": [
+    "ui/seasons.js"
+  ],
+  "Updates apply only in a review window, never during an active stage. Automatic continuation keeps the approved versions.": [
+    "ui/seasons.js"
+  ],
+  "5. Shared resources and schedule": [
+    "ui/seasons.js"
+  ],
+  "All active stages share this budget. Dependent stages wait for qualification; independent divisions can run together.": [
+    "ui/seasons.js"
+  ],
+  "Scheduled minimum; playoffs and championship tiebreaks can add games.": [
+    "ui/seasons.js"
+  ],
+  "Qualification": [
+    "ui/seasons.js",
+    "arena\\seasons.py",
+    "ui/circuits.js"
+  ],
+  "Championship": [
+    "ui/seasons.js",
+    "arena\\seasons.py",
+    "ui/circuits.js"
+  ],
+  "Use source conditions": [
+    "ui/seasons.js"
+  ],
+  "Pairs per matchup": [
+    "ui/seasons.js",
+    "arena\\seasons.py"
+  ],
+  "games": [
+    "ui/seasons.js",
+    "ui/player.js",
+    "ui/circuits.js"
+  ],
+  "Fresh copy…": [
+    "ui/seasons.js"
+  ],
+  "Delete event…": [
+    "ui/seasons.js"
+  ],
+  "Name for the fresh competition": [
+    "ui/seasons.js"
+  ],
+  "Fresh": [
+    "ui/seasons.js"
+  ],
+  "Review roster…": [
+    "ui/seasons.js"
+  ],
+  "Divisions": [
+    "ui/seasons.js",
+    "arena\\event_insights.py"
+  ],
+  "Next season": [
+    "ui/seasons.js",
+    "arena\\event_insights.py"
+  ],
+  "Season roster review": [
+    "ui/seasons.js"
+  ],
+  "Review division places and engine versions before approving the next stage. Earlier results remain unchanged.": [
+    "ui/seasons.js"
+  ],
+  "Change a version or replace a withdrawn engine": [
+    "ui/seasons.js"
+  ],
+  "Choose an engine from the library. Test and save new versions in Engines first, using a separate installation folder.": [
+    "ui/seasons.js"
+  ],
+  "Participant number": [
+    "ui/seasons.js"
+  ],
+  "Change type": [
+    "ui/seasons.js"
+  ],
+  "Upgrade same engine": [
+    "ui/seasons.js"
+  ],
+  "New entrant replacing this engine": [
+    "ui/seasons.js"
+  ],
+  "Add a new entrant": [
+    "ui/seasons.js"
+  ],
+  "Division for new entrant": [
+    "ui/seasons.js"
+  ],
+  "Find engine": [
+    "ui/seasons.js",
+    "ui/tournament-extend.js"
+  ],
+  "Search": [
+    "ui/seasons.js"
+  ],
+  "Division assignments": [
+    "ui/seasons.js"
+  ],
+  "Use participant numbers, one division per line. Removing a participant withdraws it from the next season. Every remaining division needs at least two engines.": [
+    "ui/seasons.js"
+  ],
+  "Approve roster": [
+    "ui/seasons.js"
+  ],
+  "New entrant": [
+    "ui/seasons.js"
+  ],
+  "Choose an existing roster place.": [
+    "ui/seasons.js",
+    "arena\\seasons.py"
+  ],
+  "Select event": [
+    "ui/seasons.js"
+  ],
+  "Delete all events…": [
+    "ui/seasons.js"
+  ],
+  "Select events to delete.": [
+    "ui/seasons.js",
+    "arena\\event_deletion.py"
+  ],
+  "Delete event records": [
+    "ui/seasons.js"
+  ],
+  "Delete the selected events, all their stages and attempts, managed PGN records, and their records in recovery backups?": [
+    "ui/seasons.js"
+  ],
+  "Events": [
+    "ui/seasons.js"
+  ],
+  "Stages": [
+    "ui/seasons.js"
+  ],
+  "Records selected for deletion": [
+    "ui/seasons.js"
+  ],
+  "Engine installations, opening books, source tournaments, presets and independently exported files are kept.": [
+    "ui/seasons.js"
+  ],
+  "Pause and drain all games before deleting. Cleanup may take time and continues safely after a restart.": [
+    "ui/seasons.js"
+  ],
+  "Delete records and recover space": [
+    "ui/seasons.js"
+  ],
+  "Cleaning event records…": [
+    "ui/seasons.js"
+  ],
+  "Cleanup complete": [
+    "ui/seasons.js",
+    "ui/rating-center.js"
+  ],
+  "Space recovered": [
+    "ui/seasons.js"
+  ],
+  "Engine upgrades": [
+    "ui/seasons.js"
+  ],
+  "Previous version": [
+    "ui/seasons.js"
+  ],
+  "New version": [
+    "ui/seasons.js"
+  ],
+  "Season {0} — ": [
+    "arena\\events.py"
+  ],
+  "Review and approve the roster before running the next stage.": [
+    "arena\\events.py"
+  ],
+  "An event changed. Refresh the event list.": [
+    "arena\\event_deletion.py"
+  ],
+  "An event changed. Preview deletion again.": [
+    "arena\\event_deletion.py"
+  ],
+  "Pause and drain events before deleting records.": [
+    "arena\\event_deletion.py"
+  ],
+  "Event deletion could not be saved: ": [
+    "arena\\event_deletion.py"
+  ],
+  "Season ": [
+    "arena\\pgn_format.py",
+    "arena\\seasons.py"
+  ],
+  "Stop or pause and drain all tournaments and experiments before deleting records.": [
+    "arena\\runner.py"
+  ],
+  "Each division needs at least two engines.": [
+    "arena\\seasons.py"
+  ],
+  "Assign each selected engine to exactly one division.": [
+    "arena\\seasons.py"
+  ],
+  "Enter a nonnegative movement count for each division boundary.": [
+    "arena\\seasons.py"
+  ],
+  "Division sizes must total the participant count, with at least two engines per division.": [
+    "arena\\seasons.py"
+  ],
+  "Assign every participant once and match the selected division sizes.": [
+    "arena\\seasons.py"
+  ],
+  "Invalid season policy: ": [
+    "arena\\seasons.py"
+  ],
+  "Playoff pairs": [
+    "arena\\seasons.py"
+  ],
+  "Enter distinct division names, highest first.": [
+    "arena\\seasons.py"
+  ],
+  "Choose a qualifying format.": [
+    "arena\\seasons.py"
+  ],
+  "Qualification pairs": [
+    "arena\\seasons.py"
+  ],
+  "Swiss rounds cannot exceed the number of possible opponents.": [
+    "arena\\seasons.py"
+  ],
+  "Choose whether to play all championship games.": [
+    "arena\\seasons.py"
+  ],
+  "Unknown stage conditions.": [
+    "arena\\seasons.py"
+  ],
+  "Stage pairs per matchup": [
+    "arena\\seasons.py"
+  ],
+  "Placement playoff": [
+    "arena\\seasons.py",
+    "arena\\event_insights.py"
+  ],
+  "Review the season roster and approve the next stage.": [
+    "arena\\seasons.py"
+  ],
+  "Complete opening pairs; ": [
+    "arena\\seasons.py"
+  ],
+  "played boundary playoffs": [
+    "arena\\seasons.py"
+  ],
+  "configured standings tiebreaks, then recorded seed": [
+    "arena\\seasons.py"
+  ],
+  "Completed championship has no winner.": [
+    "arena\\seasons.py"
+  ],
+  "All scheduled seasons completed.": [
+    "arena\\seasons.py"
+  ],
+  "Roster changes require a scheduled review window.": [
+    "arena\\seasons.py"
+  ],
+  "Finish and drain the current stage before changing the roster.": [
+    "arena\\seasons.py"
+  ],
+  "Choose each roster place only once.": [
+    "arena\\seasons.py"
+  ],
+  "Choose an engine upgrade or a new entrant.": [
+    "arena\\seasons.py"
+  ],
+  "New entrants require a season boundary.": [
+    "arena\\seasons.py"
+  ],
+  "Choose a division for the new entrant.": [
+    "arena\\seasons.py"
+  ],
+  "Engine is not in the current roster.": [
+    "arena\\seasons.py"
+  ],
+  "Engine updates are not allowed in this window.": [
+    "arena\\seasons.py"
+  ],
+  "Select a registered engine version.": [
+    "arena\\seasons.py",
+    "arena\\server.py"
+  ],
+  "Install the updated engine in a separate version folder to preserve earlier games.": [
+    "arena\\seasons.py"
+  ],
+  "Division changes require a season boundary.": [
+    "arena\\seasons.py"
+  ],
+  "Keep the division count; create a fresh competition to change its structure.": [
+    "arena\\seasons.py"
+  ],
+  "Roster approved. Run event to continue.": [
+    "arena\\seasons.py"
+  ],
+  "Roster changes saved. Review before approving.": [
+    "arena\\seasons.py"
+  ],
+  "Later stages archived. Replay the corrected stage before continuing.": [
+    "arena\\seasons.py"
+  ],
+  "Finish the current season before adding another.": [
+    "arena\\seasons.py"
+  ],
+  "Confirm event deletion first.": [
+    "arena\\server.py"
+  ],
+  "No remaining game fits the resource budgets:": [
+    "arena\\store.py"
+  ],
+  "Engine upgrade": [
+    "ui/seasons.js"
+  ],
+  "The lowest division plays first. Promoted engines can climb through higher divisions in the same season.": [
+    "ui/seasons.js"
+  ],
+  "Independent divisions play together. Promotion and relegation determine the following season.": [
+    "ui/seasons.js"
+  ],
+  "Engine Arena — 1.4.0": [
+    "desktop/Program.cs",
+    "desktop\\Program.cs"
+  ],
+  "Select engine profiles first.": [
+    "ui/profile-bulk.js",
+    "arena\\profile_bulk.py"
+  ],
+  "Bulk engine settings": [
+    "ui/profile-bulk.js"
+  ],
+  "Only checked changes are applied. Preview shows unsupported options and values outside an engine’s range. Saved tournaments keep their recorded profiles.": [
+    "ui/profile-bulk.js"
+  ],
+  "Engine SyzygyPath": [
+    "ui/profile-bulk.js"
+  ],
+  "This configures engine probing only where SyzygyPath is advertised. GUI tablebase adjudication is a separate tournament setting.": [
+    "ui/profile-bulk.js"
+  ],
+  "These are each engine’s own move-book settings. A shared tournament opening file is configured in tournament setup.": [
+    "ui/profile-bulk.js"
+  ],
+  "Keep existing books": [
+    "ui/profile-bulk.js"
+  ],
+  "Maximum book plies (0 = unlimited)": [
+    "ui/profile-bulk.js"
+  ],
+  "Keep existing controls": [
+    "ui/profile-bulk.js"
+  ],
+  "Use tournament time control": [
+    "ui/profile-bulk.js"
+  ],
+  "Set a common profile control": [
+    "ui/profile-bulk.js"
+  ],
+  "Other UCI options": [
+    "ui/profile-bulk.js"
+  ],
+  "Use the engine’s advertised option name and value. Unsupported options are skipped. Ponder and chess variant are controlled by the tournament.": [
+    "ui/profile-bulk.js"
+  ],
+  "Add option": [
+    "ui/profile-bulk.js"
+  ],
+  "Changes": [
+    "ui/profile-bulk.js"
+  ],
+  "Skipped / warnings": [
+    "ui/profile-bulk.js"
+  ],
+  "{0} selected profiles": [
+    "ui/profile-bulk.js"
+  ],
+  "Preview changes": [
+    "ui/profile-bulk.js"
+  ],
+  "Apply reviewed changes": [
+    "ui/profile-bulk.js"
+  ],
+  "UCI option name": [
+    "ui/profile-bulk.js"
+  ],
+  "Enter an advertised UCI option name.": [
+    "ui/profile-bulk.js"
+  ],
+  "Each UCI option can appear only once.": [
+    "ui/profile-bulk.js"
+  ],
+  "{0} profiles will change; {1} unsupported or invalid settings skipped.": [
+    "ui/profile-bulk.js"
+  ],
+  "{0} engine profiles updated.": [
+    "ui/profile-bulk.js"
+  ],
+  "Editing saved setup": [
+    "ui/setup-workflow.js"
+  ],
+  "Unsaved setup restored": [
+    "ui/setup-workflow.js"
+  ],
+  "Draft saves automatically": [
+    "ui/setup-workflow.js"
+  ],
+  "Start fresh": [
+    "ui/setup-workflow.js"
+  ],
+  "Engine library…": [
+    "ui/setup-workflow.js"
+  ],
+  "Choose engines below without leaving tournament setup.": [
+    "ui/setup-workflow.js"
+  ],
+  "Engine selection & gauntlet roles": [
+    "ui/setup-workflow.js"
+  ],
+  "Choose participants, then mark candidates by name for a gauntlet. Candidates play the remaining opponents; candidates do not play each other.": [
+    "ui/setup-workflow.js"
+  ],
+  "Selected only": [
+    "ui/setup-workflow.js"
+  ],
+  "Use entire library": [
+    "ui/setup-workflow.js"
+  ],
+  "Play": [
+    "ui/setup-workflow.js",
+    "ui/player.js"
+  ],
+  "Candidate": [
+    "ui/setup-workflow.js"
+  ],
+  "Extra grace before a time forfeit, including fixed time per move. This is not engine Move Overhead. It does not add a clock to node-only games.": [
+    "ui/setup-workflow.js"
+  ],
+  "GUI adjudication only: the referee can end covered positions. This does not configure engines or produce engine TB hits. Set each engine’s SyzygyPath in Engine library or Bulk settings for engine probing. Missing table files leave the game playing normally.": [
+    "ui/setup-workflow.js"
+  ],
+  "Saving draft…": [
+    "ui/setup-workflow.js"
+  ],
+  "Draft saved — safe to close": [
+    "ui/setup-workflow.js"
+  ],
+  "Draft not saved: ": [
+    "ui/setup-workflow.js"
+  ],
+  "{0} candidates · {1} opponents": [
+    "ui/setup-workflow.js"
+  ],
+  "Select at least one supported bulk change.": [
+    "arena\\profile_bulk.py"
+  ],
+  "UCI options must be a name/value object.": [
+    "arena\\profile_bulk.py"
+  ],
+  "Ponder and variant are controlled by the tournament.": [
+    "arena\\profile_bulk.py"
+  ],
+  "Use the Threads and Hash fields for resource options.": [
+    "arena\\profile_bulk.py"
+  ],
+  "{0}: not advertised": [
+    "arena\\profile_bulk.py"
+  ],
+  "{0}: button options cannot be saved": [
+    "arena\\profile_bulk.py"
+  ],
+  "Use a positive whole number": [
+    "arena\\profile_bulk.py"
+  ],
+  "Use positive whole resource values.": [
+    "arena\\profile_bulk.py"
+  ],
+  "move_book: no existing book": [
+    "arena\\profile_bulk.py"
+  ],
+  "Invalid engine move book change.": [
+    "arena\\profile_bulk.py"
+  ],
+  "Profiles changed after preview. Review the changes again.": [
+    "arena\\profile_bulk.py",
+    "ui/profile-bulk.js",
+    "arena\\store.py"
+  ],
+  "The setup draft changed in another window. Reopen tournament setup before editing it.": [
+    "arena\\setup_draft.py"
+  ],
+  "Invalid tournament draft.": [
+    "arena\\setup_draft.py"
+  ],
+  "Choose named gauntlet candidates.": [
+    "arena\\setup_draft.py"
+  ],
+  "Choose at least one candidate and one opponent from the tournament participants.": [
+    "arena\\setup_draft.py"
+  ],
+  "Select all matching profiles": [
+    "ui/profile-bulk.js"
+  ],
+  "The saved preset changed or was removed. Review resource settings before saving.": [
+    "ui/setup-workflow.js"
+  ],
+  "Preview changes to selected engine profiles before applying them.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py",
+    "ui/help.js"
+  ],
+  "Use true or false for a checkbox option.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py",
+    "arena\\profile_bulk.py"
+  ],
+  "Use a whole number for a numeric option.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py",
+    "arena\\profile_bulk.py"
+  ],
+  "Engine Arena — 1.4.1": [
+    "desktop/Program.cs"
+  ],
+  "{0} profiles need option discovery.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py"
+  ],
+  "Imported profiles may not contain option definitions. Discover missing options while games are paused: one engine starts at a time, without searching. Saved option values are retained.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py"
+  ],
+  "Discover missing options": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py"
+  ],
+  "Stop after current engine": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py"
+  ],
+  "{0} profiles checked; {1} still need discovery.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py"
+  ],
+  "{0}: discover options first": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py",
+    "arena\\profile_bulk.py"
+  ],
+  "Pause and drain games before discovering engine options.": [
+    "ui/setup-workflow.js",
+    "ui/profile-bulk.js",
+    "arena/profile_bulk.py",
+    "arena/setup_draft.py",
+    "arena\\server.py"
+  ],
+  "All entrants": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Career totals are descriptive. Versions, opponents and time controls can differ; no combined Elo is inferred.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Champions": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Championship place": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "arena\\event_insights.py"
+  ],
+  "Championship race": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Championship seasons": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Climbs from initial seeding": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Competition history follows the entrant across approved engine upgrades.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Competition views": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Complete season tables": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Copy / save summary…": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Current event": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Current roster": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Detail": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Division & stage history": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Division leaders": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Division races": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "ui/circuits.js"
+  ],
+  "Engine career": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Engine careers": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Event official games": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Fingerprint": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Forum recap": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Historical entrant": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Latest 10 seasons": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Live places are provisional until advancement is recorded. Tied boundaries may need playoffs.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Next steps": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "No champion yet.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "No recorded movements yet.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "No stages have been created for this season yet.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Open a stage to follow play.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Open the stage for the complete table.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Place": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Promotion & relegation": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Provisional": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Recorded versions": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Retained": [
+    "ui/rating-center.js",
+    "arena\\event_insights.py"
+  ],
+  "Review a fixed snapshot, then copy a forum post or save a text file.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Rivalries": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Roster review": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "arena\\event_insights.py"
+  ],
+  "Scores are from this entrant’s perspective, across valid stages in this competition.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Season champion": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Season official games": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Season overview": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Season summary": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Seed changes describe this event, not a measured change in engine strength.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Stages & records": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Titles": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Version": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Choose a scheduled season.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "arena\\event_insights.py"
+  ],
+  "Choose an entrant from this competition.": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "arena\\event_insights.py"
+  ],
+  "Engine Arena — 1.4.2": [
+    "desktop/Program.cs"
+  ],
+  "Stage conditions": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "ui/circuits.js"
+  ],
+  "Per-engine controls": [
+    "ui/season-insights.js",
+    "arena/event_insights.py",
+    "ui/circuits.js"
+  ],
+  "Official failure results": [
+    "ui/season-insights.js",
+    "arena/event_insights.py"
+  ],
+  "Keep compact Rating Center evidence": [
+    "ui/rating-center.js",
+    "ui/app.js",
+    "ui/seasons.js"
+  ],
+  "plies": [
+    "ui/rating-center.js",
+    "ui/profile-bulk.js"
+  ],
+  "ENGINE ARENA / RATINGS": [
+    "ui/rating-center.js"
+  ],
+  "Strength across your testing history": [
+    "ui/rating-center.js"
+  ],
+  "One entry for each version and configuration. Compare thread counts together, with a separate rating for each time category.": [
+    "ui/rating-center.js"
+  ],
+  "Manage contributions…": [
+    "ui/rating-center.js"
+  ],
+  "Rating settings…": [
+    "ui/rating-center.js"
+  ],
+  "Rating list": [
+    "ui/rating-center.js"
+  ],
+  "Time category": [
+    "ui/rating-center.js"
+  ],
+  "Search engines": [
+    "ui/rating-center.js"
+  ],
+  "Name or configuration ID": [
+    "ui/rating-center.js"
+  ],
+  "Hardware": [
+    "ui/rating-center.js"
+  ],
+  "All recorded hardware": [
+    "ui/rating-center.js"
+  ],
+  "Failure results": [
+    "ui/rating-center.js"
+  ],
+  "Include official failures": [
+    "ui/rating-center.js"
+  ],
+  "Exclude engine failures": [
+    "ui/rating-center.js"
+  ],
+  "Reference anchor…": [
+    "ui/rating-center.js"
+  ],
+  "Text / forum…": [
+    "ui/rating-center.js"
+  ],
+  "Refresh while visible": [
+    "ui/rating-center.js"
+  ],
+  "How these ratings are calculated": [
+    "ui/rating-center.js"
+  ],
+  "Ratings compare configurations against their actual opponents. A 1-thread engine and a 32-thread engine are separate entries in the same rating list.": [
+    "ui/rating-center.js"
+  ],
+  "W–D–L includes official games. Paired estimates wait for both colors of an opening pair. Diagnostic games, byes, same-configuration self-play and superseded event stages are excluded.": [
+    "ui/rating-center.js"
+  ],
+  "Confidence intervals and LOS are approximate, conditional on the fixed reference. LOS compares an entry with the named reference, not with the next entry. Provisional predecessor ratings never supply measured games or confidence.": [
+    "ui/rating-center.js"
+  ],
+  "Time categories use a nominal 60-move allocation, including increments or delays. Nodes, depth, time-per-move and unequal clock handicaps have separate categories. Hardware is recorded, not normalized; use filters or separate lists for controlled comparisons.": [
+    "ui/rating-center.js"
+  ],
+  "Only compact result evidence is stored here. No duplicate PGNs, move logs or engine search output. Existing tournaments enter only when you import their history.": [
+    "ui/rating-center.js"
+  ],
+  "Importing includes current official results and future replacements. Removing a contribution leaves its tournament untouched. Deleted tournaments can retain compact rating evidence.": [
+    "ui/rating-center.js"
+  ],
+  "Search tournaments": [
+    "ui/rating-center.js"
+  ],
+  "Import this page": [
+    "ui/rating-center.js"
+  ],
+  "Stop importing": [
+    "ui/rating-center.js"
+  ],
+  "Tournament / stage": [
+    "ui/rating-center.js"
+  ],
+  "Games in list": [
+    "ui/rating-center.js"
+  ],
+  "Collection": [
+    "ui/rating-center.js"
+  ],
+  "This removes compact rating evidence and cleans its recovery copies. Original tournaments and game attempts are preserved. Pause and drain games first.": [
+    "ui/rating-center.js"
+  ],
+  "A reset does not automatically reimport old games. You can explicitly import selected history afterward.": [
+    "ui/rating-center.js"
+  ],
+  "Confirm removal": [
+    "ui/rating-center.js"
+  ],
+  "Each list has independent results, categories and anchors. Use separate lists for different test environments, or filter the recorded hardware in one list.": [
+    "ui/rating-center.js"
+  ],
+  "Collect newly played official games": [
+    "ui/rating-center.js"
+  ],
+  "Bullet below (seconds)": [
+    "ui/rating-center.js"
+  ],
+  "Blitz through (seconds)": [
+    "ui/rating-center.js"
+  ],
+  "Classical from (seconds)": [
+    "ui/rating-center.js"
+  ],
+  "Action / Rapid fills the gap between Blitz and Classical. Boundaries use nominal 60-move time. Reset a nonempty list before changing boundaries, then import history under the new rules.": [
+    "ui/rating-center.js"
+  ],
+  "Save settings": [
+    "ui/rating-center.js",
+    "ui/pgn-output.js",
+    "ui/player-sound.js",
+    "ui/player.js"
+  ],
+  "Reset selected category…": [
+    "ui/rating-center.js"
+  ],
+  "Reset this rating list…": [
+    "ui/rating-center.js"
+  ],
+  "New rating list name": [
+    "ui/rating-center.js"
+  ],
+  "Create empty list": [
+    "ui/rating-center.js"
+  ],
+  "Delete rating list…": [
+    "ui/rating-center.js"
+  ],
+  "Choose an exact engine version and thread configuration. Its supplied rating is fixed; other ratings and uncertainty are relative to it. Upgrading an engine never moves this anchor automatically.": [
+    "ui/rating-center.js"
+  ],
+  "Reference configuration": [
+    "ui/rating-center.js"
+  ],
+  "Reference rating": [
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
+  ],
+  "Search returns up to 50 matches. Clear the user anchor to return to the internal scale.": [
+    "ui/rating-center.js"
+  ],
+  "Use internal reference": [
+    "ui/rating-center.js"
+  ],
+  "Save anchor": [
+    "ui/rating-center.js"
+  ],
+  "Rating history": [
+    "ui/rating-center.js"
+  ],
+  "Cumulative current official results through each stage end. Later replacements revise history.": [
+    "ui/rating-center.js"
+  ],
+  "Version continuity": [
+    "ui/rating-center.js"
+  ],
+  "Use an older version as a provisional reference. Its games and confidence never transfer. Choose a predecessor with the same thread count.": [
+    "ui/rating-center.js"
+  ],
+  "Search predecessor": [
+    "ui/rating-center.js"
+  ],
+  "Predecessor": [
+    "ui/rating-center.js"
+  ],
+  "Save version link": [
+    "ui/rating-center.js"
+  ],
+  "Recorded configuration": [
+    "ui/rating-center.js"
+  ],
+  "Remove this entry’s rating records…": [
+    "ui/rating-center.js"
+  ],
+  "Rating Center": [
+    "ui/rating-center.js"
+  ],
+  "Hardware unrecorded": [
+    "ui/rating-center.js"
+  ],
+  "Filtered competition or conditions": [
+    "ui/rating-center.js"
+  ],
+  "Show full rating list": [
+    "ui/rating-center.js"
+  ],
+  "Rated configurations": [
+    "ui/rating-center.js"
+  ],
+  "Games in rating samples": [
+    "ui/rating-center.js"
+  ],
+  "Each category has an independent scale and reference; there is no combined all-time-control Elo.": [
+    "ui/rating-center.js"
+  ],
+  "Predecessor reference": [
+    "ui/rating-center.js"
+  ],
+  "not measured evidence": [
+    "ui/rating-center.js"
+  ],
+  "No rating evidence in this view yet": [
+    "ui/rating-center.js"
+  ],
+  "New results are collected automatically when enabled. Import existing tournament history through Manage contributions, or choose another category.": [
+    "ui/rating-center.js"
+  ],
+  "Updated": [
+    "ui/rating-center.js"
+  ],
+  "Rating contributions": [
+    "ui/rating-center.js"
+  ],
+  "Import / refresh": [
+    "ui/rating-center.js"
+  ],
+  "Remove contribution…": [
+    "ui/rating-center.js"
+  ],
+  "Remove this tournament’s rating contribution?": [
+    "ui/rating-center.js"
+  ],
+  "games imported": [
+    "ui/rating-center.js"
+  ],
+  "Cleaning recovery records…": [
+    "ui/rating-center.js"
+  ],
+  "Rating settings": [
+    "ui/rating-center.js"
+  ],
+  "Settings saved": [
+    "ui/rating-center.js"
+  ],
+  "Reset selected rating category?": [
+    "ui/rating-center.js"
+  ],
+  "Reset all categories in this rating list?": [
+    "ui/rating-center.js"
+  ],
+  "Delete this rating list?": [
+    "ui/rating-center.js"
+  ],
+  "Rating reference anchor": [
+    "ui/rating-center.js"
+  ],
+  "Choose a reference and enter its rating": [
+    "ui/rating-center.js"
+  ],
+  "Version link saved": [
+    "ui/rating-center.js"
+  ],
+  "Remove this entry’s rating evidence?": [
+    "ui/rating-center.js"
+  ],
+  "Event rating history": [
+    "ui/rating-center.js"
+  ],
+  "Exact conditions": [
+    "ui/rating-center.js"
+  ],
+  "All recorded conditions": [
+    "ui/rating-center.js"
+  ],
+  "Excluded configurations…": [
+    "ui/rating-center.js"
+  ],
+  "Choose a category to view its rating history.": [
+    "ui/rating-center.js"
+  ],
+  "Excluded configurations": [
+    "ui/rating-center.js"
+  ],
+  "Restore collection for an excluded configuration. Previously removed results return only after an explicit history import.": [
+    "ui/rating-center.js"
+  ],
+  "Restore collection": [
+    "ui/rating-center.js"
+  ],
+  "No excluded configurations": [
+    "ui/rating-center.js"
+  ],
+  "Bullet": [
+    "ui/rating-center.js"
+  ],
+  "Blitz": [
+    "ui/rating-center.js"
+  ],
+  "Action / Rapid": [
+    "ui/rating-center.js"
+  ],
+  "Classical": [
+    "ui/rating-center.js"
+  ],
+  "Clock handicaps": [
+    "ui/rating-center.js"
+  ],
+  "All categories": [
+    "ui/rating-center.js"
+  ],
+  "Opponents": [
+    "ui/rating-center.js"
+  ],
+  "User-defined anchor": [
+    "ui/rating-center.js"
+  ],
+  "Internal scale, not an external rating": [
+    "ui/rating-center.js"
+  ],
+  "Automatic collection enabled": [
+    "ui/rating-center.js"
+  ],
+  "Automatic collection paused": [
+    "ui/rating-center.js"
+  ],
+  "Excluded": [
+    "ui/rating-center.js"
+  ],
+  "Included": [
+    "ui/rating-center.js"
+  ],
+  "Not imported": [
+    "ui/rating-center.js"
+  ],
+  "Engine Arena — 1.5.0": [
+    "desktop/Program.cs"
+  ],
+  "GPU configuration": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "GPU hardware": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "GPU unverified": [
+    "ui/rating-center.js",
+    "arena/rating_center.py",
+    "arena\\rating_compute.py"
+  ],
+  "Computing backend": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Network fingerprint": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "CPU support threads": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Unverified": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "CPU and GPU configurations share one rating list, with separate ratings for each time category.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Ratings compare configurations against their actual opponents. CPU threads, GPU model and count, backend, and network distinguish entries. Hardware speed is not normalized.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Choose an exact CPU or GPU configuration. Its supplied rating stays fixed. Engine, network, or hardware upgrades never move the anchor automatically.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Use a compatible older configuration as a provisional reference. CPU threads must match; GPU entries also require matching verified hardware and backend. Games and confidence never transfer.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "GPU model and count come from recorded engine evidence. CPU support threads remain part of the configuration.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "GPU selection could not be verified. These results are kept separate from identified GPU configurations.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Legacy GPU results keep their original grouping. Reimport available tournament history to rebuild identities from saved evidence.": [
+    "ui/rating-center.js",
+    "arena/rating_center.py"
+  ],
+  "Choose a predecessor with matching CPU threads or verified GPU hardware and backend": [
+    "ui/rating-center.js",
+    "arena/rating_center.py",
+    "arena\\rating_center.py"
+  ],
+  "Engine Arena — 1.5.1": [
+    "desktop/Program.cs"
+  ],
+  "Search by name or browse all pages. The selected reference stays available while you browse.": [
+    "ui/rating-center.js"
+  ],
+  "Rank": [
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
+  ],
+  "Rank follows Elo within this category and filters; sorting or searching does not change it.": [
+    "ui/rating-center.js"
+  ],
+  "Each time category has its own rating rank.": [
+    "ui/rating-center.js"
+  ],
+  "Engine Arena — 1.5.2": [
+    "desktop/Program.cs"
+  ],
+  "Kept by default: already-collected results remain available for future ratings. Moves, PGNs and engine logs are deleted. Uncheck to also remove rating history.": [
+    "ui/app.js",
+    "ui/seasons.js"
+  ],
+  "Engine Arena — 1.5.11": [
+    "desktop/Program.cs"
+  ],
+  "Knight direction": [
+    "ui/board3d-ui.js"
+  ],
+  "Toward the king": [
+    "ui/board3d-ui.js"
+  ],
+  "Away from the king": [
+    "ui/board3d-ui.js"
+  ],
+  "Forward": [
+    "ui/board3d-ui.js"
+  ],
+  "Backward": [
+    "ui/board3d-ui.js"
+  ],
+  "Left": [
+    "ui/board3d-ui.js"
+  ],
+  "Right": [
+    "ui/board3d-ui.js"
+  ],
+  "Choose how the 3D knights face. Left and right are from each player's side.": [
+    "ui/board3d-ui.js"
+  ],
+  "Toward or away from the king uses each knight's starting side and stays fixed as it moves. Promoted knights and positions without verified starting history face forward.": [
+    "ui/board3d-ui.js"
+  ],
+  "Beginning": [
+    "ui/game-moves.js"
+  ],
+  "Browsing history": [
+    "ui/game-moves.js"
+  ],
+  "Showing moves {0}–{1}": [
+    "ui/game-moves.js"
+  ],
+  "Show the opening and earliest recorded moves. Home also returns to the beginning.": [
+    "ui/game-moves.js"
+  ],
+  "Scroll up for earlier moves and down for later moves. Your reading position stays in place while games continue.": [
+    "ui/game-moves.js"
+  ],
+  "Choose a valid standings page.": [
+    "arena/event_insights.py",
+    "arena\\event_insights.py"
+  ],
+  "Automatic PGN file": [
+    "ui/pgn-output.js",
+    "desktop\\Program.cs"
+  ],
+  "Save official games automatically to my file": [
+    "ui/pgn-output.js"
+  ],
+  "Combine tournaments in one PGN. Completed official games are added automatically; replacement results update the existing game. Diagnostic and interrupted attempts stay in the internal history.": [
+    "ui/pgn-output.js"
+  ],
+  "Saved destinations": [
+    "ui/pgn-output.js"
+  ],
+  "Choose a file…": [
+    "ui/pgn-output.js"
+  ],
+  "File mode": [
+    "ui/pgn-output.js"
+  ],
+  "New file never overwrites an existing PGN. Append / continue keeps existing games and shares the file with other selected tournaments.": [
+    "ui/pgn-output.js"
+  ],
+  "New file": [
+    "ui/pgn-output.js"
+  ],
+  "Append / continue": [
+    "ui/pgn-output.js"
+  ],
+  "PGN file": [
+    "ui/pgn-output.js"
+  ],
+  "C:\\Chess\\PGN\\my-rating-list.pgn": [
+    "ui/pgn-output.js"
+  ],
+  "Remember this destination for new tournaments": [
+    "ui/pgn-output.js"
+  ],
+  "Keep the .arena-pgn.sqlite3 export index beside your PGN for safe continuation. Copy just the PGN when sharing. Existing games without GameId tags are preserved, but cannot be matched to saved tournament games.": [
+    "ui/pgn-output.js"
+  ],
+  "{0} tracked games · {1} waiting": [
+    "ui/pgn-output.js"
+  ],
+  "Previously completed official games will also be included.": [
+    "ui/pgn-output.js"
+  ],
+  "Automatic PGN settings saved.": [
+    "ui/pgn-output.js"
+  ],
+  "Choose a PGN file that receives official results automatically, including across multiple tournaments.": [
+    "ui/pgn-output.js"
+  ],
+  "Automatic PGN…": [
+    "ui/pgn-output.js"
+  ],
+  "Automatic PGN files": [
+    "ui/pgn-output.js"
+  ],
+  "Automatic PGN needs attention. Results remain saved in the tournament database.": [
+    "ui/pgn-output.js"
+  ],
+  "This PGN file already uses another preset. Select its existing preset or a new file.": [
+    "arena\\pgn_output.py"
+  ],
+  "The PGN file is shorter than its saved export index.": [
+    "arena\\pgn_output.py"
+  ],
+  "That PGN file already exists. Choose Append / continue or a new filename.": [
+    "arena\\pgn_output.py"
+  ],
+  "This PGN file belongs to another Engine Arena data folder. Choose a different file.": [
+    "arena\\pgn_output.py"
+  ],
+  "The existing PGN has unrecognized or incomplete text. Use a new filename.": [
+    "arena\\pgn_output.py"
+  ],
+  "The existing PGN contains an incomplete or invalid game. Use a new filename.": [
+    "arena\\pgn_output.py"
+  ],
+  "The existing PGN has duplicate GameId records. Export current official results or use a new filename.": [
+    "arena\\pgn_output.py"
+  ],
+  "The PGN file changed while it was being connected. Try again when its other writer is stopped.": [
+    "arena\\pgn_output.py"
+  ],
+  "The PGN file was changed outside Engine Arena. Saving is paused; choose a new file or restore the matching PGN and export index.": [
+    "arena\\pgn_output.py"
+  ],
+  "PGN recovery found an altered committed prefix.": [
+    "arena\\pgn_output.py"
+  ],
+  "PGN recovery found an unexpected file tail.": [
+    "arena\\pgn_output.py"
+  ],
+  "PGN recovery found extra external games. The file was left unchanged.": [
+    "arena\\pgn_output.py"
+  ],
+  "PGN recovery found an externally changed file. The file was left unchanged.": [
+    "arena\\pgn_output.py"
+  ],
+  "Choose an absolute path ending in .pgn.": [
+    "arena\\pgn_output.py"
+  ],
+  "Choose a PGN output folder outside Engine Arena’s managed data folder.": [
+    "arena\\pgn_output.py"
+  ],
+  "The PGN output folder does not exist.": [
+    "arena\\pgn_output.py"
+  ],
+  "Choose a PGN preset and file mode.": [
+    "arena\\pgn_output.py"
+  ],
+  "Automatic PGN saving needs attention before deleting records: ": [
+    "arena\\pgn_output.py"
+  ],
+  "Automatic PGN · needs attention": [
+    "ui/pgn-output.js"
+  ],
+  "Setting & lighting": [
+    "ui/board3d-presentation.js"
+  ],
+  "Brightness (%)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Warmth (−100 to 100)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Move highlight (%)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Motion & performance": [
+    "ui/board3d-presentation.js"
+  ],
+  "Reduced-motion preferences disable movement. GPU engines share graphics resources with the display.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Table details": [
+    "ui/board3d-presentation.js"
+  ],
+  "Trays show recorded captures only; pieces absent from a custom starting position are not counted.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Camera views": [
+    "ui/board3d-presentation.js"
+  ],
+  "Saved camera": [
+    "ui/board3d-presentation.js"
+  ],
+  "View {0}": [
+    "ui/board3d-presentation.js"
+  ],
+  "Save current view": [
+    "ui/board3d-presentation.js"
+  ],
+  "Load view": [
+    "ui/board3d-presentation.js"
+  ],
+  "View saved. Apply to keep changes.": [
+    "ui/board3d-presentation.js"
+  ],
+  "This view has not been saved yet.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Open a game in 3D before taking a photo.": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Board photo": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Camera view": [
+    "ui/board3d-presentation.js"
+  ],
+  "Current view": [
+    "ui/board3d-presentation.js"
+  ],
+  "White’s seat": [
+    "ui/board3d-presentation.js"
+  ],
+  "Black’s seat": [
+    "ui/board3d-presentation.js"
+  ],
+  "Overhead": [
+    "ui/board3d-presentation.js"
+  ],
+  "Broadcast": [
+    "ui/board3d-presentation.js"
+  ],
+  "Background blur": [
+    "ui/board3d-presentation.js"
+  ],
+  "Subtle": [
+    "ui/board3d-presentation.js"
+  ],
+  "Soft": [
+    "ui/board3d-presentation.js"
+  ],
+  "A frozen board position, with no controls in the picture. Export size: 3840 × 2160 PNG.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Save 4K PNG…": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Rendering 4K image…": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Image saved.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Save canceled.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Image ready for download.": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Photo…": [
+    "ui/board3d-presentation.js",
+    "ui/player.js"
+  ],
+  "Export the focused 3D board as a 4K picture.": [
+    "ui/board3d-presentation.js"
+  ],
+  "4K export is unavailable on this graphics device.": [
+    "ui/board3d-photo.js"
+  ],
+  "Environment": [
+    "ui/board3d-presentation.js"
+  ],
+  "Chess club": [
+    "ui/board3d-presentation.js"
+  ],
+  "Championship hall": [
+    "ui/board3d-presentation.js"
+  ],
+  "Daylight study": [
+    "ui/board3d-presentation.js"
+  ],
+  "Table surface": [
+    "ui/board3d-presentation.js"
+  ],
+  "Green felt": [
+    "ui/board3d-presentation.js"
+  ],
+  "Leather": [
+    "ui/board3d-presentation.js"
+  ],
+  "Lighting": [
+    "ui/board3d-presentation.js"
+  ],
+  "Warm evening": [
+    "ui/board3d-presentation.js"
+  ],
+  "Viewing mode": [
+    "ui/board3d-presentation.js"
+  ],
+  "Testing · render when needed": [
+    "ui/board3d-presentation.js"
+  ],
+  "Presentation · camera tour": [
+    "ui/board3d-presentation.js"
+  ],
+  "Piece movement": [
+    "ui/board3d-presentation.js"
+  ],
+  "Instant": [
+    "ui/board3d-presentation.js"
+  ],
+  "Quick": [
+    "ui/board3d-presentation.js"
+  ],
+  "Smooth": [
+    "ui/board3d-presentation.js"
+  ],
+  "Camera tour": [
+    "ui/board3d-presentation.js"
+  ],
+  "Slow orbit": [
+    "ui/board3d-presentation.js"
+  ],
+  "Saved views": [
+    "ui/board3d-presentation.js"
+  ],
+  "Animation limit": [
+    "ui/board3d-presentation.js"
+  ],
+  "Graphics quality": [
+    "ui/board3d-presentation.js"
+  ],
+  "Economy": [
+    "ui/board3d-presentation.js"
+  ],
+  "Balanced": [
+    "ui/board3d-presentation.js"
+  ],
+  "Captured-piece trays": [
+    "ui/board3d-presentation.js"
+  ],
+  "Engine nameplates": [
+    "ui/board3d-presentation.js"
+  ],
+  "Engine Arena plaque": [
+    "ui/board3d-presentation.js"
+  ],
+  "Board photo preview": [
+    "ui/board3d-presentation.js"
+  ],
+  "Choose the surroundings for your board.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Choose the table surface.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Soft lighting presets preserve the carved details.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Testing keeps the camera still. Presentation moves it continuously while visible.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Animate only consecutive moves. Switching games and jumping through history stays instant.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Dragging, scrolling or using camera keys stops the tour.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Limit animation work. Hidden boards stop rendering.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Higher quality uses more graphics resources.": [
+    "ui/board3d-presentation.js"
+  ],
+  "15 FPS": [
+    "ui/board3d-presentation.js"
+  ],
+  "30 FPS": [
+    "ui/board3d-presentation.js"
+  ],
+  "60 FPS": [
+    "ui/board3d-presentation.js"
+  ],
+  "Cinematic tour": [
+    "ui/board3d-presentation.js"
+  ],
+  "Tour speed (%)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Natural wood": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room assets could not load. The board remains available.": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js",
+    "ui/player-board.js",
+    "ui/player.js"
+  ],
+  "Room view": [
+    "ui/board3d-presentation.js"
+  ],
+  "Piece close-up": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room rotation (degrees)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Board design": [
+    "ui/board3d-presentation.js"
+  ],
+  "Original Engine Arena": [
+    "ui/board3d-presentation.js"
+  ],
+  "Walnut & maple · Drueke": [
+    "ui/board3d-presentation.js"
+  ],
+  "Purpleheart & maple · Jaques": [
+    "ui/board3d-presentation.js"
+  ],
+  "Board coordinates": [
+    "ui/board3d-presentation.js"
+  ],
+  "Choose the board independently of the room and table. The two wood reproductions follow the reference boards with 2.5-inch squares.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Photo folder": [
+    "ui/board3d-presentation.js",
+    "desktop\\Program.cs"
+  ],
+  "Choose folder…": [
+    "ui/board3d-presentation.js"
+  ],
+  "Your browser controls the download folder. Use the desktop app to remember a photo folder.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Empty square": [
+    "ui/player-board.js"
+  ],
+  "Player chessboard. Click or drag pieces. Right-drag to turn the camera.": [
+    "ui/player-board.js"
+  ],
+  "Sound…": [
+    "ui/player-sound.js"
+  ],
+  "Optional sounds for new moves on the visible focus board. Independent of Player Arena.": [
+    "ui/player-sound.js"
+  ],
+  "Focus board sound": [
+    "ui/player-sound.js"
+  ],
+  "Sound effects": [
+    "ui/player-sound.js",
+    "ui/player.js"
+  ],
+  "Volume": [
+    "ui/player-sound.js",
+    "ui/player.js"
+  ],
+  "Only newly played moves on the visible focus board produce sound. Browsing saved moves, switching games and hidden boards stay quiet.": [
+    "ui/player-sound.js"
+  ],
+  "Test sound": [
+    "ui/player-sound.js"
+  ],
+  "Player Arena": [
+    "ui/player.js",
+    "arena\\player_pgn.py",
+    "arena\\player_store.py"
+  ],
+  "PLAYER ARENA": [
+    "ui/player.js"
+  ],
+  "Your seat at the board": [
+    "ui/player.js"
+  ],
+  "Play your engines. Build your game.": [
+    "ui/player.js"
+  ],
+  "New game / series…": [
+    "ui/player.js"
+  ],
+  "Player settings…": [
+    "ui/player.js"
+  ],
+  "3D board": [
+    "ui/board3d-ui.js",
+    "ui/player.js"
+  ],
+  "Flip only the Player Arena board.": [
+    "ui/player.js"
+  ],
+  "Appearance…": [
+    "ui/player.js"
+  ],
+  "Camera controls": [
+    "ui/player.js"
+  ],
+  "Sound on": [
+    "ui/player.js"
+  ],
+  "Right-drag to orbit; Shift + right-drag to raise the board. Scroll to zoom.": [
+    "ui/player.js"
+  ],
+  "Choose an opponent to begin.": [
+    "ui/player.js"
+  ],
+  "Resign…": [
+    "ui/player.js"
+  ],
+  "Offer draw": [
+    "ui/player.js"
+  ],
+  "Claim draw": [
+    "ui/player.js"
+  ],
+  "A hint makes this game casual and excludes it from your personal rating.": [
+    "ui/player.js"
+  ],
+  "Hint": [
+    "ui/player.js"
+  ],
+  "Undo your last turn in a casual game. Original moves remain in the saved history.": [
+    "ui/player.js"
+  ],
+  "Take back": [
+    "ui/player.js"
+  ],
+  "Abandon…": [
+    "ui/player.js"
+  ],
+  "First position": [
+    "ui/player.js"
+  ],
+  "Live board": [
+    "ui/player.js"
+  ],
+  "Move (UCI)": [
+    "ui/player.js"
+  ],
+  "e2e4": [
+    "ui/player.js"
+  ],
+  "Enter move, for example e2e4": [
+    "ui/player.js"
+  ],
+  "Engine thinking": [
+    "ui/player.js"
+  ],
+  "Show analysis": [
+    "ui/player.js"
+  ],
+  "Optional analysis and hints make a game casual. Evaluations favor White.": [
+    "ui/player.js"
+  ],
+  "Best-move changes": [
+    "ui/player.js"
+  ],
+  "Engine output": [
+    "ui/player.js"
+  ],
+  "Personal ratings": [
+    "ui/player.js"
+  ],
+  "Local practice Elo, separate from Rating Center. Starts at 1500; K = 32. Opponent ratings are assigned estimates, not verified playing strength. First 20 games are provisional.": [
+    "ui/player.js"
+  ],
+  "Challenge series": [
+    "ui/player.js"
+  ],
+  "A human gauntlet: play each opponent, alternating colors each cycle. Start the next game when you are ready.": [
+    "ui/player.js"
+  ],
+  "Saved games": [
+    "ui/player.js"
+  ],
+  "Export all games…": [
+    "ui/player.js"
+  ],
+  "Return to current game": [
+    "ui/player.js"
+  ],
+  "Player": [
+    "ui/player.js"
+  ],
+  "Older": [
+    "ui/player.js"
+  ],
+  "Newer": [
+    "ui/player.js"
+  ],
+  "PLAY / LEARN / COMPETE": [
+    "ui/player.js"
+  ],
+  "Category": [
+    "ui/player.js",
+    "arena\\rating_center_report.py"
+  ],
+  "Your first rated result starts a personal rating.": [
+    "ui/player.js"
+  ],
+  "Review": [
+    "ui/player.js"
+  ],
+  "PGN…": [
+    "ui/player.js"
+  ],
+  "No games yet.": [
+    "ui/player.js"
+  ],
+  "Play next game": [
+    "ui/player.js"
+  ],
+  "Export series PGN…": [
+    "ui/player.js"
+  ],
+  "Create a match or challenge series from New game / series.": [
+    "ui/player.js"
+  ],
+  "Untimed practice": [
+    "ui/player.js"
+  ],
+  "Choose an engine from your library": [
+    "ui/player.js"
+  ],
+  "Your seat is ready": [
+    "ui/player.js"
+  ],
+  "Waiting for engine search…": [
+    "ui/player.js"
+  ],
+  "Choose promotion": [
+    "ui/player.js"
+  ],
+  "Player settings": [
+    "ui/player.js"
+  ],
+  "Player name": [
+    "ui/player.js"
+  ],
+  "Show legal destinations": [
+    "ui/player.js"
+  ],
+  "Promote to queen automatically": [
+    "ui/player.js"
+  ],
+  "Automatic PGN saving": [
+    "ui/player.js"
+  ],
+  "Every game is saved in the PlayerArena folder in your data directory. Completed games have their own PGNs; unfinished positions are kept separately. Your database also retains takebacks and session history.": [
+    "ui/player.js"
+  ],
+  "Additional PGN folder": [
+    "ui/player.js"
+  ],
+  "Optional additional folder": [
+    "ui/player.js"
+  ],
+  "One file per game prevents duplicate appends after a restart. Your most recently remembered Player PGN export choices apply to this additional folder.": [
+    "ui/player.js"
+  ],
+  "Retry PGN saving": [
+    "ui/player.js"
+  ],
+  "Reset personal ratings": [
+    "ui/player.js"
+  ],
+  "Resets ratings for the player name above. Saved games remain, and old results are not counted again.": [
+    "ui/player.js"
+  ],
+  "Reset ratings…": [
+    "ui/player.js"
+  ],
+  "PGN files saved.": [
+    "ui/player.js"
+  ],
+  "Reset this player’s ratings to the initial 1500 for future games? Saved games remain.": [
+    "ui/player.js"
+  ],
+  "Reset ratings": [
+    "ui/player.js"
+  ],
+  "New game / challenge series": [
+    "ui/player.js"
+  ],
+  "Play mode": [
+    "ui/player.js"
+  ],
+  "Single game": [
+    "ui/player.js"
+  ],
+  "Match / challenge series": [
+    "ui/player.js"
+  ],
+  "Play as": [
+    "ui/player.js"
+  ],
+  "Random": [
+    "ui/player.js"
+  ],
+  "Rated game": [
+    "ui/player.js"
+  ],
+  "Personal ratings use your assigned opponent estimate. They are not official federation ratings. Pausing, recovery, hints or visible analysis make a game casual.": [
+    "ui/player.js"
+  ],
+  "Choose opponents": [
+    "ui/player.js"
+  ],
+  "Search your installed engines": [
+    "ui/player.js"
+  ],
+  "Series name": [
+    "ui/player.js"
+  ],
+  "Games per engine": [
+    "ui/player.js",
+    "arena\\player_store.py"
+  ],
+  "Time preset": [
+    "ui/player.js"
+  ],
+  "Your clock": [
+    "ui/player.js"
+  ],
+  "Engine uses the same time control": [
+    "ui/player.js"
+  ],
+  "Engine limit": [
+    "ui/player.js"
+  ],
+  "Engine resources, strength and draw offers": [
+    "ui/player.js"
+  ],
+  "Engine strength limit": [
+    "ui/player.js"
+  ],
+  "Use saved engine options": [
+    "ui/player.js"
+  ],
+  "Draw offers": [
+    "ui/player.js"
+  ],
+  "Accept balanced positions": [
+    "ui/player.js"
+  ],
+  "Never accept offers": [
+    "ui/player.js"
+  ],
+  "Always accept (casual)": [
+    "ui/player.js"
+  ],
+  "Strength limiting requires UCI_Elo and UCI_LimitStrength. Other strength settings come from the saved engine profile. Ponder is off. Thread, memory and GPU use shares the testing resource budget.": [
+    "ui/player.js"
+  ],
+  "UCI has no draw-offer command. Player Arena accepts a balanced offer only after the minimum move number and a depth-8 or deeper, exact evaluation inside the selected range. Otherwise play continues. Legal draw claims are always available when the rules permit.": [
+    "ui/player.js"
+  ],
+  "Starting position": [
+    "ui/player.js"
+  ],
+  "Standard starting position": [
+    "ui/player.js"
+  ],
+  "Chess960": [
+    "ui/player.js"
+  ],
+  "Custom positions and Chess960 are casual. Click king then its castling destination; in Chess960 the UCI text move uses the rook’s square.": [
+    "ui/player.js"
+  ],
+  "Engine threads": [
+    "ui/player.js"
+  ],
+  "Assigned opponent rating": [
+    "ui/player.js"
+  ],
+  "Engine clock tolerance (seconds)": [
+    "ui/player.js"
+  ],
+  "Hang watchdog (seconds)": [
+    "ui/player.js"
+  ],
+  "Draw range (centipawns)": [
+    "ui/player.js"
+  ],
+  "Minimum moves before offering a draw": [
+    "ui/player.js"
+  ],
+  "Create game": [
+    "ui/player.js"
+  ],
+  "selected": [
+    "ui/player.js"
+  ],
+  "scheduled games": [
+    "ui/player.js"
+  ],
+  "Strength limiting available": [
+    "ui/player.js"
+  ],
+  "No matching engines. Add engines in Engine library.": [
+    "ui/player.js"
+  ],
+  "Choose at least one engine.": [
+    "ui/player.js"
+  ],
+  "Series saved. Use Play next game when you are ready.": [
+    "ui/player.js"
+  ],
+  "Game saved. Press Start game when you are ready.": [
+    "ui/player.js"
+  ],
+  "Player PGN saving failed: ": [
+    "arena\\player.py",
+    "arena\\player_store.py"
+  ],
+  "Player saving failed: ": [
+    "arena\\player.py"
+  ],
+  "Resolve storage maintenance or saving failures before playing": [
+    "arena\\player.py"
+  ],
+  "Wait for the active benchmark or suite before playing": [
+    "arena\\player.py"
+  ],
+  "Player Arena is waiting for resources: ": [
+    "arena\\player.py"
+  ],
+  "This game is not paused": [
+    "arena\\player.py"
+  ],
+  "Preparing the engine…": [
+    "arena\\player.py"
+  ],
+  "Your move.": [
+    "arena\\player.py"
+  ],
+  "Engine is thinking…": [
+    "arena\\player.py"
+  ],
+  "Engine stopped: ": [
+    "arena\\player.py"
+  ],
+  "Time expired.": [
+    "arena\\player.py"
+  ],
+  "Time expired; opponent has insufficient mating material.": [
+    "arena\\player.py"
+  ],
+  "Draw accepted by the configured Player Arena policy.": [
+    "arena\\player.py"
+  ],
+  "Engine claims a legal draw.": [
+    "arena\\player.py"
+  ],
+  "Start a Player Arena game first": [
+    "arena\\player.py"
+  ],
+  "The game changed. Refresh before trying again.": [
+    "arena\\player.py",
+    "arena\\player_store.py"
+  ],
+  "This game has ended": [
+    "arena\\player.py"
+  ],
+  "Engine analysis enabled. This game is now casual.": [
+    "arena\\player.py"
+  ],
+  "Paused. Resume when ready; this game is now casual.": [
+    "arena\\player.py"
+  ],
+  "Game abandoned.": [
+    "arena\\player.py"
+  ],
+  "Resume the game first": [
+    "arena\\player.py"
+  ],
+  "Offer a draw on your turn, then play your move": [
+    "arena\\player.py"
+  ],
+  "Draw offers are disabled for this game": [
+    "arena\\player.py"
+  ],
+  "Wait until the configured minimum move number before offering a draw": [
+    "arena\\player.py"
+  ],
+  "Draw offer queued. Play your move.": [
+    "arena\\player.py"
+  ],
+  "Draw offer withdrawn.": [
+    "arena\\player.py"
+  ],
+  "No legal draw claim is available on your turn": [
+    "arena\\player.py"
+  ],
+  "Human claims a legal draw.": [
+    "arena\\player.py"
+  ],
+  "Wait for the engine to move": [
+    "arena\\player.py"
+  ],
+  "Wait for the hint search to finish": [
+    "arena\\player.py"
+  ],
+  "Takebacks are available only in casual games": [
+    "arena\\player.py"
+  ],
+  "There are no moves to take back": [
+    "arena\\player.py"
+  ],
+  "Hints are available on your turn": [
+    "arena\\player.py"
+  ],
+  "A search is already in progress": [
+    "arena\\player.py"
+  ],
+  "Hint requested. This game is now casual.": [
+    "arena\\player.py"
+  ],
+  "Unknown player action": [
+    "arena\\player.py"
+  ],
+  "Saved on close. Resume when ready; this game is now casual.": [
+    "arena\\player.py"
+  ],
+  "Invalid Player Arena settings": [
+    "arena\\player_store.py"
+  ],
+  "Enter a player name (1–80 characters)": [
+    "arena\\player_store.py"
+  ],
+  "sound volume": [
+    "arena\\player_store.py"
+  ],
+  "Select an existing folder for automatic PGNs": [
+    "arena\\player_store.py"
+  ],
+  "Player game not found": [
+    "arena\\player_store.py"
+  ],
+  "Recovered saved position. Resume when ready; this interrupted game is now casual.": [
+    "arena\\player_store.py"
+  ],
+  "Choose White, Black or Random": [
+    "arena\\player_store.py"
+  ],
+  "A human clock cannot use nodes or depth; select untimed practice instead": [
+    "arena\\player_store.py"
+  ],
+  "clock tolerance": [
+    "arena\\player_store.py"
+  ],
+  "hang watchdog": [
+    "arena\\player_store.py"
+  ],
+  "opponent rating": [
+    "arena\\player_store.py"
+  ],
+  "draw threshold": [
+    "arena\\player_store.py"
+  ],
+  "minimum moves before a draw offer": [
+    "arena\\player_store.py"
+  ],
+  "Unknown draw offer policy": [
+    "arena\\player_store.py"
+  ],
+  "Choose a legal, unfinished starting position": [
+    "arena\\player_store.py"
+  ],
+  "Rated games require standard starting chess, a human clock and a balanced or disabled draw policy": [
+    "arena\\player_store.py"
+  ],
+  "Engine profile no longer exists": [
+    "arena\\player_store.py"
+  ],
+  "This engine does not advertise UCI strength limiting; use its saved profile options": [
+    "arena\\player_store.py"
+  ],
+  "engine strength": [
+    "arena\\player_store.py"
+  ],
+  "Finish or abandon your current Player Arena game first": [
+    "arena\\player_store.py"
+  ],
+  "Finished games cannot be reopened": [
+    "arena\\player_store.py"
+  ],
+  "Select at least one engine": [
+    "arena\\player_store.py"
+  ],
+  "Player challenge": [
+    "arena\\player_store.py"
+  ],
+  "Enter a series name (1–120 characters)": [
+    "arena\\player_store.py"
+  ],
+  "Player series not found": [
+    "arena\\player_store.py"
+  ],
+  "Finish your current game before starting the next round": [
+    "arena\\player_store.py"
+  ],
+  "This series is complete": [
+    "arena\\player_store.py"
+  ],
+  "Finish your current game before resetting ratings": [
+    "arena\\player_store.py"
+  ],
+  "Finish or abandon the game before deleting it": [
+    "arena\\player_store.py"
+  ],
+  "Series games preserve the competition record; export them before starting a fresh series": [
+    "arena\\player_store.py"
+  ],
+  "Unknown Player Arena request": [
+    "arena\\server.py"
+  ],
+  "Save board photo": [
+    "desktop\\Program.cs"
+  ],
+  "2D board": [
+    "Player Arena UI"
+  ],
+  "Sound off": [
+    "Player Arena UI"
+  ],
+  "Withdraw draw offer": [
+    "Player Arena UI"
+  ],
+  "Rated": [
+    "Player Arena UI"
+  ],
+  "Casual": [
+    "Player Arena UI"
+  ],
+  "Create series": [
+    "Player Arena UI"
+  ],
+  "Start game": [
+    "Player Arena UI"
+  ],
+  "Resume game": [
+    "Player Arena UI"
+  ],
+  "Export player PGN": [
+    "Player Arena UI"
+  ],
+  "Waiting for you": [
+    "Player Arena UI"
+  ],
+  "Resign game": [
+    "Player Arena UI"
+  ],
+  "Abandon game": [
+    "Player Arena UI"
+  ],
+  "Record a loss by resignation. This ends the current game.": [
+    "Player Arena UI"
+  ],
+  "Save this unfinished game without a result or rating change. A series counts it as an unplayed round.": [
+    "Player Arena UI"
+  ],
+  "Export saved Player Arena games. Human moves include elapsed time and clocks; engine measurements appear only when recorded.": [
+    "ui/pgn.js"
+  ],
+  "Automatic copies use Player settings. Export choices never change stored moves or results.": [
+    "ui/pgn.js"
+  ],
+  "Ready to play.": [
+    "Player Arena UI"
+  ],
+  "Live environment": [
+    "ui/board3d-presentation.js"
+  ],
+  "Bring the room to life": [
+    "ui/board3d-presentation.js"
+  ],
+  "Players & spectators": [
+    "ui/board3d-presentation.js"
+  ],
+  "Background chess games": [
+    "ui/board3d-presentation.js"
+  ],
+  "Subtle room movement": [
+    "ui/board3d-presentation.js"
+  ],
+  "Distant chess sounds": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room activity": [
+    "ui/board3d-presentation.js"
+  ],
+  "Quiet session": [
+    "ui/board3d-presentation.js"
+  ],
+  "Club session": [
+    "ui/board3d-presentation.js"
+  ],
+  "Busy chess evening": [
+    "ui/board3d-presentation.js"
+  ],
+  "Choose how many background tables have players. Your game remains the focus.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room sound volume (%)": [
+    "ui/board3d-presentation.js"
+  ],
+  "Optional scenery for both 3D boards. Background games are decorative and do not affect results. Sound is off by default. Animation pauses when the board is hidden.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Choose Live chess club for a complete modeled room with four distinct visitors. Photographic rooms stay still. Background games are illustrative; the clock beside your board shows your actual game. Sound is off by default. Hidden boards pause animation.": [
+    "ui/board3d-presentation.js"
+  ],
+  "The club has six individual characters. Background games are illustrative opening studies. The clock beside your board shows game time; the wall clock follows your computer. Hidden boards pause animation.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Local-time daylight uses dawn from 06:00 to 08:00 and dusk from 18:00 to 20:00. Turn it off to use a lighting preset.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Playing board": [
+    "Player Arena UI"
+  ],
+  "Player board view": [
+    "Player Arena UI"
+  ],
+  "Player workspace": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Workspace…": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Move panel": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Panel options": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Resize panel": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Dock position": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Left column": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Right column": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Below the board": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Panel height": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Floating width": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Panel text size (%)": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Board column width (%)": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Engine opening book": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "Book source": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "Use each engine’s saved book": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "No Arena opening book": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "Choose a book for this game / series": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "Choose an engine opening book": [
+    "Player Arena UI",
+    "ui/player.js",
+    "arena\\player_store.py"
+  ],
+  "Choose visible panels. Your layout is saved automatically.": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Drag panel headings to rearrange. Drag the bottom-right corner to resize. The center divider changes docked widths.": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "The book plays only the engine’s moves. You choose your own moves. After a missing position or the ply limit, the engine searches for the rest of the game.": [
+    "Player Arena UI",
+    "ui/player.js"
+  ],
+  "Pause your Player Arena game before importing or deleting a book": [
+    "Player Arena UI",
+    "arena\\server.py"
+  ],
+  "Full screen": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "Done": [
+    "Player Arena UI",
+    "ui/player-workspace.js"
+  ],
+  "paused": [
+    "Player Arena UI"
+  ],
+  "abandoned": [
+    "Player Arena UI"
+  ],
+  "WDL": [
+    "Player Arena UI"
+  ],
+  "resignation": [
+    "Player Arena UI"
+  ],
+  "insufficient_material": [
+    "Player Arena UI"
+  ],
+  "checkmate": [
+    "Player Arena UI"
+  ],
+  "stalemate": [
+    "Player Arena UI"
+  ],
+  "fivefold_repetition": [
+    "Player Arena UI"
+  ],
+  "seventyfive_moves": [
+    "Player Arena UI"
+  ],
+  "draw_claim": [
+    "Player Arena UI"
+  ],
+  "draw_agreement": [
+    "Player Arena UI"
+  ],
+  "timeout": [
+    "Player Arena UI"
+  ],
+  "playing": [
+    "Player Arena UI"
+  ],
+  "starting": [
+    "Player Arena UI"
+  ],
+  "completed": [
+    "Player Arena UI"
+  ],
+  "engine_failure": [
+    "Player Arena UI"
+  ],
+  "Season admission": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Keep the existing roster": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Everyone requalifies every season": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Challengers compete for places": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Main season field size": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Returning places at risk": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "All selected engines retain a place in the league. New entrants are managed manually.": [
+    "Player Arena UI"
+  ],
+  "Candidate pool": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Qualification field": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Protected places": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Protected place": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Places available": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Swiss rounds (effective)": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Future totals assume the current candidate pool. Playoffs can add games. Concurrency is independent of field size.": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Playing field per division, including incoming qualifiers": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Use participant numbers to choose eligible candidates. Removing a number withdraws that engine from future qualification, without deleting its history.": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Must qualify": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Outside season field": [
+    "Player Arena UI",
+    "ui/seasons.js"
+  ],
+  "Not qualified": [
+    "Player Arena UI",
+    "ui/seasons.js",
+    "arena\\event_insights.py"
+  ],
+  "Every candidate plays qualification before Season 1. Later seasons follow this admission policy. Engines missing the cut stay eligible; their records are preserved.": [
+    "Player Arena UI"
+  ],
+  "Retry 3D": [
+    "Player Arena UI",
+    "ui/board3d-recovery.js"
+  ],
+  "Restoring 3D…": [
+    "Player Arena UI"
+  ],
+  "Graphics interrupted. Showing 2D; one automatic retry when the board is visible.": [
+    "Player Arena UI"
+  ],
+  "3D is unavailable. Continue in 2D or retry. Game clocks and play are unchanged.": [
+    "Player Arena UI"
+  ],
+  "3D chessboard. Right-drag or Alt+left-drag to orbit. Scroll to zoom. Shift-drag adjusts height. Home resets the camera.": [
+    "Player Arena UI",
+    "ui/board3d-ui.js"
+  ],
+  "Right-drag or Alt+left-drag to turn the board. Scroll to zoom. Hold Shift while dragging to adjust height.": [
+    "Player Arena UI",
+    "ui/board3d-ui.js"
+  ],
+  "Raise or lower the board without changing its angle or zoom. Shift+right-drag or Shift+Up/Down also adjusts height.": [
+    "Player Arena UI",
+    "ui/board3d-ui.js"
+  ],
+  "Right-drag or Alt+left-drag to turn the 3D board in either workspace. Left-click or drag pieces in Player Arena. Arrow keys turn the camera; Shift+Up/Down adjusts height. Scroll or press plus/minus to zoom; Home resets the camera. Your view is saved.": [
+    "Player Arena UI",
+    "ui/board3d-ui.js"
+  ],
+  "Player chessboard. Click or drag pieces. Right-drag or Alt+left-drag to turn the camera. Scroll to zoom; hold Shift while dragging to adjust height.": [
+    "Player Arena UI",
+    "ui/player-board.js"
+  ],
+  "3D piece set": [
+    "ui/board3d-ui.js"
+  ],
+  "1849 Staunton": [
+    "ui/board3d-ui.js"
+  ],
+  "Tal 1962 · Soviet Championship": [
+    "ui/board3d-ui.js"
+  ],
+  "Choose the 3D pieces for both Focused Game and Player Arena.": [
+    "ui/board3d-ui.js"
+  ],
+  "Red crowns apply to the 1849 Staunton set only and follow the original kingside rook and knight.": [
+    "ui/board3d-ui.js"
+  ],
+  "Live room graphics were interrupted. Staying in 2D until you choose Retry 3D. Game clocks and play are unchanged.": [
+    "Player Arena UI"
+  ],
+  "Live room rendering is bounded to 720p, 1080p or 1440p pixel budgets. Photo export still supports 4K.": [
+    "Player Arena UI"
+  ],
+  "Resignation window (consecutive plies)": [
+    "ui/app.js",
+    "ui/circuits.js"
+  ],
+  "Draw window (consecutive plies)": [
+    "ui/app.js",
+    "ui/circuits.js"
+  ],
+  "Minimum played plies before a draw": [
+    "ui/app.js",
+    "ui/circuits.js"
+  ],
+  "Successive played plies with reported evaluations beyond the resignation threshold, favoring the same side. A missing evaluation or a score outside the threshold breaks the sequence.": [
+    "ui/help.js"
+  ],
+  "Successive played plies with reported evaluations inside the draw threshold. A missing evaluation or a score outside the threshold breaks the sequence.": [
+    "ui/help.js"
+  ],
+  "Counted from the selected starting position, excluding its imported opening history. Zero removes this minimum; the draw threshold and window still apply.": [
+    "ui/help.js"
+  ],
+  "One ply is one move by either side; 2 plies equal 1 full move. Windows count successive played plies from both engines. The minimum draw length counts from the selected starting position, excluding imported opening moves. A zero evaluation threshold disables that rule.": [
+    "ui/polish.js",
+    "ui/circuits.js"
+  ],
+  "Adjudication windows must be positive whole numbers of plies.": [
+    "Player Arena UI",
+    "arena\\store.py"
+  ],
+  "Minimum draw length must be a non-negative whole number of plies.": [
+    "Player Arena UI",
+    "arena\\store.py"
+  ],
+  "Adjudication thresholds must be finite, non-negative centipawn values.": [
+    "Player Arena UI",
+    "arena\\circuits.py",
+    "arena\\store.py"
+  ],
+  "Within {0} cp for {1} plies, after {2} played plies from the starting position": [
+    "Player Arena UI",
+    "arena\\tournament_report.py"
+  ],
+  "Custom competition…": [
+    "ui/circuits.js"
+  ],
+  "COMPETITION DESIGNER": [
+    "ui/circuits.js"
+  ],
+  "Build the path to your champion": [
+    "ui/circuits.js"
+  ],
+  "Arrange stages, set their conditions and choose who advances. Each season starts with the complete roster.": [
+    "ui/circuits.js"
+  ],
+  "Custom championship": [
+    "ui/circuits.js"
+  ],
+  "Started and completed stages in this season are locked. Changes apply to remaining stages and future seasons.": [
+    "ui/circuits.js"
+  ],
+  "Competition template": [
+    "ui/circuits.js"
+  ],
+  "Current design": [
+    "ui/circuits.js"
+  ],
+  "Delete template": [
+    "ui/circuits.js"
+  ],
+  "Quick structure": [
+    "ui/circuits.js"
+  ],
+  "Choose a starting structure": [
+    "ui/circuits.js"
+  ],
+  "Competition path": [
+    "ui/circuits.js"
+  ],
+  "KO groups advance one winner each. Percentages round up within each group. Group qualifiers are interleaved by finishing place, not compared by raw points.": [
+    "ui/circuits.js"
+  ],
+  "Add stage": [
+    "ui/circuits.js"
+  ],
+  "Shared resources and scheduling": [
+    "ui/circuits.js"
+  ],
+  "Locked": [
+    "ui/circuits.js"
+  ],
+  "Move stage up": [
+    "ui/circuits.js"
+  ],
+  "Move stage down": [
+    "ui/circuits.js"
+  ],
+  "Stage name": [
+    "ui/circuits.js"
+  ],
+  "Tournament format": [
+    "ui/circuits.js"
+  ],
+  "Group seeding": [
+    "ui/circuits.js"
+  ],
+  "Advance from each group": [
+    "ui/circuits.js"
+  ],
+  "Top count": [
+    "ui/circuits.js"
+  ],
+  "Top percentage": [
+    "ui/circuits.js"
+  ],
+  "Advancement value": [
+    "ui/circuits.js"
+  ],
+  "Clocks, book, adjudication and tiebreaks": [
+    "ui/circuits.js"
+  ],
+  "A saved setup supplies opening positions, engine-book policy and adjudication rules. Explicit stage clocks apply to every entrant in that stage.": [
+    "ui/circuits.js"
+  ],
+  "Override stage time control": [
+    "ui/circuits.js"
+  ],
+  "Override stage adjudication": [
+    "ui/circuits.js"
+  ],
+  "Knockout matches always play additional pairs until a winner. Placement playoffs decide tied advancement places without adding their points to the original standings.": [
+    "ui/circuits.js"
+  ],
+  "New stage": [
+    "ui/circuits.js"
+  ],
+  "Competition saved. Review the plan, then run the event.": [
+    "ui/circuits.js"
+  ],
+  "Groups": [
+    "ui/circuits.js",
+    "arena\\circuits.py"
+  ],
+  "Competition preview": [
+    "ui/circuits.js"
+  ],
+  "Regular schedule only. Tied matches and placement playoffs can add games; no finite tiebreak maximum is guaranteed.": [
+    "ui/circuits.js"
+  ],
+  "Opening reuse expected": [
+    "ui/circuits.js"
+  ],
+  "Choose a larger opening inventory if repetition is unwanted.": [
+    "ui/circuits.js"
+  ],
+  "Parallel groups share an opening sequence. Later stages and seasons continue beyond the longest group, including tiebreaks.": [
+    "ui/circuits.js"
+  ],
+  "NEXT ACTION": [
+    "ui/circuits.js"
+  ],
+  "Approve plan": [
+    "ui/circuits.js"
+  ],
+  "Edit future stages": [
+    "ui/circuits.js"
+  ],
+  "Save competition template…": [
+    "ui/circuits.js"
+  ],
+  "Review full competition plan": [
+    "ui/circuits.js"
+  ],
+  "Competition template name": [
+    "ui/circuits.js"
+  ],
+  "Competition template saved.": [
+    "ui/circuits.js"
+  ],
+  "Stage progress": [
+    "ui/circuits.js"
+  ],
+  "Entrants": [
+    "ui/circuits.js"
+  ],
+  "Advance": [
+    "ui/circuits.js"
+  ],
+  "Eliminated": [
+    "ui/circuits.js",
+    "arena\\event_insights.py"
+  ],
+  "Custom competition": [
+    "Player Arena UI"
+  ],
+  "Swiss → KO": [
+    "Player Arena UI"
+  ],
+  "Groups → KO": [
+    "Player Arena UI"
+  ],
+  "Swiss → Groups → Final": [
+    "Player Arena UI"
+  ],
+  "Round-robin championship": [
+    "Player Arena UI"
+  ],
+  "Spread incoming seeds": [
+    "Player Arena UI"
+  ],
+  "Consecutive seeds": [
+    "Player Arena UI"
+  ],
+  "Keep recorded stage conditions": [
+    "Player Arena UI"
+  ],
+  "Pairs per tiebreak": [
+    "Player Arena UI"
+  ],
+  "Competition completed": [
+    "Player Arena UI"
+  ],
+  "Review and approve the plan": [
+    "Player Arena UI"
+  ],
+  "Stage in progress": [
+    "Player Arena UI"
+  ],
+  "Run event to continue": [
+    "Player Arena UI"
+  ],
+  "Review competition plan": [
+    "Player Arena UI",
+    "arena\\event_insights.py"
+  ],
+  "Delete this template? Existing events keep their settings. The current draft will return to source conditions.": [
+    "Player Arena UI",
+    "ui/circuits.js"
+  ],
+  "Version display": [
+    "ui/rating-center.js"
+  ],
+  "All versions": [
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
+  ],
+  "Best version per engine family": [
+    "ui/rating-center.js"
+  ],
+  "Engine family": [
+    "ui/rating-center.js",
+    "arena\\rating_center_report.py"
+  ],
+  "Changing the family affects display grouping only. Games, ratings and anchors stay unchanged. Leave blank to use the automatic family.": [
+    "ui/rating-center.js"
+  ],
+  "Family name": [
+    "ui/rating-center.js"
+  ],
+  "Save family": [
+    "ui/rating-center.js"
+  ],
+  "Family saved": [
+    "ui/rating-center.js"
+  ],
+  "Choose a time category to show its best versions.": [
+    "Player Arena UI"
+  ],
+  "Highest current Elo estimate per family and thread/GPU configuration, not proof of superiority. All versions remain in the calculation. Click an engine to edit its family.": [
+    "Player Arena UI"
+  ],
+  "Family names are inferred from engine version names. Click an engine to correct its family if needed.": [
+    "Player Arena UI"
+  ],
+  "Ranks describe the selected best-version view; searching and sorting do not change them.": [
+    "Player Arena UI"
+  ],
+  "Room motion": [
+    "ui/board3d-presentation.js"
+  ],
+  "Follow Windows": [
+    "ui/board3d-presentation.js"
+  ],
+  "Animate": [
+    "ui/board3d-presentation.js"
+  ],
+  "Still": [
+    "ui/board3d-presentation.js"
+  ],
+  "Follow Windows respects reduced motion. Animate enables this room without changing Windows. Still pauses people and scenery; the wall clock keeps time.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room animation is turned off.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room motion: Still. The wall clock keeps time.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room motion paused by Windows. Choose Animate to enable it here.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Room animation is enabled.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Windows reduced motion still pauses camera tours and focus-board move animation. Room motion is controlled separately.": [
+    "ui/board3d-presentation.js"
+  ],
+  "Delete selected ({0})…": [
+    "ui/app.js"
+  ],
+  "Camera tilt (degrees)": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js",
+    "ui/player.js"
+  ],
+  "Tilt": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js",
+    "ui/player.js"
+  ],
+  "Reset tilt": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js"
+  ],
+  "Low angle": [
+    "ui/board3d-presentation.js"
+  ],
+  "Positive tilt aims upward; negative tilt aims downward. Lower the viewing angle for a table-level shot.": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js",
+    "ui/player.js"
+  ],
+  "Right-drag to look up, down, left or right. Keep dragging upward to look above the board. No extra key is needed.": [
+    "ui/board3d-presentation.js",
+    "ui/board3d-ui.js",
+    "ui/player-board.js",
+    "ui/player.js"
+  ],
+  "CPU opening pairs retained across system updates: {0}.": [
+    "Player Arena UI",
+    "ui/rating-center.js"
+  ],
+  "Outside rating samples — missing partner in this view: {0}; engine/color mismatch: {1}; incompatible conditions: {2}.": [
+    "Player Arena UI",
+    "ui/rating-center.js"
+  ],
+  "Original records remain saved. Exact hardware and conditions filters still require both games.": [
+    "Player Arena UI",
+    "ui/rating-center.js"
+  ],
+  "Half-moves since the last pawn move or capture; either resets the counter. Two plies equal one full move. This is not a time estimate. Checkmate and other game endings take precedence.": [
+    "ui/draw-rule.js"
+  ],
+  "Fifty-move claims are disabled; showing the automatic seventy-five-move limit.": [
+    "ui/draw-rule.js"
+  ],
+  "Show draw-rule counter": [
+    "ui/focus-layout.js"
+  ],
+  "Add engines…": [
+    "ui/tournament-extend.js"
+  ],
+  "Extend a completed round robin with new engines. Existing results are retained; only missing matchups are added.": [
+    "ui/tournament-extend.js"
+  ],
+  "Extend round robin": [
+    "ui/tournament-extend.js"
+  ],
+  "Existing games, engine settings and ratings are retained. New engines play every existing engine and each other using the recorded tournament conditions.": [
+    "ui/tournament-extend.js"
+  ],
+  "Preview added games": [
+    "ui/tournament-extend.js"
+  ],
+  "Save extension paused": [
+    "ui/tournament-extend.js"
+  ],
+  "{0} new engines selected": [
+    "ui/tournament-extend.js"
+  ],
+  "Already included": [
+    "ui/tournament-extend.js"
+  ],
+  "Opening-pair and round presets continue their recorded sequence. Shared-cycle and fixed-position presets deliberately reuse their suite. Random selection or an exhausted book may repeat positions.": [
+    "ui/tournament-extend.js"
+  ],
+  "New profiles keep their current thread, hash and per-engine time-control settings. Review these in Engine library before saving.": [
+    "ui/tournament-extend.js"
+  ],
+  "The extension is saved paused. Start it when ready.": [
+    "ui/tournament-extend.js"
+  ],
+  "{0} additional games · {1} total scheduled": [
+    "ui/tournament-extend.js"
+  ],
+  "{0} completed games retained · {1} participants": [
+    "ui/tournament-extend.js"
+  ],
+  "Recorded cycles: {0} · color-reversed pairs: {1}": [
+    "ui/tournament-extend.js"
+  ],
+  "Tournament extended and saved paused. Start when ready.": [
+    "ui/tournament-extend.js"
+  ],
+  "Select at least one new engine profile.": [
+    "arena\\server.py",
+    "arena\\tournament_extend.py"
+  ],
+  "Round-robin extensions": [
+    "arena\\tournament_report.py"
+  ],
+  "Retained original games": [
+    "arena\\tournament_report.py"
+  ],
+  "50-move rule: {0} / 100 plies · {1} remaining": [
+    "ui/draw-rule.js"
+  ],
+  "75-move rule: {0} / 150 plies · {1} remaining": [
+    "ui/draw-rule.js"
+  ],
+  "Event stages cannot be extended. Change the next season roster instead.": [
+    "extension update"
+  ],
+  "Only standalone round-robin tournaments can be extended.": [
+    "extension update"
+  ],
+  "Finish the tournament and all replays before extending it.": [
+    "extension update"
+  ],
+  "Select different registered engine profiles.": [
+    "extension update"
+  ],
+  "An engine profile is already in this tournament.": [
+    "extension update"
+  ],
+  "Every scheduled game needs a completed official result before extension.": [
+    "extension update"
+  ],
+  "The tournament or engine selection changed. Preview the extension again.": [
+    "extension update"
+  ],
+  "Championship standings": [
+    "ui/season-insights.js"
+  ],
+  "Championship stage total": [
+    "ui/season-insights.js"
+  ],
+  "Final match": [
+    "ui/season-insights.js"
+  ],
+  "Stage leaders": [
+    "ui/season-insights.js"
+  ],
+  "All stages": [
+    "ui/season-insights.js"
+  ],
+  "Placement playoff history": [
+    "ui/season-insights.js"
+  ],
+  "Separate tiebreak tournaments; their points do not change the original group standings.": [
+    "ui/season-insights.js"
+  ],
+  "Advancement and final placements are recorded.": [
+    "ui/season-insights.js"
+  ],
+  "Points and W–D–L include every game in this stage. Knockout placement follows match results, not total game points.": [
+    "ui/season-insights.js"
+  ],
+  "Engine Arena — 1.9.6": [
     "desktop/Program.cs"
   ]
 }

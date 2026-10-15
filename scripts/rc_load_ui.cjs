@@ -18,7 +18,7 @@ const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtime
    maxBoards=Math.max(maxBoards,s.boards);if(s.completed)break;
    await page.waitForTimeout(400);
   }
-  assert.ok(maxBoards>=28,`Only ${maxBoards} boards observed`);assert.deepEqual(errors,[]);
+  assert.ok(maxBoards>=Math.min(info.concurrency||32,28),`Only ${maxBoards} boards observed`);assert.deepEqual(errors,[]);
   await page.screenshot({path:file.replace(/\.json$/,'.png')});
   const metrics=await page.evaluate(()=>api('status'));
   fs.writeFileSync(file.replace(/\.json$/,'-ui-result.json'),JSON.stringify({maxBoards,errors,seconds:(Date.now()-began)/1000,metrics:metrics.ui_metrics},null,2));

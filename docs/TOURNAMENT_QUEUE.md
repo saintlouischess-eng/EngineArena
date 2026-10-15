@@ -1,5 +1,13 @@
 # Automatic tournament queue
 
+The private 1.3.1 update adds an all-tournaments progress view to Tournament
+Manager, including event/league stages. The **Source** filter selects all current
+tournaments, the independent queue, or events and leagues. Search, status filters,
+sortable headers and live completion counts work in both queue execution modes.
+Event rows link to their parent event; they are never enrolled in the independent
+queue or selected by its bulk controls. **Event resources…** edits the active
+event's shared budget. See [league update notes](V1_3_LEAGUES.md).
+
 Version 1.1.0 adds **Run together** in Tournament manager. See
 [Simultaneous tournaments](SIMULTANEOUS_TOURNAMENTS.md). The sequential mode
 described below remains the default for existing workspaces.

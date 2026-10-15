@@ -1,0 +1,566 @@
+{
+  "license": "CC0-1.0 base assets; GPL-3.0-or-later original project artwork",
+  "source": "MakeHuman graphical data; see vendor/MakeHuman/club-cast/provenance.json; generated cameo artwork and owner-supplied younger-player reference; see prototypes/live-club/art/PROVENANCE.md",
+  "cast": [
+    {
+      "id": "arthur",
+      "macro": "caucasian-male-old",
+      "body": "male-old",
+      "face": [
+        [
+          "head/head-rectangular",
+          0.5
+        ],
+        [
+          "nose/nose-curve-convex",
+          0.3
+        ]
+      ],
+      "clothes": "male_casualsuit01",
+      "hair": "short02",
+      "skin": "old_lightskinned_male",
+      "height": 32.4,
+      "footwear": "penny-loafers",
+      "file": "arthur.glb",
+      "bytes": 12346716,
+      "sha256": "87f05f34d2dfd7ba68fd8539a5e7e3bfbaa446dfcbf6063f254157bfb22cc244"
+    },
+    {
+      "id": "mei",
+      "macro": "caucasian-female-young",
+      "body": "female-young",
+      "face": [
+        [
+          "head/head-oval",
+          0.45
+        ],
+        [
+          "head/head-round",
+          0.13
+        ],
+        [
+          "chin/chin-triangle",
+          0.12
+        ],
+        [
+          "nose/nose-scale-horiz-decr",
+          0.22
+        ],
+        [
+          "nose/nose-scale-vert-decr",
+          0.12
+        ],
+        [
+          "mouth/mouth-angles-up",
+          0.2
+        ],
+        [
+          "mouth/mouth-scale-horiz-incr",
+          0.12
+        ]
+      ],
+      "clothes": "female_casualsuit01",
+      "hair": "bob02",
+      "skin": "young_lightskinned_female",
+      "height": 30.2,
+      "hair_color": [
+        0.19,
+        0.135,
+        0.075
+      ],
+      "portrait": "younger-player-reference.png",
+      "footwear": "court-sneakers",
+      "file": "mei.glb",
+      "bytes": 13872036,
+      "sha256": "326bbdce30c0926a4de77350914578b088cd7def40c0c8d5781a87751665f113"
+    },
+    {
+      "id": "daniel",
+      "macro": "african-male-young",
+      "body": "male-young",
+      "face": [
+        [
+          "chin/chin-width-incr",
+          0.35
+        ],
+        [
+          "nose/nose-scale-horiz-incr",
+          0.2
+        ]
+      ],
+      "clothes": "male_casualsuit04",
+      "hair": "afro01",
+      "skin": "middleage_darkskinned_male",
+      "height": 33.2,
+      "footwear": "sport-trainers",
+      "file": "daniel.glb",
+      "bytes": 20407060,
+      "sha256": "83d99334bac9fa23e445931e92bd2f6192f984ae278524fa69633b8b1258fdff"
+    },
+    {
+      "id": "elena",
+      "macro": "caucasian-female-old",
+      "body": "female-old",
+      "face": [
+        [
+          "head/head-oval",
+          0.65
+        ],
+        [
+          "nose/nose-curve-convex",
+          0.25
+        ]
+      ],
+      "clothes": "female_elegantsuit01",
+      "hair": "ponytail01",
+      "skin": "old_lightskinned_female",
+      "height": 31.0,
+      "hair_tint": [
+        0.64,
+        0.58,
+        0.5
+      ],
+      "glasses": true,
+      "footwear": "leather-flats",
+      "file": "elena.glb",
+      "bytes": 6665856,
+      "sha256": "fc531f09bfbd5aab8d6493067501eccf1a53ba021ec19f5e7fb503566ac295c1"
+    },
+    {
+      "id": "jonas",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "weight": 0.7,
+      "face": [
+        [
+          "head/head-rectangular",
+          0.8
+        ],
+        [
+          "chin/chin-width-incr",
+          0.7
+        ],
+        [
+          "head/head-fat-incr",
+          0.3
+        ]
+      ],
+      "clothes": "male_elegantsuit01",
+      "hair": "short03",
+      "skin": "middleage_lightskinned_male",
+      "height": 34.3,
+      "standing": true,
+      "glasses": true,
+      "footwear": "oxfords",
+      "file": "jonas.glb",
+      "bytes": 9955508,
+      "sha256": "ca37c78697c373eaca427358fb31033f7ff09ec7be9e34ca5b69f50d890da712"
+    },
+    {
+      "id": "nora",
+      "macro": "african-female-young",
+      "body": "female-young",
+      "weight": 0.4,
+      "face": [
+        [
+          "head/head-round",
+          0.65
+        ],
+        [
+          "nose/nose-scale-horiz-incr",
+          0.35
+        ]
+      ],
+      "clothes": "female_sportsuit01",
+      "hair": "braid01",
+      "skin": "middleage_darkskinned_female",
+      "height": 31.8,
+      "standing": true,
+      "footwear": "sport-trainers",
+      "file": "nora.glb",
+      "bytes": 5240068,
+      "sha256": "e18acc3f781d9f4d20f367f1141b71464045bd972f7341190e3f55b53f59cff7"
+    },
+    {
+      "id": "magnus",
+      "cameo": "Magnus Carlsen",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "weight": 0.25,
+      "face": [
+        [
+          "head/head-square",
+          0.4
+        ],
+        [
+          "head/head-round",
+          0.2
+        ],
+        [
+          "chin/chin-width-incr",
+          0.5
+        ],
+        [
+          "chin/chin-prominent-incr",
+          0.2
+        ],
+        [
+          "nose/nose-scale-vert-decr",
+          0.15
+        ],
+        [
+          "mouth/mouth-scale-horiz-incr",
+          0.15
+        ],
+        [
+          "eyes/l-eye-height1-decr",
+          0.15
+        ],
+        [
+          "eyes/r-eye-height1-decr",
+          0.15
+        ]
+      ],
+      "clothes": "male_casualsuit01",
+      "hair": "short02",
+      "skin": "middleage_lightskinned_male",
+      "height": 33.5,
+      "standing": true,
+      "hair_color": [
+        0.42,
+        0.33,
+        0.185
+      ],
+      "hair_root_color": [
+        0.25,
+        0.19,
+        0.105
+      ],
+      "hair_strand_color": [
+        0.48,
+        0.4,
+        0.255
+      ],
+      "jacket": [
+        0.035,
+        0.065,
+        0.12
+      ],
+      "beard": 0.26,
+      "footwear": "court-sneakers",
+      "file": "magnus.glb",
+      "bytes": 13374856,
+      "sha256": "56993cee2534cff97dc0fe9e3d61b21073a5b0461077519e5dedd020fdfa4e13"
+    },
+    {
+      "id": "fabiano",
+      "cameo": "Fabiano Caruana",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "face": [
+        [
+          "head/head-oval",
+          0.45
+        ],
+        [
+          "head/head-scale-horiz-decr",
+          0.2
+        ],
+        [
+          "head/head-scale-vert-incr",
+          0.12
+        ],
+        [
+          "chin/chin-triangle",
+          0.22
+        ],
+        [
+          "nose/nose-curve-convex",
+          0.6
+        ],
+        [
+          "nose/nose-scale-depth-incr",
+          0.25
+        ],
+        [
+          "nose/nose-scale-horiz-decr",
+          0.15
+        ],
+        [
+          "mouth/mouth-scale-horiz-decr",
+          0.12
+        ]
+      ],
+      "clothes": "male_elegantsuit01",
+      "hair": "short04",
+      "skin": "middleage_lightskinned_male",
+      "height": 32.2,
+      "standing": true,
+      "glasses": true,
+      "hair_color": [
+        0.016,
+        0.01,
+        0.007
+      ],
+      "curls": 0.2,
+      "jacket": [
+        0.025,
+        0.027,
+        0.04
+      ],
+      "footwear": "oxfords",
+      "file": "fabiano.glb",
+      "bytes": 16006600,
+      "sha256": "d8cf41236180d5a8ab603ddafdf3ebfe23e34fc4ad0d9677797ae7886c9feb01"
+    },
+    {
+      "id": "hans",
+      "cameo": "Hans Niemann",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "face": [
+        [
+          "head/head-square",
+          0.25
+        ],
+        [
+          "head/head-scale-vert-incr",
+          0.2
+        ],
+        [
+          "chin/chin-width-incr",
+          0.25
+        ],
+        [
+          "chin/chin-height-incr",
+          0.18
+        ],
+        [
+          "nose/nose-point-down",
+          0.2
+        ],
+        [
+          "nose/nose-scale-depth-incr",
+          0.12
+        ],
+        [
+          "eyes/l-eye-height1-decr",
+          0.17
+        ],
+        [
+          "eyes/r-eye-height1-decr",
+          0.17
+        ]
+      ],
+      "clothes": "male_elegantsuit01",
+      "hair": "short04",
+      "skin": "middleage_lightskinned_male",
+      "height": 34.0,
+      "standing": true,
+      "hair_color": [
+        0.05,
+        0.026,
+        0.013
+      ],
+      "curls": 0.32,
+      "jacket": [
+        0.07,
+        0.08,
+        0.105
+      ],
+      "beard": 0.34,
+      "footwear": "ankle-boots",
+      "file": "hans.glb",
+      "bytes": 16013644,
+      "sha256": "0f41e2b662c9ecb0cfa193f6624f0d902315a95f0ce9c831fd894880a1d85447"
+    },
+    {
+      "id": "bobby",
+      "cameo": "Bobby Fischer (1972)",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "face": [
+        [
+          "head/head-oval",
+          0.4
+        ],
+        [
+          "head/head-scale-horiz-decr",
+          0.16
+        ],
+        [
+          "head/head-scale-vert-incr",
+          0.3
+        ],
+        [
+          "chin/chin-prominent-incr",
+          0.35
+        ],
+        [
+          "nose/nose-scale-depth-incr",
+          0.4
+        ],
+        [
+          "nose/nose-scale-vert-incr",
+          0.2
+        ],
+        [
+          "nose/nose-curve-convex",
+          0.25
+        ],
+        [
+          "mouth/mouth-scale-horiz-incr",
+          0.25
+        ],
+        [
+          "mouth/mouth-angles-up",
+          0.15
+        ]
+      ],
+      "clothes": "male_elegantsuit01",
+      "hair": "short03",
+      "skin": "middleage_lightskinned_male",
+      "height": 35.5,
+      "standing": true,
+      "hair_color": [
+        0.08,
+        0.043,
+        0.024
+      ],
+      "jacket": [
+        0.19,
+        0.15,
+        0.1
+      ],
+      "footwear": "derbies",
+      "file": "bobby.glb",
+      "bytes": 11401088,
+      "sha256": "c715057f11d0765b0d737432f9afd9189126d743f4c4abb53a492393789877e1"
+    },
+    {
+      "id": "hikaru",
+      "cameo": "Hikaru Nakamura",
+      "macro": "asian-male-young",
+      "macro_mix": "caucasian-male-young",
+      "mix": 0.35,
+      "body": "male-young",
+      "weight": 0.3,
+      "face": [
+        [
+          "head/head-round",
+          0.3
+        ],
+        [
+          "head/head-scale-horiz-incr",
+          0.16
+        ],
+        [
+          "chin/chin-width-incr",
+          0.15
+        ],
+        [
+          "nose/nose-scale-horiz-incr",
+          0.18
+        ],
+        [
+          "mouth/mouth-scale-horiz-incr",
+          0.16
+        ],
+        [
+          "mouth/mouth-angles-up",
+          0.15
+        ]
+      ],
+      "clothes": "male_casualsuit01",
+      "hair": "short01",
+      "skin": "middleage_lightskinned_male",
+      "height": 31.7,
+      "standing": true,
+      "hair_color": [
+        0.01,
+        0.009,
+        0.008
+      ],
+      "jacket": [
+        0.03,
+        0.04,
+        0.05
+      ],
+      "beard": 0.9,
+      "shirt_print": {
+        "file": "hikaru-pineapple-shirt.png",
+        "center_x": 1.65,
+        "center_height": 0.755,
+        "width": 1.55,
+        "height": 2.07,
+        "placement": "wearer left chest"
+      },
+      "footwear": "sport-trainers",
+      "file": "hikaru.glb",
+      "bytes": 18967232,
+      "sha256": "8b011ba452d4f56edb97a2aafda8a71de07a53072dae6119848802bb3e95f86c"
+    },
+    {
+      "id": "levy",
+      "cameo": "IM Levy Rozman",
+      "macro": "caucasian-male-young",
+      "body": "male-young",
+      "face": [
+        [
+          "head/head-oval",
+          0.4
+        ],
+        [
+          "head/head-scale-vert-incr",
+          0.24
+        ],
+        [
+          "head/head-scale-horiz-decr",
+          0.14
+        ],
+        [
+          "nose/nose-curve-convex",
+          0.35
+        ],
+        [
+          "nose/nose-scale-depth-incr",
+          0.22
+        ],
+        [
+          "chin/chin-triangle",
+          0.25
+        ]
+      ],
+      "clothes": "male_casualsuit04",
+      "hair": "short04",
+      "skin": "middleage_lightskinned_male",
+      "height": 32.6,
+      "standing": true,
+      "glasses": true,
+      "hair_color": [
+        0.029,
+        0.017,
+        0.009
+      ],
+      "curls": 0.27,
+      "jacket": [
+        0.055,
+        0.09,
+        0.075
+      ],
+      "beard": 0.7,
+      "shirt_print": {
+        "file": "levy-rook-shirt.png",
+        "center_x": 0,
+        "center_height": 0.712,
+        "width": 5.6,
+        "height": 5.6,
+        "placement": "center front"
+      },
+      "footwear": "chelsea-boots",
+      "file": "levy.glb",
+      "bytes": 26232360,
+      "sha256": "8a457a2e52fa25da03930c957a47b5b914579750111e5c3207d9e88890bc6844"
+    }
+  ]
+}

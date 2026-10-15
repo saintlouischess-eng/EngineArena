@@ -9,7 +9,7 @@ GROUPS=(
     ('Engine identities and resources',('WhiteEngine','BlackEngine','WhiteThreads','BlackThreads','WhiteHashMB','BlackHashMB','Ponder')),
     ('Independent engine controls',('WhiteTimeControl','BlackTimeControl','WhiteSearchControl','BlackSearchControl')),
     ('Networks and GPU',tuple(side+key for side in ('White','Black') for key in ('Network','NetworkSHA256','Backend','GPU','GPUGroup','NNCachePositions'))),
-    ('Game and attempt tracking',('TournamentId','GameId','GameNumber','AttemptId','Attempt','AttemptMode','OpeningPair','OpeningLeg','CompetitionStage','PlayoffStage')),
+    ('Game and attempt tracking',('TournamentId','GameId','GameNumber','AttemptId','Attempt','AttemptMode','OpeningPair','OpeningLeg','CompetitionStage','PlayoffStage','EventId','EventStage','LeagueSeason')),
     ('Complete encoded settings',('SettingsEncoding','WhiteSettings','BlackSettings','TournamentSettings')),
 )
 HEADERS=tuple(key for _,keys in GROUPS for key in keys)

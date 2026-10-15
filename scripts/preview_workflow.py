@@ -6,7 +6,7 @@ import chess
 from aiohttp import web
 from arena.server import create_app
 from arena.models import Clock,TimeControl
-from arena.crown_marks import CrownMarks
+from arena.crown_marks import CrownMarks,opening_marks
 
 async def main():
     folder=ROOT/'test-output'/('workflow-'+str(time.time_ns()));app=await create_app(folder,'workflow-review');app['stop']=asyncio.Event();db=app['db'];r=app['runner']
@@ -19,28 +19,39 @@ async def main():
     for result,reason in [('1-0','timeout'),('1/2-1/2','adjudication')]:
         g=await db.call('claim',done['id']);await db.call('finish',g['aid'],result,reason)
     await db.call('execute',"UPDATE tournaments SET state='completed' WHERE id=?",(done['id'],))
-    t=await db.call('create_tournament','Live scoresheet · workflow fixture',profiles[:2],{'cycles':10,'concurrency':1},backup=False)
+    long='--long' in sys.argv
+    opening={'fen':chess.STARTING_FEN}
+    if long:
+        start=chess.Board();history=['e2e4','e7e5','g1f3','b8c6']
+        for uci in history:start.push_uci(uci)
+        opening={'fen':start.fen(),'moves':history}
+    t=await db.call('create_tournament','Live scoresheet · workflow fixture',profiles[:2],{'cycles':10,'concurrency':1},[opening],backup=False)
     await db.call('set_state',t['id'],'running');await db.call('fill_queue',t['id'],2);g=await db.call('claim',t['id'])
-    board=chess.Board();marks=CrownMarks(board);rng=random.Random(251);clocks={s:Clock(TimeControl.parse({'kind':'fischer','seconds':180,'increment':2})).snapshot() for s in ('white','black')}
-    for ply in range(1,81):
-        if board.is_game_over():break
-        move=rng.choice(list(board.legal_moves));san=board.san(move);marks.advance(board,move);board.push(move);side='white' if ply%2 else 'black';clocks[side]['remaining']-=.6
+    board=chess.Board(opening['fen']);marks=opening_marks(opening);rng=random.Random(251);clocks={s:Clock(TimeControl.parse({'kind':'fischer','seconds':3600 if long else 180,'increment':2})).snapshot() for s in ('white','black')}
+    # Repeated legal knight moves deliberately make a long navigation fixture.
+    # This bypasses termination rules; it is not an engine-game correctness test.
+    cycle=['f3g1','c6b8','g1f3','b8c6']
+    for ply in range(1,623 if long else 81):
+        if not long and board.is_game_over():break
+        move=board.parse_uci(cycle[(ply-1)%4]) if long else rng.choice(list(board.legal_moves));san=board.san(move);marks.advance(board,move);board.push(move);side='white' if ply%2 else 'black';clocks[side]['remaining']-=.6
         info={'depth':22+ply%4,'seldepth':32,'cp':42-ply,'nodes':1234567+ply*1000,'nps':2470000,'time':530}
         await db.call('move',g['aid'],ply,move.uci(),san,board.fen(),.6,clocks,info)
-    live={'tid':t['id'],'tournament_name':t['name'],'game':g['id'],'number':0,'fen':board.fen(),'crown_squares':marks.snapshot(),'white':profiles[0],'black':profiles[1],'status':'Thinking','ply':ply,'san':san,'last_move':move.uci(),'clock_active':'white','clocks':clocks,'search_started':time.monotonic(),'info':info,'info_side':side,'searches':{}}
+    live={'tid':t['id'],'tournament_name':t['name'],'game':g['id'],'number':0,'fen':board.fen(),'crown_squares':marks.snapshot(),'knight_facings':marks.knight_snapshot(),'captured':marks.capture_snapshot(),'white':profiles[0],'black':profiles[1],'status':'Thinking','ply':ply,'san':san,'last_move':move.uci(),'clock_active':'white','clocks':clocks,'search_started':time.monotonic(),'info':info,'info_side':side,'searches':{}}
     r.live[g['aid']]=live
     await db.call('execute','INSERT OR REPLACE INTO preferences VALUES(?,?)',('ui',json.dumps({'theme':'dark','split':45,'panels':{'standings':{'visible':False},'games':{'visible':False},'live':{'visible':False},'search':{'visible':False},'focus':{'column':'left','height':740},'moves':{'column':'right','height':600}},'focus3d':False})))
     async def finish(request):
         r.live.clear();await db.call('finish',g['aid'],'1/2-1/2','adjudication');return web.json_response({'ok':True})
     app.router.add_post('/fixture/finish',finish)
     async def step(request):
-        move=next(iter(board.legal_moves));san=board.san(move);marks.advance(board,move);board.push(move);live['ply']+=1
-        await db.call('move',g['aid'],live['ply'],move.uci(),san,board.fen(),.6,clocks,info)
-        live.update(fen=board.fen(),san=san,last_move=move.uci(),crown_squares=marks.snapshot())
+        count=max(1,min(250,int(request.query.get('count','1')))) if long else 1
+        for _ in range(count):
+            move=board.parse_uci(cycle[live['ply']%4]) if long else next(iter(board.legal_moves));san=board.san(move);marks.advance(board,move);board.push(move);live['ply']+=1
+            await db.call('move',g['aid'],live['ply'],move.uci(),san,board.fen(),.6,clocks,info)
+            live.update(fen=board.fen(),san=san,last_move=move.uci(),crown_squares=marks.snapshot(),knight_facings=marks.knight_snapshot(),captured=marks.capture_snapshot())
         return web.json_response({'ply':live['ply']})
     app.router.add_post('/fixture/step',step)
     server=web.AppRunner(app);await server.setup();site=web.TCPSite(server,'127.0.0.1',0);await site.start();port=site._server.sockets[0].getsockname()[1]
-    ready={'url':f'http://127.0.0.1:{port}/?token=workflow-review','tid':t['id'],'completed':done['id'],'gid':g['id'],'folder':str(folder),'profiles':[p['id'] for p in profiles]}
+    ready={'url':f'http://127.0.0.1:{port}/?token=workflow-review','tid':t['id'],'completed':done['id'],'gid':g['id'],'folder':str(folder),'profiles':[p['id'] for p in profiles],'long':long}
     (ROOT/'test-output/workflow-ready.json').write_text(json.dumps(ready),encoding='utf-8');print(json.dumps(ready),flush=True)
     try:await app['stop'].wait()
     finally:r.live.clear();await server.cleanup()

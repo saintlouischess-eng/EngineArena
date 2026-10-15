@@ -75,6 +75,7 @@ def select(settings,pair_no,round_no,cycle=0,assignment=None):
             index=sum(round_cycles(settings,r) for r in range(round_no))+cycle
         else:index=round_no*settings['cycles']+cycle if settings['format'] in ('swiss','ladder','knockout','double_elimination') else round_no
     else:index=pair_no
+    index+=settings.get('event_opening_offset',0)
     k=index
     if settings['opening_order']=='random':k=int.from_bytes(hashlib.sha256(f"{settings['seed']}:{index}".encode()).digest()[:8],'big')
     result=items[k%len(items)]|{'seed':settings['seed'],'selection':k%len(items),'assignment':index,'opening_policy':policy,'pool_pass':index//len(items)}

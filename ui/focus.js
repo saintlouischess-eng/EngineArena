@@ -6,7 +6,7 @@ function selectedFocusGame(){
  const games=state.live.filter(g=>g.tid===state.tid);
  const live=games.find(g=>g.game===focusId);
  if(live)retainedFocus=live;
- if(!live&&games.length&&displayPrefs.followNextGame!==false&&!(typeof reviewingRecordedMove==='function'&&reviewingRecordedMove())){focusId=games[0].game;retainedFocus=games[0]}
+ if(!live&&games.length&&displayPrefs.followNextGame!==false&&!(typeof browsingRecordedMoves==='function'&&browsingRecordedMoves())){focusId=games[0].game;retainedFocus=games[0]}
  if(retainedFocus&&!games.some(g=>g.game===retainedFocus.game))games.push({...retainedFocus,clock_active:null,status:retainedFocus.clock_active?ArenaI18n.t('Saved game'):retainedFocus.status});
  if(!games.some(g=>g.game===focusId))focusId=games[0]?.game||'';
  const options=games.length?games.map(g=>ArenaI18n.h`<option value="${g.game}">Game ${g.number+1} · ${esc(g.white.name)} / ${esc(g.black.name)}</option>`).join(''):ArenaI18n.h('<option value="">No active game</option>');
@@ -33,18 +33,25 @@ function renderFocus(){
  if(!panels.focus.hidden){
   if(!g){root.dataset.game='';stableHtml('#focusContent',ArenaI18n.h('<div class="panel-empty"><span class="empty-icon">♞</span><h3>Ready for the next game</h3><p>Start or resume a tournament to follow a live board.<br>Completed games remain in Games & attempt history.</p></div>'))}
   else{
-   if(root.dataset.game!==g.game||!root.querySelector('.focus-board')){
+   const changedGame=root.dataset.game!==g.game;
+   // Keep the canvas and GPU resources when following a different game.
+   if(!root.querySelector('.focus-board')){
     root.innerHTML=ArenaI18n.h`<div class="focus-toolbar"><span class="focus-game-state"></span><span class="focus-last-move"></span><span class="spacer"></span><button class="subtle" data-focus-search data-help="Show the independently resizable Engine search panel for this game.">Engine search</button><button class="subtle" data-focus-flip data-help="Rotate the live boards without changing the position.">Flip</button><button class="subtle" data-focus-replay data-help="Open saved attempts, move replay, clocks and diagnostic logs for this game.">Replay</button></div><div class="focus-stage"><div class="focus-clocks">${clockFace(g,'white')}${clockFace(g,'black')}</div><div class="focus-board" data-help="The board fits the available width and height automatically. Right-drag to draw arrows, right-click to mark squares, or left-click to clear marks."></div></div>`;
     root.dataset.game=g.game;root._renderedHtml=null;
     root.querySelector('[data-focus-search]').onclick=()=>revealFocusPanel('search');
     root.querySelector('[data-focus-flip]').onclick=()=>{state.flip=!state.flip;renderBoards()};
-    root.querySelector('[data-focus-replay]').onclick=safely(()=>gameDetail(g.game));
-    for(const side of ['white','black'])root.querySelector(`[data-clock-side=${side}] .clock-name`).title=g[side].name;
+    root.querySelector('[data-focus-replay]').onclick=safely(()=>gameDetail(root.dataset.game));
+   }
+   root.dataset.game=g.game;
+   if(changedGame){
+    root.querySelector('.board-arrows')?.replaceChildren();
+    for(const side of ['white','black']){const name=root.querySelector(`[data-clock-side=${side}] .clock-name`);name.textContent=(side==='white'?ArenaI18n.t('White'):ArenaI18n.t('Black'))+' · '+g[side].name;name.title=g[side].name;}
    }
    root.querySelector('.focus-game-state').textContent=state.connected===false?ArenaI18n.t('Connection unavailable'):[g.competition_label,g.status].filter(Boolean).join(' · ');
    root.querySelector('.focus-game-state').classList.toggle('is-thinking',!!g.clock_active&&state.connected!==false);
-   root.querySelector('.focus-last-move').textContent=g.san?ArenaI18n.t('Last move ')+g.san+' · '+g.ply+ArenaI18n.t(' ply'):ArenaI18n.t('Opening position');
-   if(typeof paintFocusBoard==='function')paintFocusBoard(root.querySelector('.focus-board'),g.fen,g.last_move,g.crown_squares||[]);
+   root.querySelector('.focus-last-move').textContent=g.san?(g.opening_move?ArenaI18n.t('Opening')+' · '+g.move_label+' '+g.san:ArenaI18n.t('Last move ')+g.san+' · '+g.ply+ArenaI18n.t(' ply')):ArenaI18n.t('Opening position');
+   paintDrawRule(root,g);
+   if(typeof paintFocusBoard==='function')paintFocusBoard(root.querySelector('.focus-board'),g.fen,g.last_move,g.crown_squares||[],g.knight_facings||{},g);
    else updateBoard(root.querySelector('.focus-board'),g.fen,g.last_move);
    if(typeof paintEvaluation==='function')paintEvaluation(root.querySelector('.focus-board'),g,'focus');
    if(typeof styleFocusLayout==='function')styleFocusLayout(root);

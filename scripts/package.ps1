@@ -31,10 +31,14 @@ foreach ($metadata in Get-ChildItem -Path .venv\Lib\site-packages\*.dist-info -D
 }
 New-Item -ItemType Directory -Path release\EngineArena\ThirdParty\LibreHardwareMonitor -Force | Out-Null
 Copy-Item -Path vendor\LibreHardwareMonitor\* -Destination release\EngineArena\ThirdParty\LibreHardwareMonitor -Force
-foreach ($notices in @('Three','DotNet','WebView2SDK','Python','PawnIO','InnoSetup')) {
+foreach ($notices in @('Three','PolyHaven','MakeHuman','DotNet','WebView2SDK','Python','PawnIO','InnoSetup')) {
     Copy-Item -LiteralPath (Join-Path 'vendor' $notices) -Destination release\EngineArena\ThirdParty -Recurse -Force
 }
 $sourceFiles = @(& rg --files arena desktop sensors ui tests installer vendor locales)
+$sourceFiles += @(& rg --files prototypes/live-club -g '*.js' -g '*.py' -g '*.html' -g '*.md' -g '*.json' -g '*LICENSE*')
+$sourceFiles += @('prototypes/tal1962/build.py')
+$sourceFiles += @('prototypes/live-club/art/guest-face-atlas.png','prototypes/live-club/art/levy-face.png','prototypes/live-club/art/younger-player-reference.png')
+$sourceFiles += @(& rg --files prototypes/live-club/art -g '*-shirt.svg' -g '*-shirt.png')
 $sourceFiles += @(Get-Content installer\source-scripts.txt | ForEach-Object { Join-Path scripts $_ })
 $sourceFiles += @('worker.py','README.md','LICENSE','NOTICE','pytest.ini','requirements.txt','requirements-dev.txt','requirements.lock.txt','requirements-statistics.txt')
 foreach ($source in $sourceFiles) {

@@ -48,7 +48,7 @@ def original_openings(settings):
     return original
 
 
-def edit(store,tid,name,settings,revision,profiles=None,openings=None,*,keep_openings=True,backup=True):
+def edit(store,tid,name,settings,revision,profiles=None,openings=None,*,keep_openings=True,backup=True,output=None):
     from .store import encode
     from .rankings import create
     if type(revision) is not int:raise ValueError('Reopen Edit setup before saving this tournament.')
@@ -69,6 +69,8 @@ def edit(store,tid,name,settings,revision,profiles=None,openings=None,*,keep_ope
     profiles,s,total=store.prepare_tournament(profiles,s,openings)
     with store.tx():
         require_editable(store,tid,revision)
+        from .pgn_output import bind
+        bind(store,tid,output)
         for table in ('participants','aggregates','rankings','ranking_meta','rating_anchors'):
             store.db.execute(f'DELETE FROM {table} WHERE tid=?',(tid,))
         store.db.execute('UPDATE tournaments SET name=?,settings=?,total=?,setup_revision=setup_revision+1 WHERE id=?',(name,encode(s),total,tid))

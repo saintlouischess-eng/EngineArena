@@ -10,3 +10,6 @@
 .pgn-preview{margin-top:20px;min-width:0}.pgn-preview-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.pgn-preview-title strong{margin-right:auto}
 #pgnPreviewStatus{font-size:.82rem;color:var(--muted)}#pgnExample{width:100%;height:290px;min-height:160px;max-height:65vh;resize:vertical;font:13px/1.6 Consolas,monospace;white-space:pre;overflow:auto;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:12px}
 @media(max-width:680px){.pgn-header-groups,.pgn-export .fields{grid-template-columns:minmax(0,1fr)}}
+.pgn-auto-fields .fields>label{display:flex;flex-direction:column;gap:6px;min-width:0}.pgn-auto-fields input:not([type=checkbox]),.pgn-auto-fields select{min-width:0;width:100%}.pgn-auto-fields h3{margin:0 0 12px}.pgn-output-state{padding:10px 0;border-top:1px solid var(--border)}.pgn-output-state code{overflow-wrap:anywhere}.pgn-output-state p{margin:6px 0}
+
+.pgn-auto-fields .fields>label.pgn-remember{flex-direction:row;align-items:center;gap:10px}.pgn-remember input{flex-shrink:0}

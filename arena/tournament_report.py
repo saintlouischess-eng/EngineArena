@@ -117,16 +117,22 @@ def render(path,tid,confidence=95,all_engines=False,technical=True):
     from .knockout import format_name,round_title
     if event_context:
         condition_rows.extend([(_t('Event'),event_context['name']),(_t('Event stage'),event_context['label']),(_t('Event status'),_t('Current stage') if event_member and event_member['valid'] else _t('Archived / superseded'))])
+    if settings.get('rr_extensions'):
+        condition_rows.append((_t('Round-robin extensions'),len(settings['rr_extensions'])))
+        condition_rows.append((_t('Retained original games'),settings['rr_extensions'][0]['start']*(2 if settings['paired'] else 1)))
     condition_rows[0]=(_t('Format'),_t(format_name(settings['format'])))
     condition_rows=[(_t('Opening positions available'),value) if key==_t('Opening positions') else (key,value) for key,value in condition_rows]
-    condition_rows.extend([(_t('Unique starting positions used'),evidence['openings']['used']),
+    from .schedule_order import LABELS
+    condition_rows.extend([(_t('Game scheduling'),_t(LABELS[settings.get('schedule_order','legacy')])),
+        (_t('Scheduling seed'),settings.get('schedule_seed',7970) if settings.get('schedule_order')=='shuffle' else _t('Not applicable')),
+        (_t('Unique starting positions used'),evidence['openings']['used']),
         (_t('Opening assignment'),{'pair':_t('Fresh position per reversed opening pair') if settings['paired'] else _t('Fresh position per game'),'round':_t('One shared position per round'),'cycle':_t('Shared ordered opening suite'),'fixed':_t('One fixed position throughout'),'legacy':_t('Legacy sequential assignment')}.get(settings.get('opening_policy','legacy'))),
         (_t('Book import depth'),str(settings.get('opening_source',{}).get('depth',_t('Not recorded')))+_t(' plies (half-moves)')),
         (_t('Initial seeding'),settings.get('seeding',_t('Not recorded'))),(_t('Clock tolerance'),_t('{0} seconds' ,f"{settings.get('tolerance', 0):g}")),
         (_t('GUI move overhead'),_t('{0} seconds' ,f"{settings.get('overhead', 0):g}")),
         (_t('Draw claims'),_t('Enabled') if settings['claim_draws'] else _t('Disabled')),
         (_t('Resign adjudication'),_t('{0} cp for {1} plies' ,f"{settings['resign_cp']}",f"{settings['resign_plies']}") if settings['resign_cp'] else _t('Disabled')),
-        (_t('Draw adjudication'),_t('Within {0} cp for {1} plies, after {2} plies' ,f"{settings['draw_cp']}",f"{settings['draw_plies']}",f"{settings['draw_after']}") if settings['draw_cp'] else _t('Disabled')),
+        (_t('Draw adjudication'),_t('Within {0} cp for {1} plies, after {2} played plies from the starting position' ,f"{settings['draw_cp']}",f"{settings['draw_plies']}",f"{settings['draw_after']}") if settings['draw_cp'] else _t('Disabled')),
         (_t('Maximum played plies'),settings['max_plies'] or _t('No adjudication limit')),
         (_t('GUI tablebase adjudication'),_t('Configured') if settings.get('syzygy_path') else _t('Disabled'))])
     if competition:

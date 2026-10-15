@@ -23,10 +23,11 @@ def workspace_bytes(folder):
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--cycles',type=int,default=128)
     parser.add_argument('--node',type=Path,required=True);parser.add_argument('--data',type=Path,default=ROOT/'test-output/rc-load')
-    parser.add_argument('--exercise-exports',action='store_true');args=parser.parse_args()
+    parser.add_argument('--exercise-exports',action='store_true');parser.add_argument('--concurrency',type=int,default=32);args=parser.parse_args()
+    assert 1<=args.concurrency<=32 and args.cycles*2>=args.concurrency
     folder=args.data.resolve();assert folder.is_relative_to(ROOT/'test-output') and not (folder/'arena.sqlite3').exists()
     folder.mkdir(exist_ok=True);c=Candidate(ROOT/'release/EngineArena/EngineArena.exe',folder)
-    output=folder.with_suffix('.json');result={'scope':'Full legal real-engine games; headless Edge with 32 boards and 16 graphs versus frozen worker without a UI','runs':[]}
+    output=folder.with_suffix('.json');result={'scope':f'Full legal real-engine games; headless Edge with {args.concurrency} boards and 16 graphs versus frozen worker without a UI','runs':[]}
     log=(folder/'worker.log').open('w')
     worker=subprocess.Popen([str(ROOT/'release/EngineArena/worker/ArenaWorker.exe'),'--data',str(folder),'--ready',str(c.ready)],stdout=log,stderr=log,creationflags=subprocess.CREATE_NO_WINDOW)
     try:
@@ -39,10 +40,12 @@ def main():
         for name,path in [('Stockfish',ROOT/'validation-engines/stockfish/stockfish/stockfish-windows-x86-64-universal.exe'),('Berserk',ROOT/'validation-engines/berserk-14-avx2.exe')]:
             profiles.append(c.api('profiles',{'name':name+' load','path':str(path),'threads':1,'hash':32,'discover':True})['id'])
         for phase in ('baseline1','live1','live2','baseline2'):
-            t=c.tournament('RC load '+phase,profiles,{'cycles':args.cycles,'concurrency':32,'cpu_budget':32,'memory_budget_mb':24576,'time_control':{'kind':'nodes','nodes':100000},'max_plies':0})
+            t=c.tournament('RC load '+phase,profiles,{'cycles':args.cycles,'concurrency':args.concurrency,'cpu_budget':args.concurrency,'memory_budget_mb':24576,'time_control':{'kind':'nodes','nodes':100000},'max_plies':0})
             graphs=[{'id':'graph-'+str(uuid.uuid4()),'kind':kind,'game':0,'slot':0,'ci':'conservative'} for kind in ['evaluation','mate','wdl','depth','nodes','nps','moveTime','clock','hash','tablebase','cpu','memory','score','draw','elo','sprt']]
+            # The display selector offers 2/4/8/16/32, independently of the
+            # worker budget. Thirty-two slots can display all 28 active games.
             c.api('preferences',{'theme':'dark','pieceSet':'classic','boardCount':32,'fontSize':14,'graphs':graphs,'panels':{g['id']:{'column':'right','visible':True,'height':320} for g in graphs}})
-            phase_file=folder/(phase+'.json');phase_file.write_text(json.dumps(c.info|{'tid':t['id'],'phase':phase}))
+            phase_file=folder/(phase+'.json');phase_file.write_text(json.dumps(c.info|{'tid':t['id'],'phase':phase,'concurrency':args.concurrency}))
             ui=None;ui_log=None
             if phase.startswith('live'):
                 ui_log=(folder/(phase+'-ui.log')).open('w')
@@ -71,7 +74,7 @@ def main():
                 c.action(t['id'],'start');snapshot,measure=c.wait(t['id'],timeout=1200,hook=sample)
                 if ui:
                     assert ui.wait(60)==0,(folder/(phase+'-ui.log')).read_text()
-                assert snapshot['official_games']==args.cycles*2 and measure['peak_games']==32
+                assert snapshot['official_games']==args.cycles*2 and measure['peak_games']==args.concurrency
                 with closing(c.db()) as db:
                     reasons=dict(db.execute('SELECT a.reason,count(*) FROM attempts a JOIN games g ON g.id=a.gid WHERE g.tid=? GROUP BY a.reason',(t['id'],)))
                     assert not set(reasons).intersection(('timeout','crash','hang','illegal_move','startup_timeout','readiness_timeout','max_plies_adjudication')),reasons

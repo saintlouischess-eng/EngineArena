@@ -1,0 +1,56 @@
+[
+  {
+    "file": "LICENSE.txt",
+    "url": "https://raw.githubusercontent.com/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/LICENSE.txt",
+    "bytes": 7048,
+    "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+  },
+  {
+    "file": "README.md",
+    "url": "https://raw.githubusercontent.com/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/README.md",
+    "bytes": 1117,
+    "sha256": "400def805e639a6365d14ecf0fedf926c5b338d63c6a62610f9473cacecb7a23"
+  },
+  {
+    "file": "base.obj",
+    "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj",
+    "bytes": 1749303,
+    "sha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c"
+  },
+  {
+    "file": "eyes.obj",
+    "url": "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/eyes/low-poly/low-poly.obj",
+    "bytes": 6604,
+    "sha256": "783fe1e6331162c876520b4c2bed7a8ca06354ca15497e8ebd68bb1b59f4d3de"
+  },
+  {
+    "file": "short02.obj",
+    "url": "https://raw.githubusercontent.com/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/base/hair/short02/short02.obj",
+    "bytes": 139742,
+    "sha256": "48f979114adfa712165a69cc55c45a70831af1fb3cba8e2a89120f0c87407b64"
+  },
+  {
+    "file": "short02.mhmat",
+    "url": "https://raw.githubusercontent.com/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/base/hair/short02/short02.mhmat",
+    "bytes": 1323,
+    "sha256": "2ed04c8aad9c1a35d858ca72091525d32b1da3b61b5a031634dd528fd8530f6d"
+  },
+  {
+    "file": "short02_diffuse.png",
+    "url": "https://media.githubusercontent.com/media/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/base/hair/short02/short02_diffuse.png",
+    "bytes": 3553543,
+    "sha256": "47fe33831a3929567c733356dd66243116e05df2ace1f884ddca0080b728229f"
+  },
+  {
+    "file": "skin.png",
+    "url": "https://media.githubusercontent.com/media/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/base/skins/textures/middleage_lightskinned_male_diffuse.png",
+    "bytes": 3668589,
+    "sha256": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb"
+  },
+  {
+    "file": "short02.mhclo",
+    "url": "https://raw.githubusercontent.com/s20220526/makehuman-assets/8cf9645b975a98eea056b140df11a1d278da0d10/base/hair/short02/short02.mhclo",
+    "bytes": 119240,
+    "sha256": "625736cdb73e6d094df6e5a2df18f371781f1d2cd37b0ae15795c5d7051c3ec2"
+  }
+]

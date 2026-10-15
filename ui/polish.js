@@ -50,12 +50,11 @@ newTournament=async function(draft=null){
  for(const id of ['tretries','tstartup','tready','thang','tstop','ttolerance','toverhead'])watchdogs.append($('#'+id).closest('.field'));
  resource.previousElementSibling.textContent=ArenaI18n.t('Resource budget');
  resource.insertAdjacentHTML('afterend',ArenaI18n.h('<div class="section-label">Clocks & failure handling</div>'));resource.nextElementSibling.after(watchdogs);
- const adjudication=$('#tresign').closest('.fields');for(const id of ['tmaxplies','tannotations','tclaim'])adjudication.append($('#'+id).closest('.field')||$('#'+id).closest('label'));
+ const adjudication=$('#tresign').closest('.fields');adjudication.insertAdjacentHTML('beforebegin',ArenaI18n.h('<p class="caption" id="adjudicationHelp">One ply is one move by either side; 2 plies equal 1 full move. Windows count successive played plies from both engines. The minimum draw length counts from the selected starting position, excluding imported opening moves. A zero evaluation threshold disables that rule.</p>'));for(const id of ['tmaxplies','tannotations','tclaim'])adjudication.append($('#'+id).closest('.field')||$('#'+id).closest('label'));
  $('#resourceAdvice')&&resource.after($('#resourceAdvice'));$('#useRecommended')&&resource.after($('#useRecommended'));
  const preview=$('.preview-total');preview.classList.add('schedule-summary');$('#modal .modal-foot').prepend(preview);
  const relevance=()=>{const f=$('#tformat').value;$('#trounds').closest('.field').hidden=!['swiss','ladder'].includes(f);$('#tcandidates').closest('.field').hidden=f!=='gauntlet';for(const id of ['telo0','telo1'])$('#'+id).closest('.field').hidden=f!=='sprt'};
  $('#tformat').addEventListener('change',relevance);relevance();organizeEditor(ArenaI18n.t('Tournament & participants'));
- if(!tournamentParticipantCount()){const link=document.createElement('button');link.type='button';link.textContent=ArenaI18n.t('Choose engine profiles');link.dataset.help=ArenaI18n.t('Close this setup and select engines in the library before creating a tournament.');link.onclick=()=>{$('#modal').close();view('engines')};$('#tname').closest('.fields').after(link)}
 };
 $('#newTournament').onclick=safely(newTournament);
 const engineEditorBeforePolish=editEngine;

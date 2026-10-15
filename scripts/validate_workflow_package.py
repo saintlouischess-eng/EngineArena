@@ -1,7 +1,8 @@
-"""Packaged 1.2 acceptance using real CPU engines and disposable data only."""
+"""Packaged acceptance using real CPU engines and disposable data only."""
 from contextlib import closing
 import hashlib,json,time
 from rc_acceptance import Candidate,ROOT
+from arena import __version__
 
 
 def main():
@@ -21,13 +22,16 @@ def main():
         for p in profiles:
             discovered=c.api('profiles/discover',p);assert discovered['identity']['name'];assert discovered['options']['Threads']==1
         master=folder/'opening-suite.pgn';master.write_text('1. e4 e5 2. Nf3 Nc6 *\n\n1. d4 d5 2. c4 e6 *\n',encoding='utf-8')
-        t=c.tournament('1.2 real node-only acceptance',[p['id'] for p in profiles],{'cycles':3,'concurrency':1,'max_plies':40,'time_control':{'kind':'nodes','nodes':30000}},common_control=True,opening_file=str(master),book_depth=4)
+        title=f'{__version__} real node-only acceptance'
+        t=c.tournament(title,[p['id'] for p in profiles],{'cycles':3,'concurrency':1,'max_plies':40,'time_control':{'kind':'nodes','nodes':30000}},common_control=True,opening_file=str(master),book_depth=4)
         tid=t['id'];c.action(tid,'start');deadline=time.monotonic()+90;latencies=[];sheets=0
         while time.monotonic()<deadline:
             s=c.api('status');snap=c.api('tournaments/'+tid)
             if s['live']:
                 g=s['live'][0];start=time.perf_counter();data=c.api(f"games/{g['game']}/moves?after={max(0,g['ply']-4)}&limit=4");latencies.append((time.perf_counter()-start)*1000);sheets+=1
                 assert len(data['items'])<=4
+                assert isinstance(g['knight_facings'],dict)
+                assert all(isinstance(m['knight_facings'],dict) for m in data['items'])
                 for m in data['items']:assert all(k['control']['kind']=='nodes' and k['remaining'] is None for k in m['clocks'].values())
                 if snap['official_games']>=1 and g['ply']>=2:break
             time.sleep(.05)
@@ -44,9 +48,11 @@ def main():
         c.action(tid,'start');final,performance=c.wait(tid,120);assert final['official_games']==6 and final['complete_pairs']==3
         complete=c.api(f'tournaments/{tid}/completion');assert complete['state']=='completed' and complete['last_game']
         sheet=c.api(f"games/{complete['last_game']}/moves");assert sheet['attempt']['official'] and sheet['attempt']['ended'];assert len(sheet['opening_moves'])==4
-        report=c.api(f'tournaments/{tid}/report?technical=0')['html'];assert '1.2 real node-only acceptance' in report and 'opening-suite.pgn' in report
+        assert len(sheet['opening_knight_facings'])==4
+        assert all(isinstance(m['knight_facings'],dict) for m in sheet['items'])
+        report=c.api(f'tournaments/{tid}/report?technical=0')['html'];assert title in report and 'opening-suite.pgn' in report
         (folder/'report.html').write_text(report,encoding='utf-8')
-        evidence.update(passed=True,tournament=tid,official_games=6,opening_pairs=3,imported_profiles=2,duplicate_profiles_skipped=True,
+        evidence.update(passed=True,version=__version__,knightIdentityInLiveAndReplay=True,tournament=tid,official_games=6,opening_pairs=3,imported_profiles=2,duplicate_profiles_skipped=True,
             recovered_committed=len(committed),preserved_interrupted=len(unfinished),pgn=c.pgn(tid,6),scoresheet_requests=sheets,
             scoresheet_max_ms=max(latencies),scoresheet_p95_ms=sorted(latencies)[int(.95*(len(latencies)-1))],performance=performance,
             startup_seconds=c.timings,worker_sha256=hashlib.sha256((ROOT/'release/EngineArena/worker/ArenaWorker.exe').read_bytes()).hexdigest())

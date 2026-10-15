@@ -23,7 +23,14 @@ export function crownGeometry(source,type){
   const x=patch.x+(v-.5)*patch.h,z=patch.z+(u-.5)*patch.w;
   ray.set(new T.Vector3(x,2,z),new T.Vector3(0,-1,0));const hit=ray.intersectObject(probe,false)[0];
   if(!hit||hit.point.y<.9){probe.material.dispose();throw Error('Crown stamp misses the sculpture top')}
-  positions.push(x,hit.point.y+.0007,z);uv.push(u,v);
+  positions.push(x,hit.point.y+.0007,z);
+  // Keep the accepted knight artwork, size and orientation fixed to its head.
+  // Only the rook's turret stamp reads upright from its owner's side.
+  if(type==='n')uv.push(u,v);
+  else{
+   const dx=(x-patch.x)/patch.w,dz=(z-patch.z)/patch.h;
+   uv.push(.5+1.15*dx,.5-1.15*dz);
+  }
  }
  for(let j=0;j<steps;j++)for(let i=0;i<steps;i++){const a=j*(steps+1)+i,b=a+1,d=a+steps+1;indices.push(a,b,d,b,d+1,d)}
  probe.material.dispose();const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setIndex(indices);geometry.computeVertexNormals();return geometry;

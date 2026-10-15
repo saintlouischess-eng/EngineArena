@@ -129,6 +129,16 @@ def test_large_queue_paginates_without_scheduling_games(store):
     assert not store.rows('SELECT * FROM games')
 
 
+def test_add_all_ready_preserves_creation_order_when_timestamps_tie(store):
+    ids=[draft(store,str(i)) for i in range(120)]
+    # Make the formerly intermittent Windows clock collision deterministic.
+    store.execute('UPDATE tournaments SET created=12345')
+    store.queue_call('add',all_ready=True)
+    actual=[item['tid'] for offset in (0,50,100) for item in store.queue_call('page',offset)['items']]
+    assert actual==ids
+    assert not store.rows('SELECT * FROM games')
+
+
 def test_killed_worker_retains_queue_order_results_and_pending_setup(tmp_path):
     script="""import os,sys
 from arena.store import Store

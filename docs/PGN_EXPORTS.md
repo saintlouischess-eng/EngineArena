@@ -44,3 +44,7 @@ Header ordering and escaping follow the [PGN specification](https://www.saremba.
 - Reproducible scripts: `scripts/validate_pgn_presets.py`, `scripts/export_clean_completed_pgn.py`, `scripts/validate_pgn_dialog.cjs`. Evidence: `test-output/pgn-presets-real.json`, `pgn-clean-full.json`, `pgn-dialog-ui.json`, `pgn-presets-focused.xml`, `pgn-polish-full.xml`.
 
 All work is local development. The installer and GitHub release remain unchanged.
+
+## Automatic shared output (1.5.12)
+
+**Automatic PGN…** adds a continuing output destination, independent of one-time Save As. See [automatic PGN workflow and recovery](V1_5_12_AUTOMATIC_PGN.md).

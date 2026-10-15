@@ -28,10 +28,11 @@ def select(s,t,active=(),scan=None,limit=256):
 
 
 @pytest.mark.parametrize('policy',['pair','round'])
-def test_240_games_cpu_runs_ahead_gpu_catches_up_and_pairs_pgn_stay_exact(tmp_path,policy):
+@pytest.mark.parametrize('order',['legacy','balanced','matchup','shuffle'])
+def test_240_games_cpu_runs_ahead_gpu_catches_up_and_pairs_pgn_stay_exact(tmp_path,policy,order):
     s=Store(tmp_path)
     try:
-        t=s.create_tournament('Mixed RR',field(),settings(opening_policy=policy),backup=False)
+        t=s.create_tournament('Mixed RR',field(),settings(opening_policy=policy,schedule_order=order),backup=False)
         tid=t['id'];s.set_state(tid,'running');s.fill_queue(tid,56)
         active=[]
         for _ in range(28):

@@ -7,7 +7,7 @@ const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtime
  try{
   const page=await browser.newPage({viewport:{width:1450,height:1000}});page.on('pageerror',e=>errors.push(e.message));
   await page.goto(ready.url+'&lang=en');await page.waitForFunction(()=>state.snapshot&&queueData);
-  const before=await page.evaluate(async()=>{await loadEngines();state.selected=new Set(state.engines.slice(0,2).map(x=>x.id));document.querySelector('#allProfiles').checked=false;return (await api('tournaments')).length});
+  const before=await page.evaluate(async()=>{const draft=await api('setup-draft');await api('setup-draft',{revision:draft.revision,value:null});await loadEngines();state.selected=new Set(state.engines.slice(0,2).map(x=>x.id));document.querySelector('#allProfiles').checked=false;return (await api('tournaments')).length});
   await page.locator('#newTournament').click();await page.waitForFunction(()=>document.querySelector('#createTournament')&&!document.querySelector('#createTournament').disabled);
   await page.locator('#tname').fill('Clear save confirmation');
   let sent=0,release;const gate=new Promise(r=>release=r);

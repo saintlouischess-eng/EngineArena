@@ -9,6 +9,7 @@ from functools import lru_cache
 from .models import static_pair,scheduled_pairs
 from .opening_policy import round_pair
 from .resources import fits,game_cost
+from .schedule_order import canonical
 
 DYNAMIC={'swiss','knockout','double_elimination','ladder'}
 
@@ -29,10 +30,10 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
     signature=(used,admission,t['round'])
     compatible=scan and scan['signature'][1:]==signature[1:]
     if not compatible or not no_more_capacity(used,scan['signature'][0]):
-        scan={'signature':signature,'pending_after':-1,'phase':'pending','future':t['cursor'],'reason':''}
+        scan={'signature':signature,'pending_after':(-2,-1),'phase':'pending','future':t['cursor'],'reason':''}
     else:
         scan=dict(scan)
-        if scan['signature']!=signature:scan.update(pending_after=-1,phase='pending',signature=signature)
+        if scan['signature']!=signature:scan.update(pending_after=(-2,-1),phase='pending',signature=signature)
         scan['future']=max(scan['future'],t['cursor'])
 
     @lru_cache(maxsize=256)
@@ -46,7 +47,7 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
         if not allowed and not scan['reason']:scan['reason']=why
         return allowed
 
-    def rewind_pending(state):return dict(state,phase='pending',pending_after=-1)
+    def rewind_pending(state):return dict(state,phase='pending',pending_after=(-2,-1))
 
     def claim(gid,from_pending=False):
         if dry_run:
@@ -61,9 +62,9 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
 
     # Prefer the earliest eligible recorded game, including retries and replays.
     if scan['phase']=='pending':
-        rows=store.rows("SELECT id,number,white,black FROM games WHERE tid=? AND state='pending' AND invalid=0 AND number>?"+(" AND mode='diagnostic'" if diagnostic_only else '')+" ORDER BY number LIMIT ?",(tid,scan['pending_after'],limit))
+        rows=store.rows("SELECT id,number,schedule_index,white,black FROM games WHERE tid=? AND state='pending' AND invalid=0 AND (schedule_index,number)>(?,?)"+(" AND mode='diagnostic'" if diagnostic_only else '')+" ORDER BY schedule_index,number LIMIT ?",(tid,*scan['pending_after'],limit))
         for g in rows:
-            scan['pending_after']=g['number']
+            scan['pending_after']=(g['schedule_index'],g['number'])
             if eligible(g['white'],g['black']):return claim(g['id'],True)
         if len(rows)==limit:return empty|{'scan':scan,'exhausted':False}
         scan['phase']='future'
@@ -77,18 +78,26 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
     checked=0
     while scan['future']<total and checked<limit:
         from .custom_matchups import pair,decode
-        k=scan['future'];a,b,rep=pair(k,t['participants'],s);checked+=1
+        position=scan['future'];k=canonical(position,t['participants'],s);a,b,rep=pair(k,t['participants'],s);checked+=1
         if not eligible(a,b):
-            scan['future']=k+1 if decoder is round_pair else min(total,(k//s['cycles']+1)*s['cycles'])
-            if s['format']=='custom':scan['future']=decode(k,s)[3]
-            elif decoder is round_pair:
+            if s.get('rr_extensions'):
+                scan['future']=position+1
+                continue  # Segment permutations have different skip boundaries.
+            legacy=s.get('schedule_order','legacy')=='legacy'
+            scan['future']=position+1
+            if s.get('schedule_order')=='matchup':
+                scan['future']=decode(position,s)[3] if s['format']=='custom' else min(total,(position//s['cycles']+1)*s['cycles'])
+            if s['format'] in ('match','sprt'):scan['future']=total
+            if legacy and decoder is not round_pair:scan['future']=min(total,(k//s['cycles']+1)*s['cycles'])
+            if legacy and s['format']=='custom':scan['future']=decode(k,s)[3]
+            elif (legacy and decoder is round_pair) or (s.get('schedule_order')=='balanced' and s['format']!='custom'):
                 scan['blocked_run']=scan.get('blocked_run',0)+1
                 if scan['blocked_run']>=period:scan['future']=total
             continue
-        scan['blocked_run']=0;scan['future']=k+1
+        scan['blocked_run']=0;scan['future']=position+1
         if store.one('SELECT id FROM games WHERE tid=? AND pair_no=? LIMIT 1',(tid,k)):continue
         if dry_run:return empty|{'game':{'planned_pair':k},'white':profile(a),'black':profile(b)}
-        with store.tx():store._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom')
+        with store.tx():store._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom' or bool(s.get('rr_extensions')),schedule_index=position)
         g=store.one('SELECT id FROM games WHERE tid=? AND pair_no=? ORDER BY leg LIMIT 1',(tid,k))
         return claim(g['id'])
     exhausted=scan['future']>=total

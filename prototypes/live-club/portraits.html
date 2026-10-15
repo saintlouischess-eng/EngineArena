@@ -1,0 +1,19 @@
+<!doctype html><meta charset="utf-8"><title>Engine Arena · Cast review</title>
+<style>body{margin:0;background:#282f35;color:white;font:15px system-ui}#view{display:grid;grid-template-columns:repeat(3,1fr)}section{position:relative}canvas{width:100%;display:block}label{position:absolute;bottom:12px;left:18px}</style><div id="view"></div>
+<script type="module">
+import * as T from '/ui/three.module.js';
+import {GLTFLoader} from '/ui/three-gltf.js';
+import {prepareClubCharacter,clubCastNames} from '/ui/board3d-club-motion.js';
+const q=new URLSearchParams(location.search), names=q.get('names')?.split(',')||clubCastNames.slice(6), loader=new GLTFLoader();
+window.review={ready:false,models:[],render(){for(const x of this.models)x.renderer.render(x.scene,x.camera)}};
+for(const name of names){
+ const section=document.createElement('section');document.querySelector('#view').append(section);const canvas=document.createElement('canvas');section.append(canvas);const label=document.createElement('label');label.textContent=name;section.append(label);
+ const renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setSize(640,530);renderer.setPixelRatio(1);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+ const scene=new T.Scene();scene.background=new T.Color('#353e45');scene.add(new T.HemisphereLight(0xeaf3ff,0x8b7667,2));const key=new T.DirectionalLight(0xfff2e4,3);key.position.set(-6,12,14);scene.add(key);const fill=new T.DirectionalLight(0xcadfff,1.4);fill.position.set(9,5,-2);scene.add(fill);
+ const model=await loader.loadAsync('/ui/club-'+name+'.glb'),g=model.scene;prepareClubCharacter(g);scene.add(g);const mixer=new T.AnimationMixer(g);mixer.clipAction(model.animations[0]).play();mixer.update(0);g.updateWorldMatrix(true,true);
+ const bones={};g.traverse(o=>{if(o.isBone)bones[o.name]=o});const eye=bones.eyeL.getWorldPosition(new T.Vector3()), target=new T.Vector3(0,eye.y-.1,0);const camera=new T.PerspectiveCamera(28,640/530,.1,200);
+ if(q.has('feet')){const feet=bones.footL.getWorldPosition(new T.Vector3()).lerp(bones.footR.getWorldPosition(new T.Vector3()),.5);target.copy(feet).add(new T.Vector3(0,-.4,1));camera.position.copy(target).add(new T.Vector3(7,5,19))}else if(q.has('full')){target.y=16;camera.position.set(0,18,77)}else camera.position.set(q.has('back')?9:q.has('side')?17:0,target.y+1,q.has('back')?-17:q.has('side')?7:19);
+ camera.lookAt(target);const item={name,g,bones,scene,camera,renderer,mixer};review.models.push(item);renderer.render(scene,camera);
+}
+review.ready=true;
+</script>

@@ -49,6 +49,13 @@ def observe_line(body,line):
     """Parse only specific engine announcements; do not interpret arbitrary log text."""
     text=line.removeprefix('stderr ').removeprefix('< ').removeprefix('info string ').strip()
     changed=False
+    if text.startswith('GPU:'):
+        value=text[4:].strip()[:2048]
+        models=body.setdefault('gpu_models',[])
+        if value and value not in models:models.append(value);changed=True
+        observation={'backend_instance':body.get('backend_instance',0),'model':value}
+        observations=body.setdefault('gpu_observations',[])
+        if value and observation not in observations:observations.append(observation);changed=True
     for prefix,key in (('Loading weights file from:','network_file'),('GPU:','gpu'),
                        ('CUDA Runtime version:','cuda_runtime'),('Latest version of CUDA supported by the driver:','driver_cuda')):
         if text.startswith(prefix):
@@ -59,6 +66,8 @@ def observe_line(body,line):
         if body.get('backend')!=value:body['backend']=value;changed=True
     if text.startswith('Creating backend [') and ']' in text:
         value=text.partition('[')[2].partition(']')[0]
+        body['backend_instance']=body.get('backend_instance',0)+1;changed=True
+        if not body.get('root_backend'):body['root_backend']=value;changed=True
         if body.get('backend')!=value:body['backend']=value;changed=True
     return changed
 

@@ -102,3 +102,7 @@
 .dock-panel[data-panel=games]>.pager label{flex-wrap:wrap}
 .dock-panel[data-panel=games] #games{min-width:680px}
 .dock-panel[data-panel=games].floating-panel{min-height:min(var(--history-min-height,420px),calc(100dvh - 16px))}
+
+.board-3d-recovery{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:0 0 auto;padding:10px 14px;margin:0;border-bottom:1px solid var(--border);background:var(--raised);color:var(--text);font-size:.86rem}.board-3d-recovery[hidden]{display:none}.board-3d-recovery span{flex:1;min-width:180px}.board-3d-recovery button{flex:0 0 auto;font-size:inherit}
+
+.focus-draw-rule{font-size:max(11px,1em);font-variant-numeric:tabular-nums;color:var(--muted);padding:3px 7px;border:1px solid var(--border);border-radius:6px;white-space:normal}.focus-draw-rule.near-limit{color:var(--text);border-color:var(--accent)}.extend-list{max-height: min(38vh,360px);overflow:auto}.extend-list td:first-child{width:40px}.extend-list input{min-width:18px;min-height:18px}

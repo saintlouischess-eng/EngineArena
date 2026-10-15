@@ -19,9 +19,12 @@ async function savePgn(url,name){
  const a=document.createElement('a');a.href=url+(url.includes('?')?'&':'?')+'token='+encodeURIComponent(token);a.download=name;a.click();return {download:true};
 }
 
-async function pgnDialog(){
- if(!state.tid)return;
- const tid=state.tid,name=state.snapshot?.name||'tournament',schema=await api('pgn-options');
+async function pgnDialog(context=null){
+ const player=context?.player===true;
+ if(!player&&!state.tid)return;
+ const tid=player?context.id:state.tid,name=player?context.name:state.snapshot?.name||'tournament',schema=await api('pgn-options');
+ const previewUrl=player?'/api/player/pgn-preview?id='+encodeURIComponent(tid):`/api/tournaments/${tid}/pgn-preview`;
+ const exportBase=player?'/api/player/pgn?id='+encodeURIComponent(tid)+'&':`/api/export/${tid}/pgn?`;
  // Old preferences combined annotation style and header detail. Migrate them
  // once into the new explicit model without importing unwanted archive tags.
  const saved=displayPrefs.pgnExport||{};
@@ -34,7 +37,7 @@ async function pgnDialog(){
  }
  const presetOptions=Object.entries(schema.presets).map(([key,p])=>`<option value="${key}">${esc(ArenaI18n.t(p.label))}${key==='annotated'?' · '+ArenaI18n.t('Recommended'):''}</option>`).join('');
  const annotationLabels=[['eval','Evaluation'],['depth','Depth'],['elapsed','Time spent on move'],['clock','Remaining clock'],['nodes','Nodes'],['nps','Nodes per second'],['seldepth','Selective depth']];
- modal(ArenaI18n.t('Export tournament PGN'),ArenaI18n.h`
+ modal(ArenaI18n.t(player?'Export player PGN':'Export tournament PGN'),ArenaI18n.h`
   <div class="pgn-export">
    <p>Export current official results, with verified opening moves. Choose a preset, then customize only what you need.</p>
    <div class="fields">
@@ -66,6 +69,10 @@ async function pgnDialog(){
    <p id="pgnSaveStatus" role="status"></p>
   </div>`,ArenaI18n.h`<button id="rememberPgnSettings">Remember choices</button><button id="savePgnText">Save TXT as…</button><button id="savePgnFile" class="primary">Save PGN as…</button>`);
  const root=$('#pgnExample'),status=$('#pgnSaveStatus'),alive=()=>$('#modal').open&&$('#pgnExample')===root;
+ if(player){
+  $('#modal .pgn-export>p').textContent=ArenaI18n.t('Export saved Player Arena games. Human moves include elapsed time and clocks; engine measurements appear only when recorded.');
+  $('#modal .pgn-export>p.caption').textContent=ArenaI18n.t('Automatic copies use Player settings. Export choices never change stored moves or results.');
+ }
  let timer,revision=0,previewController,saving=false;
  const fields={style:'pgnStyle',perspective:'pgnPerspective',book_comments:'pgnBookComments',columns:'pgnColumns',event:'pgnEvent',site:'pgnSite',names:'pgnNames',date_zone:'pgnDateZone',preset:'pgnPreset'};
  function read(){
@@ -95,7 +102,7 @@ async function pgnDialog(){
  async function preview(){
   if(!alive())return;const version=revision,controller=new AbortController();previewController=controller;
   try{
-   const response=await fetch(`/api/tournaments/${tid}/pgn-preview`,{method:'POST',signal:controller.signal,headers:{'X-Arena-Token':token,'Content-Type':'application/json'},body:JSON.stringify(read())});
+   const response=await fetch(previewUrl,{method:'POST',signal:controller.signal,headers:{'X-Arena-Token':token,'Content-Type':'application/json'},body:JSON.stringify(read())});
    const data=await response.json();if(!response.ok)throw Error(ArenaI18n.message(data.error)||ArenaI18n.t('PGN export failed'));
    if(!alive()||version!==revision)return;
    root.value=data.pgn;$('#pgnCopyPreview').disabled=!data.pgn||data.truncated;
@@ -111,7 +118,7 @@ async function pgnDialog(){
  $('#pgnTestingHeaders').onclick=()=>{for(const e of $$('[data-pgn-header]'))e.checked=schema.presets.testing.options.headers.includes(e.dataset.pgnHeader);changed()};
  $('#pgnRefreshPreview').onclick=schedule;
  $('#pgnCopyPreview').onclick=safely(async()=>{try{await navigator.clipboard.writeText(root.value);status.textContent=ArenaI18n.t('Copied to clipboard.')}catch{root.focus();root.select();status.textContent=ArenaI18n.t('Automatic clipboard access is unavailable. The text is selected; press Ctrl+C to copy.')}});
- async function remember(value=read()){displayPrefs.pgnExport={version:2,...value};await persistDisplay()}
+ async function remember(value=read()){displayPrefs.pgnExport={version:2,...value};await persistDisplay();if(player)await api('player/settings',{pgn_options:value})}
  $('#rememberPgnSettings').onclick=safely(async()=>{await remember();if(alive())status.textContent=ArenaI18n.t('Export choices saved for next time.')});
  async function save(filetype){
   if(saving)return;saving=true;const value=read();const query=new URLSearchParams({...value,headers:value.headers.join(','),annotations:value.annotations.join(','),filetype});
@@ -119,7 +126,7 @@ async function pgnDialog(){
   for(const id of ['savePgnText','savePgnFile'])$('#'+id).disabled=true;
   status.textContent=ArenaI18n.t('Choose a location. The export streams to disk; large tournaments can take time.');
   try{
-   const result=await savePgn(`/api/export/${tid}/pgn?${query}`,filename);
+   const result=await savePgn(exportBase+query,filename);
    if(result.cancelled){if(alive())status.textContent=ArenaI18n.t('Save cancelled. No file was changed.');return}
    // A preference-write failure must not misreport a successfully saved PGN.
    await remember(value).catch(error=>notify(error.message,true));

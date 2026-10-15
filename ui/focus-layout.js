@@ -34,8 +34,9 @@ if(typeof document!=='undefined'){
    ${field('focusClockDigits',ArenaI18n.t('Clock number size (px)'),p.digits,'number','min="16" max="80" step="1" required')}
    ${field('focusClockWidth',ArenaI18n.t('Side clock width (px)'),p.width,'number','min="140" max="400" step="1" required')}
    ${field('focusBoardMax',ArenaI18n.t('Maximum board size (px; 0 = fit window)'),p.boardMax,'number','min="0" max="1600" step="1" required')}
-   <label><input id="focusClockNames" type="checkbox"> Show engine names</label><label><input id="focusClockDetails" type="checkbox"> Show clock details</label>
+   <label><input id="focusDrawRule" type="checkbox"> Show draw-rule counter</label><label><input id="focusClockNames" type="checkbox"> Show engine names</label><label><input id="focusClockDetails" type="checkbox"> Show clock details</label>
   </div><p class="caption">Clocks stay labeled White and Black. Numbers shrink to fit narrow boxes. Small windows scroll internally when needed; side clocks move above the board on narrow panels.</p><div class="focus-layout-presets"><button data-focus-preset="compact">Compact</button><button data-focus-preset="large">Large clocks</button><button data-focus-preset="split">Board between clocks</button><button data-focus-preset="default">Reset layout</button></div><div id="focusLayoutPreview" class="focus-layout-preview"></div></div>`,ArenaI18n.h`<button class="primary" id="saveFocusLayout">Save board and clocks</button>`);
+  $('#focusDrawRule').checked=displayPrefs.showDrawRule!==false;
   const fields={placement:'focusClockPlacement',arrangement:'focusClockArrangement',order:'focusClockOrder',height:'focusClockHeight',digits:'focusClockDigits',width:'focusClockWidth',boardMax:'focusBoardMax',names:'focusClockNames',details:'focusClockDetails'};
   const read=()=>Object.fromEntries(Object.entries(fields).map(([key,id])=>[key,typeof p[key]==='boolean'?$('#'+id).checked:typeof p[key]==='number'?Number($('#'+id).value):$('#'+id).value]));
   const preview=$('#focusLayoutPreview'),source=$('#focusContent .focus-stage');
@@ -48,7 +49,7 @@ if(typeof document!=='undefined'){
   for(const [key,id] of Object.entries(fields))$('#'+id).addEventListener('input',paint);
   for(const id of ['focusClockHeight','focusClockDigits','focusClockWidth','focusBoardMax'])$('#'+id).dataset.help=ArenaI18n.t('Adjust this display size. The board still fits the available panel space.');
   $$('[data-focus-preset]').forEach(b=>b.onclick=()=>apply({...ArenaFocusLayout.defaults,...({compact:{height:60,digits:22,details:false},large:{height:130,digits:52},split:{placement:'split',order:'board'}}[b.dataset.focusPreset]||{})}));
-  $('#saveFocusLayout').onclick=safely(async()=>{if(!Object.values(fields).every(id=>$('#'+id).reportValidity()))return;displayPrefs.panels.focus={...panelSettings('focus'),clocks:read()};renderFocus();await persistDisplay();$('#modal').close()});
+  $('#saveFocusLayout').onclick=safely(async()=>{if(!Object.values(fields).every(id=>$('#'+id).reportValidity()))return;displayPrefs.showDrawRule=$('#focusDrawRule').checked;displayPrefs.panels.focus={...panelSettings('focus'),clocks:read()};renderFocus();await persistDisplay();$('#modal').close()});
   apply(p);
  };
  styleFocusLayout($('#focusContent'));

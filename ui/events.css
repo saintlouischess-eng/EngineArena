@@ -10,3 +10,25 @@
 #eventDecisions .table-scroll{max-height:38vh}
 #eventContext{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap}
 .event-editor [hidden],#customEditor [hidden],#eventContext[hidden]{display:none!important}
+.event-panel{border:1px solid var(--border);border-radius:12px;padding:1.15rem;margin-bottom:1rem;background:var(--panel)}
+.event-panel h3{margin:0 0 1rem;font-size:1.05rem}
+.event-panel h3:not(:first-child){margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+.event-panel>label{display:flex;flex-direction:column;gap:.45rem;margin:.8rem 0}
+.event-panel .event-check{flex-direction:row;align-items:center;font-weight:600}
+.event-editor input[type=checkbox]{width:auto}
+.event-panel .fields>button{align-self:end;margin-bottom:.9rem}
+.event-tie-control{padding:1rem;border:1px solid var(--border);border-radius:8px;margin:.8rem 0}
+.event-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem}
+.event-summary-grid>div{border:1px solid var(--border);padding:.8rem;border-radius:10px}
+.event-summary-grid small,.event-summary-grid strong{display:block;overflow-wrap:anywhere}
+.event-summary-grid strong{margin-top:.35rem;font-size:1.15rem}
+.event-final-result{border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:8px;padding:.7rem 1rem;margin:.7rem 0 1.2rem}
+.event-match-score{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
+#eventDecisions>h3{margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+.season-intro{margin:.3rem 0 1.5rem;padding:1.2rem;border-left:4px solid var(--accent);background:var(--panel);border-radius:8px}
+.season-intro h2{margin:.5rem 0}.season-eyebrow{font-size:.8rem;letter-spacing:.13em;color:var(--accent);font-weight:700}
+.season-flow{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:0 0 1rem}.season-flow span{padding:.65rem .9rem;border:1px solid var(--border);border-radius:8px;background:var(--panel)}
+.season-conditions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:.8rem}.season-conditions label{display:flex;flex-direction:column;gap:.4rem}
+.season-decision{padding:.8rem;border:1px solid var(--border);border-radius:8px;margin:.7rem 0}.season-decision summary{cursor:pointer;font-weight:600}
+.season-delete-list{max-height:30vh;overflow:auto}.season-delete-list small{display:block;margin:.3rem}
+#eventRows input[type=checkbox]{width:auto;margin-right:.7rem}#rosterChoices{display:flex;gap:.4rem;flex-wrap:wrap;max-height:25vh;overflow:auto}#rosterGroups{width:100%;resize:vertical;max-height:35vh}#seasonRosterList .table-scroll{max-height:38vh}

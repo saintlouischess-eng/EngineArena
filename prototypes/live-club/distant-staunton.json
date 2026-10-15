@@ -1,0 +1,8 @@
+{
+  "source": "ui/staunton1849.glb",
+  "source_sha256": "fa661104f60b7a7f3be5cc6d7c6b95fb2dba62197eb0731760d1129c7f9b32a3",
+  "polygons_before": 327958,
+  "polygons_after": 21312,
+  "purpose": "Only background chess tables in the standalone room prototype",
+  "output_sha256": "15ca15ef381b677a2643698282d0b956d4f58a20a9e06f50f1b2758fcc8631c2"
+}

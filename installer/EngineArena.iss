@@ -11,8 +11,8 @@
 [Setup]
 AppId={{579ABF77-881B-49B9-ACE4-E7D302683E37}
 AppName=Engine Arena
-AppVersion=1.2.14
-AppVerName=Engine Arena 1.2.14
+AppVersion=1.9.7
+AppVerName=Engine Arena 1.9.7
 AppPublisher=Engine Arena
 AppPublisherURL=https://github.com/saintlouischess-eng/EngineArena
 AppSupportURL=https://github.com/saintlouischess-eng/EngineArena/issues
@@ -31,8 +31,8 @@ CloseApplications=no
 RestartApplications=no
 UninstallDisplayIcon={app}\EngineArena.exe
 OutputDir=..\release
-OutputBaseFilename=EngineArenaSetup-1.2.14-win-x64
-VersionInfoVersion=1.2.14.0
+OutputBaseFilename=EngineArenaSetup-1.9.7-win-x64
+VersionInfoVersion=1.9.7.0
 Compression=lzma2
 SolidCompression=yes
 DiskSpanning=no
@@ -103,7 +103,7 @@ end;
 
 procedure InitializeWizard;
 begin
-  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 1.2.14 for this Windows account.' + #13#10#13#10 +
+  WizardForm.WelcomeLabel2.Caption := 'Install Engine Arena 1.9.7 for this Windows account.' + #13#10#13#10 +
     'The app, Python, .NET and the offline Microsoft WebView2 installer are included. Chess engines and opening books are added separately.' + #13#10#13#10 +
     'Close Engine Arena before updating. Existing tournaments and settings are preserved.';
 end;

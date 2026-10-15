@@ -19,5 +19,16 @@ under ThirdParty/python-chess. Exact LibreHardwareMonitor and PawnIO source
 archives and upstream notices accompany the package. See docs/THIRD_PARTY.md.
 
 The optional 3D renderer includes Three.js (MIT), with its license and pinned
-provenance under ThirdParty/Three. The 1849-style models and wood maps are
+provenance under ThirdParty/Three. The 1849-style and Tal 1962 models and wood maps are
 original Engine Arena artwork under GPL-3.0-or-later.
+
+Photographic room panoramas, HDR illumination and scanned tabletop/leather
+materials are free public-domain assets from Poly Haven (CC0 1.0), not original
+Engine Arena artwork. Authors, sources and transformations are documented in
+ThirdParty/PolyHaven/provenance.json.
+
+Background characters in the optional live rooms use adapted MakeHuman head,
+skin and hair assets (CC0 1.0). They are not original Engine Arena artwork.
+Sources, hashes and the CC0 notice are in ThirdParty/MakeHuman. Clothing,
+furniture, background chess sets, scene layout and animation are Engine Arena
+artwork. See docs/THIRD_PARTY.md.

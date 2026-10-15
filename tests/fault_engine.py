@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 import chess
 
-p=argparse.ArgumentParser();p.add_argument('--mode',default='normal');p.add_argument('--wait',type=float,default=0);p.add_argument('--transcript');p.add_argument('--marker');p.add_argument('--bestmove');p.add_argument('--ponder-move');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--mode',default='normal');p.add_argument('--wait',type=float,default=0);p.add_argument('--transcript');p.add_argument('--marker');p.add_argument('--bestmove');p.add_argument('--ponder-move');p.add_argument('--white-scores');args=p.parse_args()
 board=chess.Board();rng=random.Random(7970);pending_ponder=None
 def say(line):print(line,flush=True)
 for raw in sys.stdin:
@@ -57,6 +57,12 @@ for raw in sys.stdin:
             say('info string depth 999 score cp 999 pv '+other)
             say('info multipv 2 depth 99 score cp 888 pv '+other)
             if args.wait:time.sleep(args.wait)
+        elif args.white_scores:
+            # Explicit White-relative score stream for adjudication boundary
+            # tests. Emit ordinary UCI side-to-move scores, as a real peer does.
+            scores=args.white_scores.split(',');score=scores[min(len(board.move_stack),len(scores)-1)]
+            score_text='' if score=='none' else 'score cp '+str(int(score)*(1 if board.turn else -1))+' '
+            say('info depth 7 '+score_text+'nodes 100 pv '+move)
         else:say('info depth 7 seldepth 9 score cp 14 nodes 100 nps 10000 hashfull 3 tbhits 0 wdl 320 410 270 pv '+move)
         suffix=''
         if args.ponder_move:suffix=' ponder '+args.ponder_move

@@ -16071,22 +16071,18 @@ const DATA = new Uint16Array( [
 	0x3c00, 0x0000, 0x3c00, 0x0001, 0x3bff, 0x0015, 0x3bfb, 0x0059, 0x3bf2, 0x00fd, 0x3bdd, 0x01df, 0x3bb7, 0x031c, 0x3b79, 0x047c, 0x3b1d, 0x05d4, 0x3aa0, 0x06d5, 0x3a08, 0x075a, 0x395d, 0x075e, 0x38aa, 0x06f7, 0x37f4, 0x0648, 0x36ac, 0x0576, 0x3586, 0x049f
 ] );
 
-let lut = null;
+// Engine Arena: each renderer owns its LUT. A shared texture's dispose listeners
+// otherwise retain every retired WebGL context during long tournament sessions.
+function createDFGLUT() {
 
-function getDFGLUT() {
-
-	if ( lut === null ) {
-
-		lut = new DataTexture( DATA, 16, 16, RGFormat, HalfFloatType );
-		lut.name = 'DFG_LUT';
-		lut.minFilter = LinearFilter;
-		lut.magFilter = LinearFilter;
-		lut.wrapS = ClampToEdgeWrapping;
-		lut.wrapT = ClampToEdgeWrapping;
-		lut.generateMipmaps = false;
-		lut.needsUpdate = true;
-
-	}
+	const lut = new DataTexture( DATA, 16, 16, RGFormat, HalfFloatType );
+	lut.name = 'DFG_LUT';
+	lut.minFilter = LinearFilter;
+	lut.magFilter = LinearFilter;
+	lut.wrapS = ClampToEdgeWrapping;
+	lut.wrapT = ClampToEdgeWrapping;
+	lut.generateMipmaps = false;
+	lut.needsUpdate = true;
 
 	return lut;
 
@@ -16130,7 +16126,7 @@ class WebGLRenderer {
 		 */
 		this.isWebGLRenderer = true;
 
-		let _alpha;
+		let _alpha, dfgLUT = null;
 
 		if ( context !== null ) {
 
@@ -17125,6 +17121,9 @@ class WebGLRenderer {
 			canvas.removeEventListener( 'webglcontextlost', onContextLost, false );
 			canvas.removeEventListener( 'webglcontextrestored', onContextRestore, false );
 			canvas.removeEventListener( 'webglcontextcreationerror', onContextCreationError, false );
+
+			// Dispose while this renderer's texture properties are still available.
+			if ( dfgLUT !== null ) { dfgLUT.dispose(); dfgLUT = null; }
 
 			background.dispose();
 			renderLists.dispose();
@@ -18779,7 +18778,7 @@ class WebGLRenderer {
 			// Set DFG LUT for physically-based materials
 			if ( m_uniforms.dfgLUT !== undefined ) {
 
-				m_uniforms.dfgLUT.value = getDFGLUT();
+				m_uniforms.dfgLUT.value = dfgLUT ??= createDFGLUT();
 
 			}
 

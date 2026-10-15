@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1024" viewBox="0 0 768 1024">
+  <title>Pineapple — original left-chest cameo emblem</title>
+  <defs><clipPath id="fruit"><path d="M384 361c-136 0-215 117-215 295 0 167 83 265 215 265s215-98 215-265c0-178-79-295-215-295z"/></clipPath></defs>
+  <g stroke="#bdcf86" stroke-width="11" stroke-linejoin="round">
+    <path fill="#56885a" d="M379 414C247 356 219 256 153 228c119-13 178 52 217 114C292 241 313 128 291 94c80 43 104 150 100 222 31-118 99-158 153-171-28 58-46 119-111 191 77-50 141-44 180-34-78 29-102 89-214 124z"/>
+    <path fill="#8fac68" d="M383 381c-28-116-13-189 22-257 30 87 36 166-22 257z"/>
+  </g>
+  <path fill="#e7b957" stroke="#f6da8f" stroke-width="13" d="M384 361c-136 0-215 117-215 295 0 167 83 265 215 265s215-98 215-265c0-178-79-295-215-295z"/>
+  <g clip-path="url(#fruit)" fill="none" stroke="#ac7839" stroke-width="10">
+    <path d="M10 409l601 601M56 317l601 601M102 225l601 601M148 133l601 601M-82 455l601 601M-174 501l601 601M758 409l-601 601M712 317l-601 601M666 225L65 826M620 133L19 734M850 455l-601 601M942 501l-601 601"/>
+  </g>
+  <path d="M265 504c-29 50-43 111-43 167" fill="none" stroke="#fff0b1" stroke-width="14" stroke-linecap="round"/>
+</svg>

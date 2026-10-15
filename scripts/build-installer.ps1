@@ -60,12 +60,16 @@ foreach ($name in Get-Content installer\public-docs.txt) {
 Copy-Item -LiteralPath optional-components\PawnIO\PawnIO_setup.exe -Destination (Join-Path $payload 'Optional') -Force
 Copy-Item -Path vendor\PawnIO\* -Destination (Join-Path $payload 'ThirdParty\PawnIO') -Force
 Copy-Item -LiteralPath vendor\InnoSetup\LICENSE.txt -Destination (Join-Path $payload 'ThirdParty\InnoSetup') -Force
-foreach ($notices in @('Three','DotNet','WebView2SDK','Python')) {
+foreach ($notices in @('Three','PolyHaven','MakeHuman','DotNet','WebView2SDK','Python')) {
     Copy-Item -LiteralPath (Join-Path 'vendor' $notices) -Destination (Join-Path $payload 'ThirdParty') -Recurse -Force
 }
 
 # A curated, auditable source snapshot: no local databases, exports, media, logs or Git history.
 $sourceFiles = @(& rg --files arena desktop sensors ui tests installer vendor locales)
+$sourceFiles += @(& rg --files prototypes/live-club -g '*.js' -g '*.py' -g '*.html' -g '*.md' -g '*.json' -g '*LICENSE*')
+$sourceFiles += @('prototypes/tal1962/build.py')
+$sourceFiles += @('prototypes/live-club/art/guest-face-atlas.png','prototypes/live-club/art/levy-face.png','prototypes/live-club/art/younger-player-reference.png')
+$sourceFiles += @(& rg --files prototypes/live-club/art -g '*-shirt.svg' -g '*-shirt.png')
 $sourceFiles += @(Get-Content installer\source-scripts.txt | ForEach-Object { Join-Path scripts $_ })
 $sourceFiles += @('worker.py','README.md','LICENSE','NOTICE','.gitignore','pytest.ini','requirements.txt','requirements-dev.txt','requirements.lock.txt','requirements-statistics.txt')
 foreach ($source in $sourceFiles) {
@@ -80,8 +84,9 @@ $inventory = foreach ($file in Get-ChildItem -LiteralPath $payload -Recurse -Fil
 $inventory | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $payload 'package-manifest.json') -Encoding UTF8
 & $Compiler '/Qp' ('/DPayloadDir='+$payload) installer\EngineArena.iss
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
-$setup = Join-Path $taskRoot 'release\EngineArenaSetup-1.2.14-win-x64.exe'
+$setup = Join-Path $taskRoot 'release\EngineArenaSetup-1.9.7-win-x64.exe'
 $hash = (Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash.ToLower()
 Set-Content -LiteralPath ($setup+'.sha256') -Value ($hash+'  '+[IO.Path]::GetFileName($setup)) -Encoding ASCII
 Write-Output "Single offline installer: $setup"
 Write-Output "SHA-256: $hash"
+

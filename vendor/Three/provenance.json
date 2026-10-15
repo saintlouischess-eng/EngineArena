@@ -7,9 +7,11 @@
     "build/three.core.js": "three.core.js",
     "build/three.module.js": "three.module.js",
     "examples/jsm/loaders/GLTFLoader.js": "three-gltf.js",
+    "examples/jsm/loaders/HDRLoader.js": "three-hdr.js",
+    "examples/jsm/objects/GroundedSkybox.js": "three-grounded.js",
     "examples/jsm/utils/BufferGeometryUtils.js": "three-geometry-utils.js",
     "examples/jsm/environments/RoomEnvironment.js": "three-room.js",
     "examples/jsm/utils/SkeletonUtils.js": "three-skeleton-utils.js"
   },
-  "modifications": "Local import paths only; bundled files are the official build."
+  "modifications": "Local import paths; renderer-owned DFG lighting LUT with explicit disposal (scripts/three_lut_patch.py) to prevent retired WebGL contexts being retained."
 }

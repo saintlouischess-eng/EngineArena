@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>The ROOK! — original cameo shirt illustration</title>
+  <g fill="#eadfc4" stroke="#c9a86c" stroke-width="9" stroke-linejoin="round">
+    <path d="M373 115h72v67h43v-67h72v67h43v-67h72v153l-42 35H415l-42-35z"/>
+    <path d="M425 323h198l-23 215 41 40H407l41-40z"/>
+    <path d="M395 590h258l22 47v36H373v-36z"/>
+  </g>
+  <path d="M445 344h158M465 366l-15 158M395 643h258" fill="none" stroke="#fff6df" stroke-width="9" stroke-linecap="round"/>
+  <path d="M235 406h83m388 0h83M277 316l64 34m342 0 64-34" fill="none" stroke="#c9a86c" stroke-width="11" stroke-linecap="round"/>
+  <text x="512" y="824" text-anchor="middle" font-family="Arial, sans-serif" font-size="121" font-weight="900" letter-spacing="-4" fill="#f4e9cf">The ROOK!</text>
+  <path d="M217 863h590" stroke="#c9a86c" stroke-width="8" stroke-linecap="round"/>
+</svg>

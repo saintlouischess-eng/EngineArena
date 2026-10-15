@@ -41,7 +41,8 @@ def progress(store,**values):
 def ensure_idle(store):
     if (store.one("SELECT 1 FROM tournaments WHERE state IN ('running','draining') LIMIT 1") or
         store.one('SELECT 1 FROM attempts WHERE ended IS NULL LIMIT 1') or
-        store.one("SELECT 1 FROM experiments WHERE state='running' LIMIT 1")):
+        store.one("SELECT 1 FROM experiments WHERE state='running' LIMIT 1") or
+        store.one("SELECT 1 FROM player_games WHERE state IN ('starting','playing') LIMIT 1")):
         raise ValueError('Stop or pause and drain all tournaments and experiments before storage maintenance')
 
 
@@ -66,7 +67,7 @@ def scratch_files(folder):
     result=[]
     for p in directory.iterdir():
         if not p.is_file() or p.is_symlink():continue
-        if re.fullmatch(r'(?:backup\.tmp|recovery-\d+\.(?:compact|delete)\.tmp)(?:-wal|-shm|-journal)?',p.name):
+        if re.fullmatch(r'(?:backup\.tmp|recovery-\d+\.(?:compact|delete|ratings)\.tmp)(?:-wal|-shm|-journal)?',p.name):
             result.append(p);continue
         # A retired snapshot may leave a WAL/shared-memory file behind after
         # an interrupted reader. Never remove sidecars of an existing snapshot.

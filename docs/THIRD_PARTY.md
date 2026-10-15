@@ -20,4 +20,35 @@ Engine Arena application source is GPL-3.0-or-later; see LICENSE and NOTICE. Thi
 
 `package-manifest.json` records installed payload files and hashes. `installer/prerequisites.json` in the source snapshot pins prerequisite binaries and publishers. License and metadata files for Python packages are retained under `ThirdParty/PythonPackages`; runtime notices remain with their corresponding components.
 
-- Three.js 0.186.1, Three.js authors: MIT. Six official modules are bundled for offline 3D rendering, with local import paths. The archive is SHA-512 pinned by `scripts/vendor_three.py`; `ThirdParty/Three` contains the upstream license and provenance. Original 1849-inspired GLB models and baked wood textures are authored in Blender by `scripts/build_staunton1849.py` and included under GPL-3.0-or-later. Historical photographs were visual references only; none is embedded or redistributed. Blender is an authoring tool, not a runtime requirement.
+- Three.js 0.186.1, Three.js authors: MIT. Eight official modules are bundled for offline 3D rendering, with local import paths and a renderer-owned DFG lighting lookup texture disposal correction. The lifetime patch is reproduced by `scripts/three_lut_patch.py`. The archive is SHA-512 pinned by `scripts/vendor_three.py`; `ThirdParty/Three` contains the upstream license and provenance. Original 1849-inspired GLB models and baked wood textures are authored in Blender by `scripts/build_staunton1849.py` and included under GPL-3.0-or-later. Historical photographs were visual references only; none is embedded or redistributed. Blender is an authoring tool, not a runtime requirement.
+
+## MakeHuman graphical data (1.7.2)
+
+The standalone live club uses twelve separately morphed, clothed, skinned visitors
+derived from CC0 MakeHuman graphical data: base mesh, targets, skeleton/weights,
+skin maps, outfits, shoes, eyes and hairstyles. The MakeHuman application code
+is not incorporated or executed. `vendor/MakeHuman/club-cast/provenance.json`
+records pinned source URLs and SHA-256 hashes; `derived.json` identifies the
+twelve outputs. `scripts/build_club_cast.py` implements fitting and pose creation.
+Four seated players and at most two roaming visitors are visible. Eight visitor identities rotate without duplicates. The six cameo face maps are original generated artwork projected and baked by the project, under GPL-3.0-or-later; their generation prompts and photo-reference links are in `prototypes/live-club/art/README.md`. Reference photographs are not redistributed. Cameos are artistic interpretations, with no claimed endorsement. The underlying CC0 assets retain their original license. MIT Three 0.186.1 compositor and light
+addons are pinned in `vendor/Three/club-addons.json`; only imports are rewritten.
+
+### Legacy background head (1.7.1, no longer used by the renderer)
+
+The optional live rooms include an adapted CC0 MakeHuman base head, a skin map,
+and short02 hair. Copyright holders at the CC0 release: Data Collection AB,
+Joel Palmius and Jonas Hauquier. Asset licensing is explicitly recorded in the
+source OBJ/MHCLO headers and the bundled CC0 text; this package does not embed
+or run the MakeHuman application.
+
+Sources: [MakeHuman asset licensing](https://github.com/makehumancommunity/makehuman/blob/master/LICENSE.md)
+and [CC0 asset mirror](https://github.com/s20220526/makehuman-assets/tree/8cf9645b975a98eea056b140df11a1d278da0d10).
+`ThirdParty/MakeHuman/provenance.json` records each source URL and SHA-256.
+`scripts/build_room_characters.py` crops the base mesh to its head, fits the hair
+through its MHCLO anchors, adds eye details and a cropped scalp, reduces the
+maps to 1024px, and exports `ui/room-head.glb`. The original inputs and Blender
+build script are included in Source. The CC0 assets retain CC0 status.
+
+All live-room data is bundled for offline use; the application makes no asset
+requests to these websites. Background people are lightweight scene figures,
+not photographic actors or simulations of actual tournament participants.

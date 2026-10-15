@@ -1,0 +1,55 @@
+// Isolated acceptance for the optional room activity. Never point at real data.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+const ready=JSON.parse(fs.readFileSync(process.env.ARENA_SCENE_READY||'test-output/workflow-ready.json'));
+assert(ready.folder.includes('test-output')&&path.basename(ready.folder).startsWith('workflow-'));
+const out=process.env.ARENA_LIFE_OUT||'test-output/live-environment-source';fs.mkdirSync(out,{recursive:true});
+const start='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+(async()=>{const b=await chromium.launch({headless:true,channel:'msedge',args:['--enable-unsafe-swiftshader']}),proof={passed:false,errors:[],rooms:[]};let p;
+ try{
+  p=await b.newPage({viewport:{width:1600,height:1000}});p.on('pageerror',e=>proof.errors.push(e.stack));p.on('console',m=>{if(m.type()==='error'||/WebGL: INVALID|GL_INVALID|mergeGeometries\(\) failed/.test(m.text()))proof.errors.push(m.text())});let headLoads=0;p.on('request',r=>{if(r.url().includes('/room-head.glb'))headLoads++});
+  const base=new URL(ready.url),headers={'X-Arena-Token':base.searchParams.get('token')},prefs=await (await p.request.get(base.origin+'/api/preferences',{headers})).json();await p.request.post(base.origin+'/api/preferences',{headers,data:{...prefs,scene3d:{...prefs.scene3d,live:false}}});
+  await p.goto(ready.url);await p.waitForFunction(()=>state.snapshot);
+  await p.evaluate(async({start})=>{await ArenaBoard3D.prepare();const c=document.createElement('canvas');c.id='lifeReview';c.style='position:fixed;inset:0;width:100vw;height:100vh;z-index:9999';document.body.append(c);window.reviewBoard=ArenaBoard3D.create(c,()=>{});window.lifeArgs=[start,false,{angle:22,orbit:0,zoom:.72,lift:-.1},false,'',[],'inward',{}, {key:'life-review',white:'Stockfish 19',black:'Reckless'}, {environment:'club',live:false,motion:'instant'}];reviewBoard.render(...lifeArgs);await reviewBoard.ready()},{start});
+  proof.graphics=await p.locator('#lifeReview').evaluate(c=>{const gl=c.getContext('webgl2'),e=gl.getExtension('WEBGL_debug_renderer_info');return e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)});
+  assert.equal(headLoads,0,'Ordinary board does not load the character model');assert.equal(await p.evaluate(()=>reviewBoard.needsFrame()),false);proof.defaultHasNoLiveAssetsOrFrames=true;
+  for(const room of ['club','hall','study','studio']){
+   await p.evaluate(async room=>{lifeArgs[9]={...lifeArgs[9],environment:room,live:true,activity:'busy'};reviewBoard.render(...lifeArgs);await reviewBoard.ready();reviewBoard.render(...lifeArgs)},room);
+   assert.equal(await p.locator('#lifeReview').getAttribute('data-live-room'),room);assert(await p.evaluate(()=>reviewBoard.needsFrame()));await p.screenshot({path:out+'/'+room+'.png'});
+   const data=await p.locator('#lifeReview').evaluate(e=>({...e.dataset}));proof.rooms.push({room,people:Number(data.roomPeople),tables:Number(data.roomTables),drawCalls:Number(data.drawCalls)});
+   assert.equal(await p.locator('#lifeReview').evaluate(c=>c.getContext('webgl2').getError()),0);
+   await p.evaluate(()=>{lifeArgs[2]={angle:16,orbit:35,zoom:.7,lift:-.1};reviewBoard.render(...lifeArgs)});await p.screenshot({path:out+'/'+room+'-angle.png'});
+   await p.evaluate(()=>{lifeArgs[2]={angle:22,orbit:0,zoom:.72,lift:-.1}});
+  }
+  const warm=await p.evaluate(()=>reviewBoard.metrics());
+  for(const room of ['club','hall','study','studio'])await p.evaluate(async room=>{lifeArgs[9].environment=room;reviewBoard.render(...lifeArgs);await reviewBoard.ready();reviewBoard.render(...lifeArgs)},room);
+  const again=await p.evaluate(()=>reviewBoard.metrics());assert.deepEqual(again,warm,'Warm room switches do not accumulate GPU resources');proof.warmMemory=warm;
+  const timeBefore=Number(await p.locator('#lifeReview').getAttribute('data-room-seconds'));for(let i=0;i<12;i++){await p.waitForTimeout(80);await p.evaluate(()=>reviewBoard.render(...lifeArgs))}assert(Number(await p.locator('#lifeReview').getAttribute('data-room-seconds'))>timeBefore+.3);proof.animationAdvances=true;
+  await p.evaluate(()=>{lifeArgs[9].activity='quiet';reviewBoard.render(...lifeArgs)});assert.equal(await p.locator('#lifeReview').getAttribute('data-room-people'),'2');
+  await p.evaluate(()=>{lifeArgs[9]={...lifeArgs[9],people:false,backgroundGames:false,atmosphere:false};reviewBoard.render(...lifeArgs)});assert.equal(await p.locator('#lifeReview').getAttribute('data-room-people'),'0');assert.equal(await p.evaluate(()=>reviewBoard.needsFrame()),false);proof.independentControls=true;
+  await p.evaluate(()=>{lifeArgs[9]={...lifeArgs[9],people:true,backgroundGames:true,atmosphere:true};reviewBoard.freezeEnvironment(true);reviewBoard.render(...lifeArgs)});const frozen=await p.locator('#lifeReview').getAttribute('data-room-seconds');await p.waitForTimeout(150);await p.evaluate(()=>reviewBoard.render(...lifeArgs));assert.equal(await p.locator('#lifeReview').getAttribute('data-room-seconds'),frozen);assert.equal(await p.evaluate(()=>reviewBoard.needsFrame()),false);
+  const image=await p.evaluate(()=>reviewBoard.photo({width:3840,height:2160,blur:.6})),png=Buffer.from(image.split(',')[1],'base64');assert.equal(png.readUInt32BE(16),3840);assert.equal(png.readUInt32BE(20),2160);fs.writeFileSync(out+'/live-room-4K.png',png);proof.frozenPhoto=true;
+  await p.evaluate(()=>{reviewBoard.freezeEnvironment(false);lifeArgs[8].environmentMotion=false;reviewBoard.render(...lifeArgs)});assert.equal(await p.evaluate(()=>reviewBoard.needsFrame()),false);proof.reducedMotionRenderer=true;
+  await p.evaluate(()=>{reviewBoard.dispose();document.querySelector('#lifeReview').remove()});
+  await p.evaluate(async ready=>{state.tid=ready.tid;await refreshTournament();if(!state.live.length)await showFinalGame(ready.gid);displayPrefs.focus3d=true;displayPrefs.scene3d={live:false,motion:'instant',fps:15};displayPrefs.panels.focus={visible:true,column:'left',height:740};applyDisplay();renderFocus()},ready);
+  await p.waitForFunction(()=>board3dCanvas?.dataset.frames>0);await p.locator('.board-3d').scrollIntoViewIfNeeded();
+  await p.evaluate(()=>boardViewDialog());assert.equal(await p.locator('#sceneLive').isChecked(),false);assert.equal(await p.locator('#sceneActivity').isDisabled(),true);await p.locator('#sceneLive').check();await p.locator('#sceneActivity').selectOption('social');await p.locator('#applyBoardView').click();
+  await p.locator('.board-3d').scrollIntoViewIfNeeded();await p.waitForFunction(()=>board3dCanvas?.dataset.liveRoom==='club');await p.waitForTimeout(300);
+  const a=Number(await p.locator('.board-3d').getAttribute('data-frames'));await p.waitForTimeout(2100);const count=Number(await p.locator('.board-3d').getAttribute('data-frames'))-a;assert(count>0&&count<=35,'15 FPS cap, allowing initial/UI redraw');proof.framesOver2100ms=count;
+  await p.evaluate(()=>view('engines'));await p.waitForTimeout(200);const hidden=await p.locator('.board-3d').getAttribute('data-frames');await p.waitForTimeout(500);assert.equal(await p.locator('.board-3d').getAttribute('data-frames'),hidden);proof.hiddenFocusStops=true;
+  await p.evaluate(()=>view('overview'));await p.locator('.board-3d').scrollIntoViewIfNeeded();await p.waitForTimeout(350);assert(Number(await p.locator('.board-3d').getAttribute('data-frames'))>Number(hidden));
+  await p.emulateMedia({reducedMotion:'reduce'});await p.evaluate(()=>requestSceneFrame(board3dArgs));await p.waitForTimeout(150);const reduced=await p.locator('.board-3d').getAttribute('data-frames');await p.waitForTimeout(450);assert.equal(await p.locator('.board-3d').getAttribute('data-frames'),reduced);proof.reducedMotionStops=true;await p.emulateMedia({reducedMotion:'no-preference'});
+  await p.evaluate(()=>{boardViewDialog();$('#sceneLive').checked=false;$('#applyBoardView').click()});await p.waitForTimeout(200);const off=await p.locator('.board-3d').getAttribute('data-frames');await p.waitForTimeout(450);assert.equal(await p.locator('.board-3d').getAttribute('data-frames'),off);proof.offStops=true;
+  await p.evaluate(async()=>{displayPrefs.scene3d={...ArenaScene3D.settings(displayPrefs.scene3d),live:true,activity:'quiet',fps:15,ambience:false,ambienceVolume:9};await persistDisplay();await paShow()});await p.waitForFunction(()=>PlayerDesk.board);
+  await p.locator('#paBoard').scrollIntoViewIfNeeded();await p.evaluate(()=>PlayerDesk.board.setMode('3d'));await p.waitForFunction(()=>PlayerDesk.board?.canvas?.dataset.liveRoom==='club');await p.locator('.pa-canvas').scrollIntoViewIfNeeded();await p.waitForTimeout(250);
+  const pa=Number(await p.locator('.pa-canvas').getAttribute('data-frames'));await p.waitForTimeout(2100);const pn=Number(await p.locator('.pa-canvas').getAttribute('data-frames'))-pa;assert(pn>0&&pn<=40,'Player Arena respects animation limit');proof.playerFramesOver2100ms=pn;
+  // IntersectionObserver stops live scenery when the board is scrolled out of view.
+  await p.evaluate(()=>{PlayerDesk.board.host.style.transform='translateY(2500px)'});await p.waitForTimeout(200);const pc=await p.locator('.pa-canvas').getAttribute('data-frames');await p.waitForTimeout(450);assert.equal(await p.locator('.pa-canvas').getAttribute('data-frames'),pc);proof.offscreenPlayerStops=true;await p.evaluate(()=>{PlayerDesk.board.host.style.transform='';PlayerDesk.board.paint()});
+  await p.evaluate(()=>view('engines'));await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>PlayerDesk.board),null);proof.hiddenPlayerDisposes=true;
+  await p.reload();await p.waitForFunction(()=>state.snapshot);const saved=await p.evaluate(()=>displayPrefs.scene3d);assert.equal(saved.live,true);assert.equal(saved.activity,'quiet');assert.equal(saved.ambience,false);assert.equal(saved.ambienceVolume,9);proof.preferencesRetained=true;
+  proof.languages=[];for(const lang of ['en','es','fr','de','pt','it','nl','pl']){await p.goto(ready.url+'&lang='+lang);await p.waitForFunction(()=>state.snapshot);await p.evaluate(()=>{window.lifeMissing=new Set();ArenaI18n.capture(k=>{if(ArenaI18n.locale!=='en'&&!Object.hasOwn(window.ARENA_MESSAGES,k))lifeMissing.add(k)});boardViewDialog()});assert.deepEqual(await p.evaluate(()=>[...lifeMissing]),[]);assert.equal(await p.locator('#modal .modal-body').evaluate(e=>e.scrollWidth>e.clientWidth+1),false);proof.languages.push(lang)}
+  // Leave only this fixture's preferences in their ordinary still-room state.
+  await p.evaluate(async()=>{displayPrefs.scene3d={...displayPrefs.scene3d,live:false};await persistDisplay()});assert.deepEqual(proof.errors,[]);proof.passed=true;
+ }finally{if(p&&!proof.passed)await p.screenshot({path:out+'/failure.png'}).catch(()=>{});await b.close();fs.writeFileSync(out+'/result.json',JSON.stringify(proof,null,2))}
+ console.log('Live environment acceptance passed: '+out);
+})().catch(e=>{console.error(e);process.exitCode=1});

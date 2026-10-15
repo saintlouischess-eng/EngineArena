@@ -4,7 +4,7 @@ let completionKey='',completionBusy=false,completionData=null,completionChecked=
 async function showFinalGame(id){
  const tid=state.tid,d=await api(`games/${id}/moves?limit=1`);if(tid!==state.tid)return;
  let last=d.items.at(-1);if(d.latest_ply>1){const tail=await api(`games/${id}/moves?after=${d.latest_ply-1}&limit=1`);if(tid!==state.tid)return;last=tail.items.at(-1)}
- retainedTid=tid;focusId=id;retainedFocus={...d,attempt:d.attempt?.id,ply:d.latest_ply,fen:last?.fen||d.opening.fen,crown_squares:last?.crown_squares||d.opening_crown_squares||[],last_move:last?.uci,san:last?.san,info:last?.info,info_side:last?.side,clocks:d.attempt?.clocks,clock_active:null,status:[d.attempt?.result,d.attempt?.reason].filter(Boolean).join(' · ')};
+ retainedTid=tid;focusId=id;retainedFocus={...d,attempt:d.attempt?.id,ply:d.latest_ply,fen:last?.fen||d.opening.fen,crown_squares:last?.crown_squares||d.opening_crown_squares||[],knight_facings:last?.knight_facings||d.opening_knight_facings||{},captured:last?.captured||d.opening_captured||[],last_move:last?.uci,san:last?.san,info:last?.info,info_side:last?.side,clocks:d.attempt?.clocks,clock_active:null,status:[d.attempt?.result,d.attempt?.reason].filter(Boolean).join(' · ')};
  revealFocusPanel('focus');renderFocus();
 }
 async function renderCompletion(){

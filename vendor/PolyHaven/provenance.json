@@ -1,0 +1,313 @@
+[
+  {
+    "file": "club-2048.jpg",
+    "asset": "lythwood_lounge",
+    "authors": {
+      "Greg Zaal": "All"
+    },
+    "source": "https://polyhaven.com/a/lythwood_lounge",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/lythwood_lounge.jpg",
+    "source_md5": "482855e7c9d03b260f3ff26c115ad774",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 2048 x 1024; JPEG quality 88.",
+    "bytes": 349887,
+    "sha256": "9a966123ae14b32872b5a1feca423f7b0b984e8e8d8c0d38235e13bacd7733b4"
+  },
+  {
+    "file": "club-4096.jpg",
+    "asset": "lythwood_lounge",
+    "authors": {
+      "Greg Zaal": "All"
+    },
+    "source": "https://polyhaven.com/a/lythwood_lounge",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/lythwood_lounge.jpg",
+    "source_md5": "482855e7c9d03b260f3ff26c115ad774",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 4096 x 2048; JPEG quality 90.",
+    "bytes": 1489082,
+    "sha256": "8be61e27a9cf4cf1184d36a2b924be1db09f7085f3afd949a9327af9d7b451e7"
+  },
+  {
+    "file": "club-8192.jpg",
+    "asset": "lythwood_lounge",
+    "authors": {
+      "Greg Zaal": "All"
+    },
+    "source": "https://polyhaven.com/a/lythwood_lounge",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/lythwood_lounge.jpg",
+    "source_md5": "482855e7c9d03b260f3ff26c115ad774",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 8192 x 4096; JPEG quality 92.",
+    "bytes": 5203244,
+    "sha256": "08c26fd7952cac381d048a8630cce879f4052d205c9ca6f36e302b3add275e00"
+  },
+  {
+    "file": "club-light.hdr",
+    "asset": "lythwood_lounge",
+    "authors": {
+      "Greg Zaal": "All"
+    },
+    "source": "https://polyhaven.com/a/lythwood_lounge",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/lythwood_lounge_1k.hdr",
+    "source_md5": "32fe358aa620f9ae759f05ea55d79b83",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 1K HDR illumination.",
+    "bytes": 1538903,
+    "sha256": "7de73ed75fbd52179152230198b3fb18bf8c36993b5608b724e899c426e53f78"
+  },
+  {
+    "file": "hall-2048.jpg",
+    "asset": "ballroom",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/ballroom",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/ballroom.jpg",
+    "source_md5": "4c379e9bfbe70eee5d3e01cd865bfb78",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 2048 x 1024; JPEG quality 88.",
+    "bytes": 464058,
+    "sha256": "9d6b50f57dff547df036c56625040510764fd61158949d0c09b63774e3b7545f"
+  },
+  {
+    "file": "hall-4096.jpg",
+    "asset": "ballroom",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/ballroom",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/ballroom.jpg",
+    "source_md5": "4c379e9bfbe70eee5d3e01cd865bfb78",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 4096 x 2048; JPEG quality 90.",
+    "bytes": 1874437,
+    "sha256": "6742b4c1f931db30aa8e9c888016fb30924481c459f5e25665e48000e773fab3"
+  },
+  {
+    "file": "hall-8192.jpg",
+    "asset": "ballroom",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/ballroom",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/ballroom.jpg",
+    "source_md5": "4c379e9bfbe70eee5d3e01cd865bfb78",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 8192 x 4096; JPEG quality 92.",
+    "bytes": 5891173,
+    "sha256": "1fa5bbb5bcdaf746294dcd123c905a918625f0ec9c5f190898811a100443e15a"
+  },
+  {
+    "file": "hall-light.hdr",
+    "asset": "ballroom",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/ballroom",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/ballroom_1k.hdr",
+    "source_md5": "ae5892fce776eb531176e54e9c0176df",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 1K HDR illumination.",
+    "bytes": 1670493,
+    "sha256": "ed82cd88ab800ec1b90af07a53f27787b00114678c4ec048fcc5267d407f105c"
+  },
+  {
+    "file": "study-2048.jpg",
+    "asset": "studio_country_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/studio_country_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/studio_country_hall.jpg",
+    "source_md5": "a66fecf7c5cd7fd0e2328f59b8c26ba5",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 2048 x 1024; JPEG quality 88.",
+    "bytes": 491393,
+    "sha256": "71f5882b49a98cc37004965ce1e89c661c2ece5ee8183485c412a1de1c52c7da"
+  },
+  {
+    "file": "study-4096.jpg",
+    "asset": "studio_country_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/studio_country_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/studio_country_hall.jpg",
+    "source_md5": "a66fecf7c5cd7fd0e2328f59b8c26ba5",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 4096 x 2048; JPEG quality 90.",
+    "bytes": 2065376,
+    "sha256": "45dbcc9a97af378b709a328d20052f45d6a9484c6ca74229946698ece5cbc30a"
+  },
+  {
+    "file": "study-8192.jpg",
+    "asset": "studio_country_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/studio_country_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/studio_country_hall.jpg",
+    "source_md5": "a66fecf7c5cd7fd0e2328f59b8c26ba5",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 8192 x 4096; JPEG quality 92.",
+    "bytes": 8223165,
+    "sha256": "6bea5c888db17f2e6eb859069dd38b5829a1fdec63e076a356e31a2c8e2e5987"
+  },
+  {
+    "file": "study-light.hdr",
+    "asset": "studio_country_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/studio_country_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_country_hall_1k.hdr",
+    "source_md5": "4b0399205216c56612a91939c54a79a6",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 1K HDR illumination.",
+    "bytes": 1684515,
+    "sha256": "3e5b7ed89e94b0d5ab5c2e5fd8012a9c89503f10a5690e35481553b0dc802026"
+  },
+  {
+    "file": "studio-2048.jpg",
+    "asset": "photo_studio_loft_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/photo_studio_loft_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/photo_studio_loft_hall.jpg",
+    "source_md5": "3456280ca1b1cb80ebe14f257bca296d",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 2048 x 1024; JPEG quality 88.",
+    "bytes": 418271,
+    "sha256": "2135207075467d54458eceed24ab5b1b3061890029b315dc4b68a28c3f7ede71"
+  },
+  {
+    "file": "studio-4096.jpg",
+    "asset": "photo_studio_loft_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/photo_studio_loft_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/photo_studio_loft_hall.jpg",
+    "source_md5": "3456280ca1b1cb80ebe14f257bca296d",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 4096 x 2048; JPEG quality 90.",
+    "bytes": 1747404,
+    "sha256": "c52b7a6e1836af8cb9e8e8cc701edcd4164a4b7194b5e3428324cf5fa2076cde"
+  },
+  {
+    "file": "studio-8192.jpg",
+    "asset": "photo_studio_loft_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/photo_studio_loft_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/photo_studio_loft_hall.jpg",
+    "source_md5": "3456280ca1b1cb80ebe14f257bca296d",
+    "license": "CC0-1.0",
+    "changes": "Tonemapped panorama resized to 8192 x 4096; JPEG quality 92.",
+    "bytes": 7058658,
+    "sha256": "94525630b213cdca07f0d663ba9ae6139c66dd31b202f96d5a420ba113a44935"
+  },
+  {
+    "file": "studio-light.hdr",
+    "asset": "photo_studio_loft_hall",
+    "authors": {
+      "Sergej Majboroda": "All"
+    },
+    "source": "https://polyhaven.com/a/photo_studio_loft_hall",
+    "download": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/photo_studio_loft_hall_1k.hdr",
+    "source_md5": "bc32a903ad3ac00bfcea0ec815ef4cea",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 1K HDR illumination.",
+    "bytes": 1640243,
+    "sha256": "2243ac7b3418e0f4ade3a39ebf29856e6c581134ce8e557d9e6464ff15459513"
+  },
+  {
+    "file": "wood-color.jpg",
+    "asset": "wood_table_001",
+    "authors": {
+      "Dimitrios Savva": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_001/wood_table_001_diff_2k.jpg",
+    "source_md5": "a36483628b915dabf82961ab2a62a85c",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 924532,
+    "sha256": "63ae5cd186197b40f18bc020fe2b652bb08df4d9fc6240c6cbf8a7e3bc32c096"
+  },
+  {
+    "file": "wood-normal.jpg",
+    "asset": "wood_table_001",
+    "authors": {
+      "Dimitrios Savva": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_001/wood_table_001_nor_gl_2k.jpg",
+    "source_md5": "50dbc9fe086df00f6bce819eae6091d1",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 385020,
+    "sha256": "d56f02c911391267ddc6adc92e8a5bc29b9803196e8d57ad5b9702e6c842dc28"
+  },
+  {
+    "file": "wood-rough.jpg",
+    "asset": "wood_table_001",
+    "authors": {
+      "Dimitrios Savva": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/wood_table_001/wood_table_001_rough_2k.jpg",
+    "source_md5": "a291ec6bc35b9827175cdd1592c62e03",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 963377,
+    "sha256": "c788876d80e4d96598590631f8de92447fb1b0ba1265a812514ee717d270ac3e"
+  },
+  {
+    "file": "leather-color.jpg",
+    "asset": "brown_leather",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "source": "https://polyhaven.com/a/brown_leather",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_albedo_2k.jpg",
+    "source_md5": "1bd381c43817743a2affdd1ce2d193c7",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 2137518,
+    "sha256": "b0de2403a31efa31e501b0028c0bd8e504d5bd6318f4a5ce90c550c3067f96d8"
+  },
+  {
+    "file": "leather-normal.jpg",
+    "asset": "brown_leather",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "source": "https://polyhaven.com/a/brown_leather",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_nor_gl_2k.jpg",
+    "source_md5": "6e86bbaf5e995c4154b76a1e4b0f4f1c",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 3030702,
+    "sha256": "3386277290af50b4d464dc9a9f195bbf8dd6f137b9ae0274552397d2f0135c98"
+  },
+  {
+    "file": "leather-rough.jpg",
+    "asset": "brown_leather",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "source": "https://polyhaven.com/a/brown_leather",
+    "download": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/brown_leather/brown_leather_rough_2k.jpg",
+    "source_md5": "95b48a5c95b02d87dadee46c26f1cfb5",
+    "license": "CC0-1.0",
+    "changes": "Unmodified 2K PBR texture.",
+    "bytes": 2801956,
+    "sha256": "8a47afca2630310849034fe40ca9497db0956c67c0d933e6efd49d3cd2befe83"
+  }
+]

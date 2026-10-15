@@ -1,18 +1,26 @@
 # Engine Arena
 
-**Engine Arena 1.2.14** is a Windows desktop application for testing UCI chess engines, running reproducible tournaments, and reviewing live results.
+**Engine Arena 1.9.7** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
 
-**Designed by Mark Young. Coding and implementation by OpenAI Codex**, an AI coding assistant working under Mark Young's direction.
+**Designed by Mark Young. Coding and implementation by OpenAI Codex**, under Mark Young's direction.
 
-[Download the Windows installer](https://github.com/saintlouischess-eng/EngineArena/releases/latest) · [User guide](docs/USER_GUIDE.md) · [Release notes and validation](docs/RELEASE_1_2_14.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
+[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.9.7) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_9_7.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
 
 ## Install or update
 
-Download **EngineArenaSetup-1.2.14-win-x64.exe** from the release page. Close Engine Arena, run setup, and use the same installation folder when upgrading. Saved engines, tournaments and settings are stored separately and are preserved. Pause and drain games before closing for an update.
+**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.9.7-win-x64.exe**, or the smaller **EngineArena-1.9.7-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
 
-The single installer includes the Python and .NET runtimes, offline Microsoft WebView2 setup, and optional signed PawnIO setup for supported CPU sensors. Leave optional WebView2 repair unchecked when the runtime already works. Add your own engines and opening books; engine binaries are not bundled. Supported target: **Windows 11 x64 (Intel/AMD)**. The Engine Arena installer itself is unsigned.
+Pause and drain games, then close Engine Arena. Run setup in your existing installation folder, or extract the entire ZIP into a fresh folder and launch `EngineArena.exe`. You can update directly from an earlier release; intermediate updates are not needed. Saved profiles, tournaments, events and ratings are stored separately and retained. The ZIP creates no Start menu shortcuts or uninstaller. Engine Arena itself is unsigned.
 
-Launch from the Start menu. Results normally live in `%LOCALAPPDATA%\EngineArena\Data`. To select another local workspace, launch `EngineArena.exe --data "D:\Engine Tests\Arena"`. Only one worker can open a workspace. Shared resource budgets apply within that workspace.
+Both packages use `%LOCALAPPDATA%\EngineArena\Data` by default. Only one copy can open that workspace at a time. Use `EngineArena.exe --data "D:\Engine Tests\Arena"` for another local workspace. Add your own chess engines and opening books; engine executables are not bundled. Supported CPU temperature/core-clock readings use an optional signed PawnIO driver and elevated sensor reader. Leave optional WebView2 repair unchecked when your runtime works.
+
+## New in this release
+
+- **Rating Center:** automatic cross-tournament ratings, optional anchors, time categories, thread/GPU configurations, best-version family views and compact rating retention after tournament deletion.
+- **Seasons and events:** qualification, division placement, configurable admission/field limits, roster/version reviews, promotion/relegation, custom multi-stage competitions and championship tiebreaks, with careers and shareable summaries.
+- **Player Arena:** human play with mouse click/drag, books, clocks, thinking panels, sounds, PGNs, challenge series and separate personal ratings.
+- **Viewing:** detailed 1849 and Tal 1962 3D pieces, additional wooden boards, photographic rooms, an animated chess club, camera tours, low-angle views and 4K photos. Live-room rendering is capped at 30 FPS.
+- **Polish:** extend completed standalone round robins, bulk engine removal, clearer event summaries, draw-rule counters, long scoresheets, dependable resize/sound behavior and improved queue ordering.
 
 ## Testing and tournament features
 
@@ -39,16 +47,14 @@ Useful guides: [Tournament manager](docs/SIMULTANEOUS_TOURNAMENTS.md), [knockout
 
 ## Release checks
 
-Version 1.2.14 corrects Windows CPU-polling stalls that could delay engine replies, handles UCI option capitalization consistently, clarifies automatic-thread imports, and includes upright, depth-tested 3D coordinates. The owner confirmed successful laptop installation and operation, including the 3D board fix.
+850 Python tests and 96 JavaScript tests passed. Packaged validation exercised all ten formats, multi-stage seasons, suites/benchmarks, statistics, recovery, failed-game replacements, reports, all four PGN presets, storage cleanup and eight languages. A 256-game load check used up to 28 concurrent games; deletion reclaimed 98.60% of the measured managed storage while preserving compact rating records. A further 12-game round robin passed after the owner installed this exact build.
 
-The release review passed 514 backend tests and 48 JavaScript tests, independent statistical checks, all ten formats, events/leagues, experiments, shared CPU/GPU scheduling, forced termination/recovery, failed-result replacement, saving-failure handling, reports and PGNs. It included a 56-game eight-engine round robin, 256 full node-controlled games at 32 concurrency, and a synthetic 50,000-game/four-million-ply archive for storage and deletion checks. All eight packaged interface languages were exercised.
-
-These checks do not guarantee compatibility with every engine or driver. Initial technical reports and large PGN exports still take time proportional to stored data; cached reports are faster. The synthetic archive is a scale check, not a new endurance run. See [release validation and limits](docs/RELEASE_1_2_14.md). Earlier candidate documents retain their historical test scope.
+These are bounded functional and scaling checks, not a guarantee for every engine or driver. Graphics context-loss tests do not substitute for physical-GPU endurance. See [validation and limits](docs/RELEASE_1_9_7.md). Earlier version documents retain their historical candidate status.
 
 ## Build and source
 
-The Windows shell is C#/.NET 10 WPF with WebView2; the interface uses HTML/CSS/JavaScript. The isolated Python 3.12 worker uses asynchronous engine communication and SQLite transactional storage. Chess engines execute as separate native processes.
+The Windows shell is C#/.NET 10 WPF with WebView2; the interface uses HTML/CSS/JavaScript. A separate Python 3.12 worker uses asynchronous engine communication and transactional SQLite storage. Chess engines execute as separate native processes.
 
-See [build instructions](docs/BUILDING.md). Application and corresponding third-party source/notices are also included in the installer. The public application code and assets match the tested installer; release documentation and credits were finalized afterward without rebuilding that installer.
+See [build instructions](docs/BUILDING.md). Matching source is in this repository/tag and GitHub's **Source code** downloads. The full installer also includes it in `Source`; the smaller application ZIP omits that duplicate folder. Both retain third-party notices and applicable dependency-source archives. Runtime code/assets match the tested installer; release documentation was finalized afterward.
 
-Engine Arena application source and original artwork are **GPL-3.0-or-later**. Bundled components retain their respective licenses. See [LICENSE](LICENSE), [NOTICE](NOTICE), [third-party notices](docs/THIRD_PARTY.md) and [credits](CREDITS.md).
+Engine Arena application source and original artwork are **GPL-3.0-or-later**. Bundled components retain their own licenses. See [LICENSE](LICENSE), [NOTICE](NOTICE), [third-party notices](docs/THIRD_PARTY.md) and [credits](CREDITS.md).

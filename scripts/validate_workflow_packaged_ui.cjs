@@ -9,6 +9,10 @@ const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtime
    await page.setViewportSize({width:lang==='en'?1600:1050,height:900});await page.goto(ready.url+'&lang='+lang);await page.waitForFunction(()=>state.snapshot);
    await page.evaluate(async r=>{state.tid=r.tid;await refreshTournament();await showFinalGame(r.gid);displayPrefs.focus3d=true;displayPrefs.theme=ArenaI18n.locale==='de'?'light':'dark';displayPrefs.panels={focus:{maximized:true,visible:true},moves:{visible:true},standings:{visible:false},games:{visible:false},search:{visible:false},live:{visible:false}};applyDisplay()},ready);
    await page.waitForFunction(()=>document.querySelector('.board-3d')?.dataset.frames>0&&moveSheet.data?.attempt?.ended);
+   await page.evaluate(()=>boardViewDialog());await page.locator('#knights3d').selectOption('outward');await page.locator('#applyBoardView').click();
+   await page.waitForFunction(()=>board3dCanvas?.dataset.knightMode==='outward');
+   assert.equal(await page.locator('#knights3d').count(),1);
+   await page.evaluate(()=>boardViewDialog());await page.locator('#knights3d').selectOption('inward');await page.locator('#applyBoardView').click();
    await page.locator('[data-zoom=reset]').click();await page.locator('[data-zoom=in]').click();assert.equal(await page.locator('[data-zoom=reset]').textContent(),'110%');
    await page.locator('[data-zoom=out]').click();assert.equal(await page.locator('[data-zoom=reset]').textContent(),'100%');
    await page.locator('[data-lift=reset]').click();await page.locator('[data-lift=up]').click();assert.equal(await page.locator('#board3dLift').inputValue(),'5');await page.locator('[data-lift=down]').click();assert.equal(await page.locator('#board3dLift').inputValue(),'0');

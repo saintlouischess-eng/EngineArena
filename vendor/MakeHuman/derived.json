@@ -1,0 +1,9 @@
+{
+  "file": "ui/room-head.glb",
+  "bytes": 2489512,
+  "sha256": "3f89532aa335438633983a554741bc66a09a1320625288c8e80eaf37127d1dde",
+  "license": "CC0-1.0",
+  "builder": "scripts/build_room_characters.py",
+  "blender": "5.2.0",
+  "transforms": "Head crop, MHCLO hair fitting, cropped scalp, eye geometry, 1024px textures. No external texture URIs."
+}

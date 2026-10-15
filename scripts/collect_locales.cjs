@@ -4,6 +4,7 @@ const messages=JSON.parse(fs.readFileSync('locales/sources.json','utf8'));
 let file='';const add=s=>{if(/[A-Za-z]/.test(s)){messages[s]??=[];if(!messages[s].includes(file))messages[s].push(file)}};
 I.capture(add);
 function walk(node){
+ if(node.type==='CallExpression'&&['seasonText','rcT','paT','cxText'].includes(node.callee.name)&&typeof node.arguments[0]?.value==='string')add(node.arguments[0].value);
  if(node.type==='CallExpression'&&node.callee.object?.name==='ArenaI18n'&&['t','h'].includes(node.callee.property.name)&&typeof node.arguments[0]?.value==='string'){
   if(node.callee.property.name==='h')I.h(node.arguments[0].value);else add(node.arguments[0].value);
  }
@@ -14,6 +15,6 @@ function walk(node){
  }
  for(const v of Object.values(node)){if(Array.isArray(v)){for(const child of v)if(child?.type)walk(child)}else if(v?.type)walk(v)}
 }
-for(const name of fs.readdirSync('ui').filter(n=>n.endsWith('.js')&&n!=='i18n.js'&&!n.startsWith('three'))){file='ui/'+name;walk(acorn.parse(fs.readFileSync(file,'utf8'),{ecmaVersion:'latest',sourceType:['board3d-studio.js','board3d-crowns.js'].includes(name)?'module':'script'}))}
+for(const name of fs.readdirSync('ui').filter(n=>n.endsWith('.js')&&n!=='i18n.js'&&!n.startsWith('three'))){file='ui/'+name;walk(acorn.parse(fs.readFileSync(file,'utf8'),{ecmaVersion:'latest',sourceType:['board3d-budget.js','board3d-club-motion.js','board3d-club.js','board3d-club-room.js','board3d-life.js','board3d-boards.js','board3d-studio.js','board3d-crowns.js','board3d-environments.js','board3d-photo.js'].includes(name)?'module':'script'}))}
 file='ui/index.html';I.h(fs.readFileSync(file,'utf8'));I.capture(null);
 fs.writeFileSync('locales/sources.json',JSON.stringify(messages,null,2)+'\n');console.log(Object.keys(messages).length+' catalog messages');

@@ -116,6 +116,7 @@ def test_migrate_existing_paused_and_previously_started(tmp_path):
         fresh=draft(s);started=draft(s)
         s.set_state(started['id'],'running');s.set_state(started['id'],'paused')
     with sqlite3.connect(tmp_path/'arena.sqlite3') as db:
+        db.execute('DROP INDEX IF EXISTS tournaments_manager')  # absent in the old schema being simulated
         db.execute('ALTER TABLE tournaments DROP COLUMN started_once')
         db.execute('ALTER TABLE tournaments DROP COLUMN setup_revision')
     with contextlib.closing(Store(tmp_path)) as s:

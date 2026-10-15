@@ -26,6 +26,7 @@ DEFAULTS={'format':'match','cycles':10,'paired':True,'rounds':5,'candidates':1,'
  'resign_cp':0,'resign_plies':6,'draw_cp':0,'draw_plies':12,'draw_after':80,'ponder':False,
  'syzygy_path':'','sprt':{'elo0':0,'elo1':5,'alpha':.05,'beta':.05}}
 DEFAULTS.update(cpu_budget=0,memory_budget_mb=0,gpu_limits={})
+DEFAULTS.update(schedule_order='legacy',schedule_seed=7970)
 DEFAULTS.update(seeding='input',tiebreaks=['wins','seed'],bye_score=1,knockout_tiebreak='continuous',playoff_limit=3,playoff_cycles=1,playoff_fallback='seed',swiss_rematches=False,ladder_swap='adjacent',ladder_distance=1)
 
 class SavingError(RuntimeError): pass
@@ -106,6 +107,11 @@ class Store:
         CREATE TABLE IF NOT EXISTS workspace_version(singleton INTEGER PRIMARY KEY CHECK(singleton=1),identity TEXT NOT NULL,revision INTEGER NOT NULL);
         ''')
         self.db.execute('INSERT OR IGNORE INTO workspace_version VALUES(1,?,0)',(uid(),))
+        self.workspace_identity=self.db.execute('SELECT identity FROM workspace_version WHERE singleton=1').fetchone()[0]
+        from .pgn_output import initialize as initialize_pgn_output
+        initialize_pgn_output(self)
+        from .schedule_order import initialize as initialize_schedule
+        initialize_schedule(self)
         restore_backup_hint(self,receipt)
         from .storage import initialize as initialize_storage
         initialize_storage(self)
@@ -127,10 +133,14 @@ class Store:
         initialize_books(self)
         from .tournament_edit import initialize as initialize_edit
         initialize_edit(self)
-        from .tournament_queue import initialize as initialize_queue
-        initialize_queue(self)
         from .events import initialize as initialize_events
         initialize_events(self)
+        from .tournament_queue import initialize as initialize_queue
+        initialize_queue(self)
+        from .rating_center import initialize as initialize_rating_center
+        initialize_rating_center(self)
+        from .player_store import initialize as initialize_player
+        initialize_player(self)
         self.schema_version=self.db.execute('PRAGMA schema_version').fetchone()[0]
         if receipt and receipt.get('schema_version')!=self.schema_version:self.backup_revision=-1
         with self.tx():
@@ -138,7 +148,7 @@ class Store:
         from .deletion import ledger
         try:
             with contextlib.closing(ledger(self.folder)) as deletions:
-                pending_deletion=bool(deletions.execute('SELECT 1 FROM deleted LIMIT 1').fetchone())
+                pending_deletion=bool(deletions.execute('SELECT 1 FROM deleted UNION ALL SELECT 1 FROM deleted_events UNION ALL SELECT 1 FROM rating_actions LIMIT 1').fetchone())
         except (OSError,sqlite3.Error):pending_deletion=True # Report through normal recovery failure handling.
         self.startup_pending=defer_maintenance and bool(pending_deletion or self.one('SELECT 1 FROM storage_jobs LIMIT 1'))
         if self.startup_pending:
@@ -186,6 +196,10 @@ class Store:
     def experiment_create(self,*args,**kwargs):
         from .experiments import create
         return create(self,*args,**kwargs)
+
+    def player_call(self,method,*args):
+        from .player_store import call
+        return call(self,method,*args)
 
     def experiment_get(self,eid,*args):
         from .experiments import get
@@ -273,9 +287,9 @@ class Store:
         from .deletion import preview
         return preview(self,tid)
 
-    def delete_tournament(self,tid,name):
+    def delete_tournament(self,tid,name,keep_ratings=True):
         from .deletion import delete
-        return delete(self,tid,name)
+        return delete(self,tid,name,keep_ratings)
 
     def audit(self,tid,action,body): self.db.execute('INSERT INTO audit(tid,created,action,body) VALUES(?,?,?,?)',(tid,now(),action,encode(body)))
 
@@ -297,6 +311,22 @@ class Store:
         from .move_books import validate
         profile['move_book']=validate(self,profile.get('move_book'))
         return profile
+
+    def bulk_profiles(self,body):
+        from .profile_bulk import bulk
+        return bulk(self,body)
+
+    def setup_draft(self,body=None):
+        from .setup_draft import draft
+        return draft(self,body)
+
+    def save_option_discovery(self,pid,original,advertised,identity):
+        with self.tx(report_change=False):
+            current=self.one('SELECT body FROM profiles WHERE id=?',(pid,))
+            if not current or current['body']!=original:raise ValueError('Profiles changed after preview. Review the changes again.')
+            p=json.loads(original);p.update(advertised=advertised,identity=identity)
+            self.db.execute('UPDATE profiles SET body=? WHERE id=?',(encode(p),pid))
+        return {'id':pid,'name':p['name'],'options':len(advertised)}
 
     def profile_import(self,body):
         from .profile_import import preview,commit
@@ -351,6 +381,9 @@ class Store:
 
     def prepare_tournament(self,profiles,settings,openings=None):
         s=DEFAULTS|settings;s.pop('_custom_index',None);TimeControl.parse(s['time_control'])
+        s.pop('rr_extensions',None)  # Internal append history never comes from a new setup.
+        from .schedule_order import validate as validate_schedule
+        validate_schedule(s)
         from .move_books import validate
         profiles=[dict(p,move_book=validate(self,p.get('move_book'))) for p in profiles]
         if not isinstance(s.get('use_engine_books',True),bool):raise ValueError('Engine move book switch must be true or false')
@@ -363,7 +396,12 @@ class Store:
             if not isinstance(s[k],int) or s[k]<0:raise ValueError(k+' must be a non-negative integer')
         if any(not isinstance(v,int) or v<1 for v in s['gpu_limits'].values()):raise ValueError('GPU limits must be positive integer engine-process counts')
         for k in ('resign_plies','draw_plies'):
-            if not isinstance(s[k],int) or s[k]<1:raise ValueError(k+' must be a positive integer')
+            if type(s[k]) is not int or s[k]<1:raise ValueError('Adjudication windows must be positive whole numbers of plies.')
+        if type(s['draw_after']) is not int or s['draw_after']<0:
+            raise ValueError('Minimum draw length must be a non-negative whole number of plies.')
+        for k in ('resign_cp','draw_cp'):
+            if isinstance(s[k],bool) or not isinstance(s[k],(int,float)) or not math.isfinite(s[k]) or s[k]<0:
+                raise ValueError('Adjudication thresholds must be finite, non-negative centipawn values.')
         from .rankings import TIEBREAKS
         if not isinstance(s['tiebreaks'],list) or any(k not in TIEBREAKS for k in s['tiebreaks']):raise ValueError('Unknown standings tiebreak')
         if s['seeding'] not in ('input','random'):raise ValueError('Unknown seeding policy')
@@ -399,10 +437,12 @@ class Store:
             if not board.is_valid():raise ValueError('Invalid opening FEN: '+o['fen'])
         return profiles,s,total
 
-    def create_tournament(self,name,profiles,settings,openings=None,backup=True):
+    def create_tournament(self,name,profiles,settings,openings=None,backup=True,output=None):
         prepared=self.prepare_tournament(profiles,settings,openings)
         with self.tx():
             tid=self.insert_tournament(name,prepared)
+            from .pgn_output import bind
+            bind(self,tid,output)
         if backup:self.backup()
         return self.tournament(tid)
 
@@ -421,6 +461,14 @@ class Store:
         from .tournament_edit import setup
         return setup(self,tid)
 
+    def rating_center_call(self,method,*args,**kwargs):
+        from . import rating_center
+        return getattr(rating_center,method)(self,*args,**kwargs)
+
+    def pgn_output_configure(self,tid,output):
+        from .pgn_output import configure
+        return configure(self,tid,output)
+
     def event_call(self,method,*args,**kwargs):
         from . import events
         return getattr(events,method)(self,*args,**kwargs)
@@ -434,6 +482,10 @@ class Store:
     def edit_tournament(self,*args,**kwargs):
         from .tournament_edit import edit
         return edit(self,*args,**kwargs)
+
+    def extension_call(self,method,*args):
+        from . import tournament_extend
+        return getattr(tournament_extend,method)(self,*args)
 
     def tournament(self,tid):
         t=self.one('SELECT * FROM tournaments WHERE id=?',(tid,))
@@ -455,7 +507,7 @@ class Store:
         from .opening_policy import select
         return encode(select(s,pair_no,round_no,cycle,assignment))
 
-    def _insert_pair(self,tid,pair_no,a,b,round_no,s,fixed_colors=False,stage='regular',cycle=0,playoff_stage=None,playoff_time_control=None,opening_assignment=None):
+    def _insert_pair(self,tid,pair_no,a,b,round_no,s,fixed_colors=False,stage='regular',cycle=0,playoff_stage=None,playoff_time_control=None,opening_assignment=None,schedule_index=None):
         legs=2 if s['paired'] else 1
         record=json.loads(self._opening(s,pair_no,round_no,cycle,opening_assignment))|{'competition_stage':stage}
         # Scheduling owns these fields; imported opening metadata cannot set clocks.
@@ -465,8 +517,8 @@ class Store:
         opening=encode(record)
         for leg in range(legs):
             w,bk=(a,b) if (leg if legs==2 else 0 if fixed_colors else pair_no%2)==0 else (b,a)
-            self.db.execute('INSERT INTO games(id,tid,number,pair_no,leg,a,b,white,black,round,opening) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
-                (uid(),tid,pair_no*legs+leg,pair_no,leg,a,b,w,bk,round_no,opening))
+            self.db.execute('INSERT INTO games(id,tid,number,pair_no,leg,a,b,white,black,round,opening,schedule_index) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                (uid(),tid,pair_no*legs+leg,pair_no,leg,a,b,w,bk,round_no,opening,(pair_no if schedule_index is None else schedule_index)*legs+leg))
 
     def fill_queue(self,tid,window,defer_pairing=False):
         t=self.tournament(tid);s=t['settings']
@@ -481,15 +533,17 @@ class Store:
         end=min(t['total']//legs,t['cursor']+max(256,(count+legs-1)//legs)) if count else t['cursor']
         if end<=t['cursor']:return
         with self.tx():
-            for k in range(t['cursor'],end):
+            from .schedule_order import canonical
+            for position in range(t['cursor'],end):
+                k=canonical(position,t['participants'],s)
                 # Admission may already have materialized this pair farther ahead.
                 # Both legs are always inserted in one transaction.
                 if not self.one('SELECT id FROM games WHERE tid=? AND pair_no=? LIMIT 1',(tid,k)):
                     from .custom_matchups import pair
                     a,b,rep=pair(k,t['participants'],s)
-                    self._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom');count-=legs
+                    self._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom' or bool(s.get('rr_extensions')),schedule_index=position);count-=legs
                 if count<=0:
-                    end=k+1;break
+                    end=position+1;break
             self.db.execute('UPDATE tournaments SET cursor=? WHERE id=?',(end,tid))
 
     def dispatch(self,tid,used,admission,scan=None,limit=256,dry_run=False):
@@ -503,7 +557,7 @@ class Store:
             clause=' AND id=?' if gid is not None else ''
             from .sequential import frozen
             if frozen(self,tid):clause+=" AND mode='diagnostic'"
-            g=self.one("SELECT * FROM games WHERE tid=? AND state='pending' AND invalid=0"+clause+' ORDER BY number LIMIT 1',(tid,gid) if gid is not None else (tid,))
+            g=self.one("SELECT * FROM games WHERE tid=? AND state='pending' AND invalid=0"+clause+' ORDER BY schedule_index,number LIMIT 1',(tid,gid) if gid is not None else (tid,))
             if not g:return None
             aid=uid();seq=self.db.execute('SELECT coalesce(max(seq),0)+1 FROM attempts WHERE gid=?',(g['id'],)).fetchone()[0]
             self.db.execute('INSERT INTO attempts(id,gid,seq,mode,started) VALUES(?,?,?,?,?)',(aid,g['id'],seq,g['mode'],now()))
@@ -593,6 +647,8 @@ class Store:
             from .reliability import delta
             delta(self,g,self.one('SELECT result,reason,mode FROM attempts WHERE id=?',(aid,)),official=1)
         self._pair_delta(g['tid'],g['pair_no'],1)
+        from .rating_center import sync
+        sync(self,g,aid)
 
     def finish(self,aid,result,reason,detail='',identity=None):
         attempt=self.one('SELECT * FROM attempts WHERE id=?',(aid,))

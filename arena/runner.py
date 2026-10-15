@@ -62,17 +62,23 @@ class Runner:
         self.lifecycle_lock=asyncio.Lock();self.maintenance=False
         self.storage_task=None;self.backup_requested=False
         self.admission_scans={};self.resource_probes={}
-        self.search_histories={}
+        self.search_histories={};self.external_resources={}
         from .shared_scheduler import FairShare
         self.fair_share=FairShare();self.scheduling_status={}
         from .runtime_evidence import RunRecorder
         self.runtime=RunRecorder(db)
+        from .pgn_output import Outputs
+        self.pgn_outputs=Outputs(db)
 
     async def start(self):
+        self.pgn_outputs.task=asyncio.create_task(self.pgn_outputs.loop())
         if self.db.store.startup_pending:
             self.maintenance=True
             self.storage_task=asyncio.create_task(self._finish_startup())
         self.scheduler=asyncio.create_task(self._schedule())
+
+    def resource_usage(self):
+        return usage([*self.live.values(),*self.external_resources.values()])
 
     async def _finish_startup(self):
         from .storage import progress
@@ -116,8 +122,9 @@ class Runner:
                         self.experiment_task=None;self.experiment_id=None
                     tournaments=await self.db.call('rows',"SELECT id,state FROM tournaments WHERE state IN ('running','draining') ORDER BY created")
                     await self.runtime.update({v['id'] for v in tournaments},{v['tid'] for v in self.live.values()})
-                    shared=self.db.store.queue_status.get('execution_mode')=='parallel'
-                    if shared:await self._schedule_shared()
+                    event_schedule=await self.db.call('event_call','scheduling')
+                    shared=(event_schedule['execution_mode']=='parallel') if event_schedule else self.db.store.queue_status.get('execution_mode')=='parallel'
+                    if shared:await self._schedule_shared(event_schedule)
                     for item in ([] if shared else tournaments):
                         tid=item['id'];t=await self.db.call('tournament',tid)
                         active=sum(v['tid']==tid for v in self.live.values())
@@ -138,7 +145,7 @@ class Runner:
                             await self.db.call('apply_round_plan',plan)
                             await self.db.call('fill_queue',tid,max(4,budget*2),True)
                         while len(self.tasks)<budget:
-                            used=usage(self.live.values(),t['settings']['ponder'])
+                            used=self.resource_usage()
                             selected=await self.db.call('dispatch',tid,used,admission,self.admission_scans.get(tid))
                             self.admission_scans[tid]=selected['scan']
                             g=selected['game']
@@ -160,7 +167,7 @@ class Runner:
                             if not unfinished['n'] and t['cursor']*(2 if t['settings']['paired'] else 1)>=t['total'] and t['settings']['format'] not in ('swiss','knockout','double_elimination','ladder'):
                                 await self.db.call('execute',"UPDATE tournaments SET state='completed' WHERE id=?",(tid,))
                         if self.tasks:break
-                    if not self.tasks and not tournaments:
+                    if not self.tasks and not tournaments and not self.external_resources:
                         experiment=await self.db.call('one',"SELECT id FROM experiments WHERE state='running' ORDER BY created LIMIT 1")
                         if experiment:
                             case=await self.db.call('experiment_claim',experiment['id'])
@@ -173,15 +180,15 @@ class Runner:
 
     def _launch(self,g,t,wp,bp):
         self.live[g['aid']]={'tid':t['id'],'tournament_name':t['name'],'game':g['id'],'number':g['number'],
-            'fen':g['opening']['fen'],'white':wp,'black':bp,'status':'Starting','ply':0,
+            'claim_draws':t['settings']['claim_draws'],'fen':g['opening']['fen'],'white':wp,'black':bp,'status':'Starting','ply':0,
             'ponder':t['settings']['ponder'],'resource_cost':game_cost(wp,bp,t['settings']['ponder'])}
         task=asyncio.create_task(self._game(g,t));self.tasks[g['aid']]=task
         task.add_done_callback(lambda task,aid=g['aid']:self._done(aid,task))
         self.max_active=max(self.max_active,len(self.tasks))
 
-    async def _schedule_shared(self):
+    async def _schedule_shared(self,event_schedule=None):
         from .shared_scheduler import EMPTY
-        limits=self.db.store.queue_status['resources']|{'gpu_default_limit':1}
+        limits=(event_schedule['resources'] if event_schedule else self.db.store.queue_status['resources'])|{'gpu_default_limit':1}
         if not limits.get('cpu_budget'):return
         candidates=await self.db.call('queue_call','candidates')
         self.resource_probes={k:v for k,v in self.resource_probes.items() if k in {c['id'] for c in candidates}}
@@ -221,7 +228,7 @@ class Runner:
                 from .rounds import build_plan
                 plan=await asyncio.to_thread(build_plan,pairing);await self.db.call('apply_round_plan',plan)
                 await self.db.call('fill_queue',tid,max(4,min(budget,limits['concurrency'])*2),True)
-            used=usage(self.live.values());local_used=usage(v for v in self.live.values() if v['tid']==tid)
+            used=self.resource_usage();local_used=usage(v for v in self.live.values() if v['tid']==tid)
             admission=limits|{'_local_used':local_used,'_local_limits':local}
             if reserve and self.fair_share.reservation_cost:admission['_reservation_cost']=self.fair_share.reservation_cost
             selected=await self.db.call('dispatch',tid,used,admission,self.admission_scans.get(tid))
@@ -279,7 +286,7 @@ class Runner:
         recorders=[]
         def clock_snapshot():return {side:clocks[color].snapshot()|{'elapsed':elapsed_by_side.get(side,0)} for side,color in [('white',chess.WHITE),('black',chess.BLACK)]}
         view=self.live.get(aid,{})
-        view.update(clocks=clock_snapshot(),clock_active=None,last_move_seconds=elapsed_by_side,searches={},competition_label=game_label(s,g['round'],g['opening']),crown_squares=crown_marks.snapshot())
+        view.update(clocks=clock_snapshot(),clock_active=None,last_move_seconds=elapsed_by_side,searches={},competition_label=game_label(s,g['round'],g['opening']),crown_squares=crown_marks.snapshot(),knight_facings=crown_marks.knight_snapshot(),captured=crown_marks.capture_snapshot())
         self.search_histories[aid]={}
         try:
             await self.db.call('execute','UPDATE attempts SET clocks=? WHERE id=?',(__import__('json').dumps(clock_snapshot()),aid))
@@ -348,7 +355,7 @@ class Runner:
                 view.update(clock_active=None,status='Saving move',clocks=clock_snapshot())
                 lines=list(engines[turn].log);engines[turn].log.clear()
                 await self.db.save_move(aid,len(board.move_stack),move.uci(),san,board.fen(),elapsed,clock_snapshot(),info,lines)
-                view.update(fen=board.fen(),ply=len(board.move_stack),last_move=move.uci(),san=san,info=info,clocks=clock_snapshot(),crown_squares=crown_marks.snapshot())
+                view.update(fen=board.fen(),ply=len(board.move_stack),last_move=move.uci(),san=san,info=info,clocks=clock_snapshot(),crown_squares=crown_marks.snapshot(),knight_facings=crown_marks.knight_snapshot(),captured=crown_marks.capture_snapshot())
                 if s['ponder'] and not book_move:await engines[turn].begin_ponder(board,go_command(clocks[turn],clocks[chess.WHITE],clocks[chess.BLACK]))
                 streak.append(info.get('cp'));streak=streak[-max(s['resign_plies'],s['draw_plies']):]
                 if s['resign_cp'] and len(streak)>=s['resign_plies']:
@@ -444,23 +451,39 @@ class Runner:
         views=[]
         for aid,v in self.live.items():
             item=dict(v);item['attempt']=aid;item['search_elapsed']=max(0,time.monotonic()-v['search_started']) if 'search_started' in v else 0;views.append(item)
-        return {'live':views,'scheduling':{'used':usage(self.live.values()),'waiting':dict(self.scheduling_status)},'maintenance':self.maintenance,'error':self.error or self.db.store.failure,'cpu_percent':cpu,
+        return {'live':views,'scheduling':{'used':self.resource_usage(),'waiting':dict(self.scheduling_status)},'player_active':bool(self.external_resources),'maintenance':self.maintenance,'error':self.error or self.db.store.failure,'cpu_percent':cpu,
           'memory_used_gb':round(memory.used/2**30,2),'memory_available_gb':round(memory.available/2**30,2),'logical_cpus':psutil.cpu_count(),
           'active_games':len(self.tasks),'max_active_games':self.max_active,'engine_process_bound':2*len(self.tasks),
-          'games_finished':self.completed,'uptime':time.monotonic()-self.started,
+          'games_finished':self.completed,'uptime':time.monotonic()-self.started,'pgn_outputs':list(self.pgn_outputs.status.values()),
           'backup':dict(self.db.store.backup_state)|{'retention':self.db.store.storage_settings['backup_copies'],'minimum_minutes':self.db.store.storage_settings['backup_minutes']}}
 
-    async def delete_tournament(self,tid,name):
+    async def delete_tournament(self,tid,name,keep_ratings=True):
         async with self.lifecycle_lock:
             if self.tasks or (self.experiment_task and not self.experiment_task.done()):
                 raise ValueError('Stop or pause and drain all tournaments and experiments before deleting a tournament')
             self.maintenance=True
             try:
+                await self.pgn_outputs.flush()
                 if self.backup_task:
                     await self.backup_task;self.backup_task=None
-                result=await self.db.call('delete_tournament',tid,name)
+                result=await self.db.call('delete_tournament',tid,name,keep_ratings)
                 self.memory_budgets.pop(tid,None)
                 self.admission_scans.pop(tid,None)
+                return result
+            finally:self.maintenance=False
+
+    async def delete_events(self,ids,expected,keep_ratings=True):
+        async with self.lifecycle_lock:
+            if self.tasks or (self.experiment_task and not self.experiment_task.done()):
+                raise ValueError('Stop or pause and drain all tournaments and experiments before deleting records.')
+            self.maintenance=True
+            try:
+                await self.pgn_outputs.flush()
+                if self.backup_task:
+                    await self.backup_task;self.backup_task=None
+                result=await self.db.call('event_call','delete_events',ids,expected,keep_ratings)
+                for row in result['stages']:
+                    self.memory_budgets.pop(row['tid'],None);self.admission_scans.pop(row['tid'],None)
                 return result
             finally:self.maintenance=False
 
@@ -492,4 +515,6 @@ class Runner:
             await self.runtime.close()
             if self.backup_task:await asyncio.gather(self.backup_task,return_exceptions=True)
             await self.db.call('backup',force=False)
-        finally:await self.db.close()
+        finally:
+            await self.pgn_outputs.close()
+            await self.db.close()

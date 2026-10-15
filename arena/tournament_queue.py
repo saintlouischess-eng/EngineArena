@@ -4,6 +4,7 @@ import time
 import json
 import os
 import psutil
+from collections import OrderedDict
 
 
 def initialize(store):
@@ -21,6 +22,10 @@ def initialize(store):
         existing={r['name'] for r in store.rows('PRAGMA table_info('+table+')')}
         for name,kind in columns.items():
             if name not in existing:store.db.execute(f'ALTER TABLE {table} ADD COLUMN {name} {kind}')
+    # Cover progress-list metadata without reading multi-megabyte opening JSON
+    # stored in the same tournament records. Also serves frequent state counts.
+    store.db.execute('''CREATE INDEX IF NOT EXISTS tournaments_manager ON tournaments
+      (state,id,name,total,dependency,note,started_once,setup_revision,created)''')
     summary(store)
 
 
@@ -41,12 +46,17 @@ def summary(store):
     counts=store.one('SELECT count(*) total,coalesce(sum(finished),0) completed FROM tournament_queue')
     active=store.one('SELECT name,state FROM tournaments WHERE id=?',(q['active_tid'],)) if q['active_tid'] else None
     counts.update(store.one('''SELECT count(*) running FROM tournaments WHERE state IN ('running','draining')'''))
-    result={**q,**counts,'remaining':counts['total']-counts['completed'],'active':active}
+    event=store.one("""SELECT e.id,e.name,e.state,e.execution_mode,e.resources FROM events e
+      WHERE e.state='running' OR EXISTS (SELECT 1 FROM event_children c JOIN tournaments t ON t.id=c.tid
+        WHERE c.eid=e.id AND c.valid=1 AND t.state IN ('running','draining')) ORDER BY e.created LIMIT 1""")
+    if event:event['resources']=json.loads(event['resources'])
+    result={**q,**counts,'remaining':counts['total']-counts['completed'],'active':active,'active_event':event}
     store.queue_status=result
     return result
 
 
-def page(store,offset=0,search='',status='',sort='position',direction='asc'):
+def page(store,offset=0,search='',status='',sort='position',direction='asc',scope=None):
+    if scope is not None:return overview_page(store,offset,search,status,sort,direction,scope)
     if control(store)['execution_mode']=='parallel':return manager_page(store,offset,search,status,sort,direction)
     offset=max(0,int(offset));q=summary(store)
     rows=store.rows('''SELECT q.*,t.name,t.state,t.total,t.dependency,t.note,t.started_once,
@@ -71,7 +81,9 @@ def ended(store,tid,state):
 def add(store,ids=None,all_ready=False):
     ids=list(dict.fromkeys(ids or []))
     if all_ready:
-        ids=[r['id'] for r in store.rows("SELECT id FROM tournaments WHERE state='paused' AND started_once=0 AND dependency='' AND id NOT IN (SELECT tid FROM event_children) ORDER BY created,id")]
+        # Windows clock readings can tie during rapid setup. Keep insertion
+        # order for those ties instead of sorting by unrelated random UUIDs.
+        ids=[r['id'] for r in store.rows("SELECT id FROM tournaments WHERE state='paused' AND started_once=0 AND dependency='' AND id NOT IN (SELECT tid FROM event_children) ORDER BY created,rowid")]
     if not ids:raise ValueError('Select a saved tournament to add to the queue.')
     added=0
     with store.tx():
@@ -102,6 +114,8 @@ def require_revision(q,value):
 def command(store,action,revision,tid=None,not_before=0):
     with store.tx():
         q=control(store);require_revision(q,revision)
+        if action in ('pause','finish_current') and store.one("SELECT 1 FROM events WHERE state='running'"):
+            raise ValueError('Use the event controls to pause or manage linked stages.')
         if q['execution_mode']=='parallel':return parallel_command(store,action,tid,not_before)
         if action=='run':
             if store.one("SELECT 1 FROM events WHERE state='running'"):raise ValueError('Pause the running event first.')
@@ -254,6 +268,14 @@ def configure(store,revision,execution_mode,resources):
         raise ValueError('Pause and drain all tournaments before changing execution mode.')
     if execution_mode!=q['execution_mode'] and q['mode'] in ('running','finish_current'):
         raise ValueError('Pause the tournament manager before changing execution mode.')
+    result=validate_resources(resources)
+    with store.tx():
+        change(store,execution_mode=execution_mode,resources=result,active_tid=None if execution_mode!=q['execution_mode'] else q['active_tid'])
+        store.audit(None,'shared_resources_changed',{'before':{'mode':q['execution_mode'],'resources':q['resources']},'after':{'mode':execution_mode,'resources':result}})
+    return summary(store)
+
+
+def validate_resources(resources):
     if not isinstance(resources,dict):raise ValueError('Enter shared resource limits.')
     result={}
     for key in ('cpu_budget','memory_budget_mb','concurrency'):
@@ -264,10 +286,7 @@ def configure(store,revision,execution_mode,resources):
     if not isinstance(gpu,dict) or any(not isinstance(k,str) or not k.strip() or k!=k.strip() or len(k)>100 or type(v) is not int or v<0 or v>2147483647 for k,v in gpu.items()):
         raise ValueError('GPU limits require a group name and a nonnegative whole number.')
     result['gpu_limits']=gpu
-    with store.tx():
-        change(store,execution_mode=execution_mode,resources=result,active_tid=None if execution_mode!=q['execution_mode'] else q['active_tid'])
-        store.audit(None,'shared_resources_changed',{'before':{'mode':q['execution_mode'],'resources':q['resources']},'after':{'mode':execution_mode,'resources':result}})
-    return summary(store)
+    return result
 
 
 def manager_page(store,offset=0,search='',status='',sort='position',direction='asc'):
@@ -292,6 +311,62 @@ def manager_page(store,offset=0,search='',status='',sort='position',direction='a
     for item in rows:
         item['active']=item['state'] in ('running','draining');item['can_up']=item['can_down']=False
     return q|{'items':rows,'offset':offset,'filtered_total':total,'search':search,'filter':status,'sort':sort,'direction':direction}
+
+
+def overview_page(store,offset=0,search='',status='',sort='position',direction='asc',scope='all'):
+    """Bounded progress view; listing an event never enrolls it in the queue.
+
+    Read compact counters and event columns only. Do not deserialize opening
+    inventories or load games, moves, or engine profiles on the refresh path.
+    """
+    if scope not in ('all','queue','events'):raise ValueError('Unknown tournament scope')
+    q=summary(store);offset=max(0,int(offset));params=[];where=[]
+    source=''' FROM tournaments t INDEXED BY tournaments_manager LEFT JOIN tournament_queue q ON q.tid=t.id
+      LEFT JOIN event_children c ON c.tid=t.id LEFT JOIN events e ON e.id=c.eid'''
+    if scope=='queue':where.append('q.tid IS NOT NULL')
+    elif scope=='events':where.append('c.tid IS NOT NULL')
+    # Superseded results remain accessible from their event, but never look active.
+    current="(c.tid IS NULL OR (c.valid=1 AND e.state<>'retired'))"
+    finished="(t.state='completed' OR coalesce(q.finished,0)=1)"
+    if status=='active':where.extend([current,"t.state IN ('running','draining')"])
+    elif status=='waiting':where.extend([current,f'NOT {finished}',"t.state='paused' AND coalesce(q.held,0)=0 AND t.dependency='' AND (t.started_once=0 OR q.tid IS NOT NULL)"])
+    elif status=='paused':where.extend([current,f'NOT {finished}',"t.state='paused' AND (coalesce(q.held,0)=1 OR t.dependency<>'' OR (t.started_once=1 AND q.tid IS NULL))"])
+    elif status=='finished':where.extend([current,finished])
+    elif status=='archived':where.append('NOT '+current)
+    elif status:raise ValueError('Unknown tournament filter')
+    else:where.append(current)
+    if search:
+        where.append("t.name LIKE ? ESCAPE '\\'");params.append('%'+search.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%')
+    clause=' WHERE '+' AND '.join(where) if where else ''
+    total=store.one('SELECT count(*) n'+source+clause,tuple(params))['n']
+    columns={'position':"CASE WHEN t.state IN ('running','draining') THEN 0 WHEN t.state='paused' THEN 1 ELSE 2 END,coalesce(q.position,2147483647),coalesce(e.created,t.created),c.stage,c.bucket",
+             'name':'t.name COLLATE NOCASE','state':'t.state','progress':'1.0*official_games/max(t.total,1)',
+             'priority':'coalesce(q.priority,0)','active':'active_games'}
+    if sort not in columns or direction not in ('asc','desc'):raise ValueError('Unknown tournament sort')
+    rows=store.rows('''SELECT t.id tid,t.name,t.state,t.total,t.dependency,t.note,t.started_once,t.setup_revision,
+      q.position,coalesce(q.held,0) held,q.priority,
+      (t.state='completed' OR coalesce(q.finished,0)=1) finished,(q.tid IS NOT NULL) queued,
+      c.eid event_id,e.name event_name,e.state event_state,c.stage event_stage,c.role event_role,c.valid event_valid,
+      coalesce((SELECT sum(n) FROM game_counts WHERE tid=t.id AND invalid=0 AND has_official=1),0) official_games,
+      coalesce((SELECT sum(n) FROM game_counts WHERE tid=t.id AND invalid=0 AND state='running'),0) active_games'''+source+clause+
+      ' ORDER BY '+columns[sort]+' '+direction+',t.id LIMIT 50 OFFSET ?',tuple(params)+(offset,))
+    ends=store.one("SELECT min(position) first,max(position) last FROM tournament_queue WHERE finished=0 AND tid<>coalesce(?,'')",(q['active_tid'],))
+    # Conditions contain potentially large opening inventories. Cache only the
+    # tiny limit, keyed by the revision incremented by every concurrency/setup edit.
+    limits=getattr(store,'_manager_game_limits',None)
+    if limits is None:limits=store._manager_game_limits=OrderedDict()
+    for item in rows:
+        key=(item['tid'],item.pop('setup_revision'))
+        if key not in limits:
+            limits[key]=store.one("SELECT json_extract(settings,'$.concurrency') n FROM tournaments WHERE id=?",(item['tid'],))['n']
+        item['game_limit']=limits[key];limits.move_to_end(key)
+        while len(limits)>256:limits.popitem(last=False)
+        item['active']=item['state'] in ('running','draining')
+        movable=item['queued'] and not item['event_id'] and not item['finished'] and item['tid']!=q['active_tid']
+        item['can_up']=bool(movable and ends['first'] is not None and item['position']>ends['first'])
+        item['can_down']=bool(movable and ends['last'] is not None and item['position']<ends['last'])
+    return q|{'items':rows,'offset':offset,'filtered_total':total,'search':search,'filter':status,
+              'sort':sort,'direction':direction,'scope':scope,'overview':True}
 
 
 def parallel_tick(store,live_tids=(),experiment_busy=False):

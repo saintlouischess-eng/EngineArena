@@ -1,0 +1,6 @@
+Poly Haven photographic environments and surface scans
+
+These assets are free public-domain assets under CC0 1.0, not original Engine Arena artwork.
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Provider license: https://polyhaven.com/license
+See provenance.json for each author, original download, checksum and transformation.
