@@ -76,7 +76,7 @@ test('a failed list reload is reported but does not change healthy hardware stat
 });
 
 test('the API preserves server error metadata alongside its translated presentation',async()=>{
- const c=vm.createContext({state:{},token:'test',ArenaI18n:{message:()=> 'Tournoi introuvable',t:v=>v},
+ const c=vm.createContext({interfaceReady:Promise.resolve(),state:{},token:'test',ArenaI18n:{message:()=> 'Tournoi introuvable',t:v=>v},
   fetch:async()=>({ok:false,status:400,headers:{get:()=> 'application/json'},json:async()=>({error:'Tournament not found'})})});
  vm.runInContext(source.slice(source.indexOf('async function api('),source.indexOf('function safely(')),c);
  await assert.rejects(c.api('tournaments/missing'),e=>e.status===400&&e.serverMessage==='Tournament not found'&&e.message==='Tournoi introuvable');

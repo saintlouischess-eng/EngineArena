@@ -30,6 +30,15 @@ public sealed class ArenaWindow : Window
     readonly HttpClient client = new() { Timeout = TimeSpan.FromSeconds(8) };
     readonly HttpClient exportClient = new() { Timeout = Timeout.InfiniteTimeSpan };
     readonly CancellationTokenSource exportCancellation = new();
+    readonly CancellationTokenSource startupCancellation = new();
+    readonly TextBlock startupMessage = new() { Foreground = System.Windows.Media.Brushes.LightSlateGray, FontSize = 15, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 12, 0, 16) };
+    readonly TextBlock startupElapsed = new() { Foreground = System.Windows.Media.Brushes.LightSlateGray, FontSize = 13, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 12, 0, 16) };
+    readonly object startupLogLock = new();
+    Task? initialization;
+    readonly Stopwatch startupWatch = new();
+    readonly System.Windows.Threading.DispatcherTimer startupTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    WorkerConnection? connection;
+    string startupLog = "";
     readonly ProcessJob job = new();
     readonly string sensorSession = Guid.NewGuid().ToString("N");
     Process? sensorReader;
@@ -42,20 +51,37 @@ public sealed class ArenaWindow : Window
     public ArenaWindow()
     {
         L.LoadFromArguments();
-        Title = L.T("Engine Arena — 1.9.7"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
+        Title = L.T("Engine Arena — 1.9.12"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 19, 24));
         Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/assets/engine-arena.ico", UriKind.Absolute));
         var startup = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center, MaxWidth = 520, Margin = new Thickness(40) };
         startup.Children.Add(new Image { Source = Icon, Width = 88, Height = 88, Margin = new Thickness(0, 0, 0, 20) });
         startup.Children.Add(new TextBlock { Text = "Engine Arena", Foreground = System.Windows.Media.Brushes.White, FontSize = 32, FontWeight = FontWeights.SemiBold, TextAlignment = TextAlignment.Center });
-        startup.Children.Add(new TextBlock { Text = L.T("Starting Engine Arena…"), Foreground = System.Windows.Media.Brushes.LightSlateGray, FontSize = 15, TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 12, 0, 24) });
+        startupMessage.Text = L.T("Starting Engine Arena…");
+        startup.Children.Add(startupMessage);
         startup.Children.Add(new ProgressBar { Height = 3, Width = 220, IsIndeterminate = true });
+        startup.Children.Add(startupElapsed);
+        var cancelStartup = new Button { Content = L.T("Close"), Padding = new Thickness(24, 8, 24, 8), HorizontalAlignment = HorizontalAlignment.Center };
+        cancelStartup.Click += (_, _) => Close(); startup.Children.Add(cancelStartup);
+        browser.DefaultBackgroundColor = System.Drawing.Color.FromArgb(16, 19, 24);
         Content = startup;
-        Loaded += async (_, _) => { try { await Initialize(); } catch (Exception ex) { Content = new TextBox { Text = ex is WebView2RuntimeNotFoundException ? L.T("Microsoft Edge WebView2 Runtime is missing.\n\nRun EngineArenaSetup again to install the included runtime, then reopen Engine Arena. Your saved tournaments are preserved.") : L.T("Engine Arena could not start.\n\n") + ex, IsReadOnly = true, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(30) }; } };
+        Loaded += async (_, _) =>
+        {
+            startupWatch.Restart(); startupTimer.Start();
+            try { initialization = Initialize(); await initialization; }
+            catch (OperationCanceledException) when (closing) { }
+            catch (Exception ex) { LogStartup(ex.ToString()); if (!closing) ShowStartupError(ex); }
+            finally { startupTimer.Stop(); }
+        };
+        startupTimer.Tick += (_, _) =>
+        {
+            var elapsed = startupWatch.Elapsed;
+            startupElapsed.Text = L.T("Elapsed") + $" {elapsed.TotalSeconds:0}s" + (elapsed.TotalSeconds >= 15 ? "\n" + L.T("Large workspaces can take longer to check. You can safely close this window and try again later.") : "");
+        };
         Closing += async (_, e) =>
         {
-            if (closing) { e.Cancel = !shutdownComplete; return; } e.Cancel = true; closing = true; exportCancellation.Cancel();
+            if (closing) { e.Cancel = !shutdownComplete; return; } e.Cancel = true; closing = true; exportCancellation.Cancel(); startupCancellation.Cancel();
             Title = L.T("Engine Arena — finishing saved games and backup…");
             var closingPanel = new StackPanel { Margin = new Thickness(48), MaxWidth = 650, VerticalAlignment = VerticalAlignment.Center };
             closingPanel.Children.Add(new TextBlock { Text = L.T("Saving your workspace"), FontSize = 28 });
@@ -66,8 +92,14 @@ public sealed class ArenaWindow : Window
             Content = closingPanel;
             // Large verified backups can exceed twelve seconds. Let the worker
             // finish its durable shutdown instead of killing a healthy save.
-            try { if (origin.Length > 0) { using var req = new HttpRequestMessage(HttpMethod.Post, origin + "/api/shutdown"); req.Headers.Add("X-Arena-Token", token); req.Content = new StringContent("{}"); await client.SendAsync(req); } if (worker is { HasExited: false }) await worker.WaitForExitAsync(); }
-            catch { if (worker is { HasExited: false }) worker.Kill(true); }
+            try
+            {
+                // Cancel startup before disposing WebView or the worker. Otherwise
+                // a late readiness notification can reopen a window during Close.
+                if (initialization is not null) { try { await initialization; } catch (Exception) { } }
+                if (worker is not null) await WorkerStartup.StopAsync(worker, ready, token, connection, client, LogStartup);
+            }
+            catch (Exception ex) { LogStartup("Shutdown: " + ex); }
             finally { job.Dispose(); browser.Dispose(); client.Dispose(); exportClient.Dispose(); if (ownsWorkspace) workspaceGuard?.ReleaseMutex(); workspaceGuard?.Dispose(); shutdownComplete = true; Close(); }
         };
         AllowDrop = true;
@@ -81,7 +113,7 @@ public sealed class ArenaWindow : Window
         var args = Environment.GetCommandLineArgs();
         var dataIndex = Array.IndexOf(args, "--data");
         var data = dataIndex >= 0 && dataIndex + 1 < args.Length ? Path.GetFullPath(args[dataIndex + 1]) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EngineArena", "Data");
-        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.9.7";
+        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.9.12";
         workspaceFolder = data; L.Load(data);
         // Claim the workspace before touching its readiness file. A second desktop
         // must not erase the live worker's connection record or launch a rival worker.
@@ -102,6 +134,10 @@ public sealed class ArenaWindow : Window
             return;
         }
         Directory.CreateDirectory(data); ready = Path.Combine(data, "worker-ready.json");
+        startupLog = Path.Combine(data, "startup.log");
+        try { if (File.Exists(startupLog)) File.Move(startupLog, startupLog + ".previous", true); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        LogStartup("Starting Engine Arena " + typeof(Program).Assembly.GetName().Version);
         if (File.Exists(ready)) File.Delete(ready);
         var baseDir = AppContext.BaseDirectory;
         var workerExe = Path.Combine(baseDir, "worker", "ArenaWorker.exe");
@@ -115,21 +151,29 @@ public sealed class ArenaWindow : Window
             if (dir == null) throw new FileNotFoundException(L.T("Worker missing. Run the reproducible build or use the complete portable folder."));
             start.FileName = Path.Combine(dir.FullName, ".venv", "Scripts", "python.exe"); start.ArgumentList.Add(Path.Combine(dir.FullName, "worker.py")); start.WorkingDirectory = dir.FullName;
         }
-        foreach (var a in new[] { "--data", data, "--ready", ready }) start.ArgumentList.Add(a);
+        token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        foreach (var a in new[] { "--data", data, "--ready", ready, "--token", token }) start.ArgumentList.Add(a);
         start.Environment["ARENA_CPU_SENSOR_PIPE"] = $"EngineArena.Cpu.{Environment.ProcessId}.{sensorSession}";
         start.Environment["ARENA_CPU_SENSOR_HELPER"] = Path.Combine(baseDir, "ArenaSensors.exe");
         worker = Process.Start(start) ?? throw new InvalidOperationException(L.T("Could not launch worker.")); job.Assign(worker);
-        var errors = worker.StandardError.ReadToEndAsync(); _ = ReadWorkerProgress(worker.StandardOutput);
-        for (int i = 0; i < 600 && !File.Exists(ready); i++)
-        {
-            if (worker.HasExited) throw new InvalidOperationException(L.T("Worker startup failed:\n") + await errors);
-            await Task.Delay(100);
-        }
-        if (!File.Exists(ready)) throw new TimeoutException(L.T("Worker readiness file did not arrive. Check the data folder and available disk space."));
-        using var info = JsonDocument.Parse(await File.ReadAllTextAsync(ready)); token = info.RootElement.GetProperty("token").GetString()!;
-        origin = "http://127.0.0.1:" + info.RootElement.GetProperty("port").GetInt32();
-        var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(data, "WebView2"));
-        Content = browser; await browser.EnsureCoreWebView2Async(env);
+        var errors = ReadWorkerErrors(worker.StandardError); _ = ReadWorkerProgress(worker.StandardOutput);
+        var cancellation = startupCancellation.Token;
+        connection = await WorkerStartup.WaitAsync(worker, ready, token, errors, cancellation);
+        token = connection.Token; origin = connection.Origin;
+        LogStartup("Worker connected. Initializing WebView2.");
+        startupMessage.Text = L.T("Loading the interface…");
+        var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(data, "WebView2")).WaitAsync(cancellation);
+        cancellation.ThrowIfCancellationRequested();
+        // WPF requires the control in the visual tree to finish initialization.
+        // Keep it hidden until navigation succeeds so there is no blank flash.
+        var startupView = Content as UIElement;
+        Content = null;
+        var surface = new Grid(); browser.Visibility = Visibility.Hidden;
+        surface.Children.Add(browser);
+        if (startupView is not null) surface.Children.Add(startupView);
+        Content = surface;
+        await browser.EnsureCoreWebView2Async(env).WaitAsync(cancellation);
+        cancellation.ThrowIfCancellationRequested();
         browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
         browser.CoreWebView2.Settings.IsStatusBarEnabled = false;
         browser.CoreWebView2.WebMessageReceived += MessageReceived;
@@ -161,7 +205,59 @@ public sealed class ArenaWindow : Window
             var report = path.StartsWith("/api/tournaments/", StringComparison.Ordinal) && (path.EndsWith("/openings", StringComparison.Ordinal) || path.EndsWith("/ratings", StringComparison.Ordinal));
             if (path.StartsWith("/api/export/", StringComparison.Ordinal) || report) browser.CoreWebView2.Navigate(e.Uri);
         };
+        // Keep the startup panel visible until the local page has actually loaded.
+        // A WebView error is explained instead of leaving an empty white surface.
+        var loaded = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        browser.CoreWebView2.NavigationCompleted += (_, e) =>
+        {
+            if (e.IsSuccess) loaded.TrySetResult();
+            else loaded.TrySetException(new IOException(L.T("The interface could not load: ") + e.WebErrorStatus));
+        };
         browser.CoreWebView2.Navigate(origin + "/?token=" + Uri.EscapeDataString(token));
+        await loaded.Task.WaitAsync(cancellation);
+        cancellation.ThrowIfCancellationRequested();
+        if (startupView is not null) surface.Children.Remove(startupView);
+        browser.Visibility = Visibility.Visible; LogStartup("Interface ready.");
+    }
+    void LogStartup(string message)
+    {
+        if (startupLog.Length == 0) return;
+        lock (startupLogLock)
+        {
+            try
+            {
+                if (File.Exists(startupLog) && new FileInfo(startupLog).Length > 65536) return;
+                File.AppendAllText(startupLog, DateTimeOffset.Now.ToString("O") + " " + message[..Math.Min(message.Length, 16384)] + Environment.NewLine);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+    }
+    async Task<string> ReadWorkerErrors(StreamReader reader)
+    {
+        var tail = new StringBuilder();
+        try
+        {
+            while (await reader.ReadLineAsync() is string line)
+            {
+                LogStartup(line); tail.AppendLine(line);
+                if (tail.Length > 16384) tail.Remove(0, tail.Length - 16384);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or ObjectDisposedException) { }
+        return tail.ToString();
+    }
+    void ShowStartupError(Exception ex)
+    {
+        var panel = new StackPanel { Margin = new Thickness(40), MaxWidth = 850, VerticalAlignment = VerticalAlignment.Center };
+        panel.SetValue(TextBlock.ForegroundProperty, System.Windows.Media.Brushes.White);
+        panel.Children.Add(new TextBlock { Text = L.T("Engine Arena could not start"), FontSize = 28, TextWrapping = TextWrapping.Wrap });
+        var explanation = ex is WebView2RuntimeNotFoundException
+            ? L.T("Microsoft Edge WebView2 Runtime is missing.\n\nRun EngineArenaSetup again to install the included runtime, then reopen Engine Arena. Your saved tournaments are preserved.")
+            : L.T("Your saved workspace has not been reset. Close this window, then try opening Engine Arena again. If this continues, share the details below.");
+        panel.Children.Add(new TextBlock { Text = explanation, FontSize = 16, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 18, 0, 18) });
+        panel.Children.Add(new TextBox { Text = ex + (startupLog.Length > 0 ? "\n\n" + L.T("Startup log: ") + startupLog : ""), IsReadOnly = true, TextWrapping = TextWrapping.Wrap, MaxHeight = 280, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(12), Foreground = System.Windows.Media.Brushes.White, Background = Background });
+        var dismiss = new Button { Content = L.T("Close"), Padding = new Thickness(24, 10, 24, 10), Margin = new Thickness(0, 20, 0, 0), HorizontalAlignment = HorizontalAlignment.Left };
+        dismiss.Click += (_, _) => Close(); panel.Children.Add(dismiss); Content = panel;
     }
     async Task ReadWorkerProgress(StreamReader output)
     {
@@ -169,6 +265,18 @@ public sealed class ArenaWindow : Window
         {
             while (await output.ReadLineAsync() is string line)
             {
+                if (line.StartsWith("ARENA_STARTUP ", StringComparison.Ordinal))
+                {
+                    LogStartup(line);
+                    try
+                    {
+                        using var progress = JsonDocument.Parse(line[14..]);
+                        var phase = progress.RootElement.GetProperty("phase").GetString() ?? "Starting Engine Arena…";
+                        await Dispatcher.InvokeAsync(() => { if (!closing && origin.Length == 0) startupMessage.Text = L.T(phase) + "…"; });
+                    }
+                    catch (JsonException) { }
+                    continue;
+                }
                 if (!line.StartsWith("ARENA_BACKUP ", StringComparison.Ordinal)) continue;
                 try
                 {
@@ -196,6 +304,7 @@ public sealed class ArenaWindow : Window
         }
         catch (IOException) { }
         catch (ObjectDisposedException) { }
+        catch (OperationCanceledException) { }
     }
     string PhotoFolder()
     {

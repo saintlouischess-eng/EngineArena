@@ -207,6 +207,11 @@ def test_fifty_thousand_pairs_compact_ledger_and_paging(tmp_path):
     assert r['official_games']==100000 and r['pairs']==50000 and r['total']==2
     assert all(x['games']==100000 for x in r['items'])
     assert elapsed<15 # generous regression guard, not a promised user benchmark
+    started=time.monotonic();ranged=read(s,opponent_range=400);filtered_seconds=time.monotonic()-started
+    assert ranged['pairs']==50000 and ranged['counted_games']==100000
+    assert [x['rating'] for x in ranged['items']]==[x['rating'] for x in r['items']]
+    assert filtered_seconds<15
+    print('100k opponent-range view:',round(filtered_seconds,3),'seconds')
     print('100k compact results / 50k pairs:',round(elapsed,3),'seconds')
     plan=' '.join(str(tuple(row)) for row in s.db.execute('EXPLAIN QUERY PLAN SELECT pool FROM rc_games WHERE gid=?',('5',)))
     assert 'rc_games_identity' in plan

@@ -1,14 +1,14 @@
 # Engine Arena
 
-**Engine Arena 1.9.7** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
+**Engine Arena 1.9.12** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
 
 **Designed by Mark Young. Coding and implementation by OpenAI Codex**, under Mark Young's direction.
 
-[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.9.7) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_9_7.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
+[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.9.12) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_9_12.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
 
 ## Install or update
 
-**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.9.7-win-x64.exe**, or the smaller **EngineArena-1.9.7-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
+**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.9.12-win-x64.exe**, or the smaller **EngineArena-1.9.12-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
 
 Pause and drain games, then close Engine Arena. Run setup in your existing installation folder, or extract the entire ZIP into a fresh folder and launch `EngineArena.exe`. You can update directly from an earlier release; intermediate updates are not needed. Saved profiles, tournaments, events and ratings are stored separately and retained. The ZIP creates no Start menu shortcuts or uninstaller. Engine Arena itself is unsigned.
 
@@ -16,11 +16,10 @@ Both packages use `%LOCALAPPDATA%\EngineArena\Data` by default. Only one copy ca
 
 ## New in this release
 
-- **Rating Center:** automatic cross-tournament ratings, optional anchors, time categories, thread/GPU configurations, best-version family views and compact rating retention after tournament deletion.
-- **Seasons and events:** qualification, division placement, configurable admission/field limits, roster/version reviews, promotion/relegation, custom multi-stage competitions and championship tiebreaks, with careers and shareable summaries.
-- **Player Arena:** human play with mouse click/drag, books, clocks, thinking panels, sounds, PGNs, challenge series and separate personal ratings.
-- **Viewing:** detailed 1849 and Tal 1962 3D pieces, additional wooden boards, photographic rooms, an animated chess club, camera tours, low-angle views and 4K photos. Live-room rendering is capped at 30 FPS.
-- **Polish:** extend completed standalone round robins, bulk engine removal, clearer event summaries, draw-rule counters, long scoresheets, dependable resize/sound behavior and improved queue ordering.
+Maintenance fixes improve startup and closing, prevent interface-loading errors,
+and keep established ratings visible when other entries have separated results.
+Rating Center also adds an optional opponent-rating-range sensitivity comparison.
+See [release notes](docs/RELEASE_1_9_12.md) for the changes and validation scope.
 
 ## Testing and tournament features
 
@@ -47,9 +46,16 @@ Useful guides: [Tournament manager](docs/SIMULTANEOUS_TOURNAMENTS.md), [knockout
 
 ## Release checks
 
-850 Python tests and 96 JavaScript tests passed. Packaged validation exercised all ten formats, multi-stage seasons, suites/benchmarks, statistics, recovery, failed-game replacements, reports, all four PGN presets, storage cleanup and eight languages. A 256-game load check used up to 28 concurrent games; deletion reclaimed 98.60% of the measured managed storage while preserving compact rating records. A further 12-game round robin passed after the owner installed this exact build.
+For this maintenance update, 98 targeted backend tests and 102 JavaScript tests
+passed. Source and packaged Rating Center checks covered exports, eight languages,
+restart and unchanged rating evidence. The packaged fixture contained 61
+configurations and 1,600 counted games. The installer remains the tested file;
+ZIP runtime files are checked against its payload manifest.
 
-These are bounded functional and scaling checks, not a guarantee for every engine or driver. Graphics context-loss tests do not substitute for physical-GPU endurance. See [validation and limits](docs/RELEASE_1_9_7.md). Earlier version documents retain their historical candidate status.
+The earlier 1.9.7 release passed broader format, lifecycle and recovery checks;
+see its historical [release report](docs/RELEASE_1_9_7.md). Those checks are not
+represented as a new complete test run for 1.9.12. The ongoing 400-entry test has
+not finished. See [current validation and limits](docs/RELEASE_1_9_12.md).
 
 ## Build and source
 

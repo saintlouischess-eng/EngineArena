@@ -84,7 +84,7 @@ $inventory = foreach ($file in Get-ChildItem -LiteralPath $payload -Recurse -Fil
 $inventory | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $payload 'package-manifest.json') -Encoding UTF8
 & $Compiler '/Qp' ('/DPayloadDir='+$payload) installer\EngineArena.iss
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
-$setup = Join-Path $taskRoot 'release\EngineArenaSetup-1.9.7-win-x64.exe'
+$setup = Join-Path $taskRoot 'release\EngineArenaSetup-1.9.12-win-x64.exe'
 $hash = (Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash.ToLower()
 Set-Content -LiteralPath ($setup+'.sha256') -Value ($hash+'  '+[IO.Path]::GetFileName($setup)) -Encoding ASCII
 Write-Output "Single offline installer: $setup"

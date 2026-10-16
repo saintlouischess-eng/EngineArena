@@ -27,6 +27,7 @@ def main():
     assert not args.output.exists(),'Choose a new output file; do not replace a published ZIP'
     prefix='EngineArena-'+args.version
     source_url=f'https://github.com/saintlouischess-eng/EngineArena/tree/v{args.version}'
+    release_notes='docs/RELEASE_'+args.version.replace('.','_')+'.md'
     entries=[];runtime_count=0
     args.output.parent.mkdir(parents=True,exist_ok=True)
     with zipfile.ZipFile(args.output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
@@ -49,7 +50,7 @@ def main():
                 assert b'This smaller ZIP' in data,'Missing ZIP source instructions'
             else:runtime_count+=1
             add(relative,data)
-        for name in ('CREDITS.md','docs/RELEASE_1_9_7.md'):
+        for name in ('CREDITS.md',release_notes):
             if not any(x['path']==name for x in entries):add(name,(public/name).read_bytes())
         instructions=f'''Engine Arena {args.version} - extract-and-run ZIP
 
@@ -87,7 +88,7 @@ Optional CPU sensors require supported hardware and the elevated reader.
 Optional/PawnIO_setup.exe is provided but is not run automatically by this ZIP.
 Add your own engines and opening books. Engine Arena itself is unsigned.
 
-See docs/USER_GUIDE.html, docs/RELEASE_1_9_7.md, NOTICE and LICENSE.
+See docs/USER_GUIDE.html, {release_notes}, NOTICE and LICENSE.
 '''
         add('START-HERE.txt',instructions.encode('utf-8'))
         archive.writestr(prefix+'/package-manifest.json',json.dumps(entries,indent=2).encode('utf-8'))

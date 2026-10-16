@@ -7,3 +7,5 @@
 
 .rc-new-list{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:18px}.rc-new-list .rc-new-name{display:flex;flex:1 1 240px;flex-direction:column;gap:8px;min-width:0}.rc-new-name input{width:100%;min-width:0}.rc-new-list>label:not(.rc-new-name){display:flex;align-items:center;gap:7px}.rc-new-list>button{flex-shrink:0}
 #ratingCenter .rc-filters label:has(#rcVersions){flex:1.6 1 285px;min-width:240px}
+
+.rc-range{border:1px solid var(--border);border-radius:10px;padding:14px 18px;background:var(--panel);margin:14px 0}.rc-range-controls{display:flex;gap:16px;align-items:end;flex-wrap:wrap}.rc-range label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted)}.rc-range select{min-width:200px}.rc-range input{width:160px}.rc-range form{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.rc-range [hidden]{display:none}.rc-range p{font-size:.85rem;line-height:1.5;color:var(--muted);margin:10px 0 0}#rcRangeNote{color:var(--text)}

@@ -1,4 +1,4 @@
-# Engine Arena 1.9.7 — user guide
+# Engine Arena 1.9.5 — private candidate
 
 ## Extend a completed round robin
 

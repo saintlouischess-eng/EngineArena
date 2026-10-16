@@ -14,12 +14,15 @@ from .rating_center import CATEGORIES, digest
 from .rating_compute import label, compute_summary, device_label, network_label, continuity
 from .ratings import fit_pool, estimate, STATUS_LABELS, SCALE
 from .stats import confidence_level
+from . import rating_range
 
 _cache = OrderedDict()
 NOTE = ('Opponent-adjusted logistic score ratings. CPU thread counts and identified GPU model/count/backend configurations are distinct entries. '
         'Ranks follow descending Elo within each category and selected evidence filters, before name search or display sorting. Equal estimates share a rank; unavailable ratings are unranked. '
         'Unverified GPU hardware is not treated as verified; legacy GPU entries retain their original evidence. '
         'Only complete, reversed-color opening pairs enter paired estimates; unpaired games enter individually. '
+        'Separated results do not suppress finite ratings within the reference comparison group. '
+        'Their games remain recorded but do not add precision to that fit; uncalibrated entries remain unranked. '
         'CPU-only pairs may span Windows build or display-driver updates when engine identities, CPU hardware and playing conditions still match. '
         'Original evidence is preserved; exact hardware and conditions filters still require both legs. '
         'CI and LOS are approximate fixed-sample estimates conditional on the fixed reference, without reference-rating uncertainty. '
@@ -144,7 +147,7 @@ def rating(values,key,confidence,full=True):
         samples=fit['participant_samples'][slot];amount=None;status=fit['status']
         if samples:
             if key==anchor['entry']:amount=anchor['rating'];status='fixed_anchor'
-            elif slot not in fit['index']:status='disconnected'
+            elif slot not in fit['index']:status='no_finite_fit' if slot in fit['connected_index'] else 'disconnected'
             elif fit['status']=='ok':amount=anchor['rating']+SCALE*fit['theta'][fit['index'][slot]];status='estimated'
         else:status='no_comparisons'
         return {'rating':amount,'ci':None,'los':None,'samples':samples,'status':status}
@@ -183,6 +186,8 @@ def assign_ranks(rows):
 def report(path,q=None):
     q=dict(q or {});pool=q.get('pool','main');cat=q.get('category','blitz');confidence=confidence_level(q.get('confidence',95))
     if cat not in (*CATEGORIES,'all'):raise ValueError('Unknown rating category')
+    limit=rating_range.width(q.get('opponent_range'))
+    if limit and cat=='all':raise ValueError('Choose one time category for opponent-range ratings')
     versions=q.get('versions','all')
     if versions not in ('all','best'):raise ValueError('Unknown version display')
     if versions=='best' and cat=='all':raise ValueError('Choose one time category for best-version ratings')
@@ -204,10 +209,18 @@ def report(path,q=None):
             if v is None:v=data(db,q,c);_cache[key]=v
             else:_cache.move_to_end(key)
             values[c]=v
-        while len(_cache)>12:_cache.popitem(last=False)
     # Explicit close: sqlite context managers commit but do not close connections.
     db.close()
     for v in values.values():fitted(v)
+    if limit:
+        full=values[cat];key=sig+(cat,'opponent_range',limit);v=_cache.get(key)
+        if v is None:
+            baseline={key:rating(full,key,confidence,False) for key in full['ordered']}
+            assign_ranks(list(baseline.values()))
+            v=fitted(rating_range.restrict(full,limit,baseline));_cache[key]=v
+        else:_cache.move_to_end(key)
+        values[cat]=v
+    while len(_cache)>12:_cache.popitem(last=False)
     rows=[]
     if cat=='all':
         identities=sorted(set().union(*(v['stats'] for v in values.values())))
@@ -224,6 +237,11 @@ def report(path,q=None):
             rows.append({**stats,**entry_details(entry),
                 **r,'points':stats['wins']+.5*stats['draws'],'score':100*(stats['wins']+.5*stats['draws'])/stats['games'],
                 'predecessor':predecessor,'provisional_seed':seed})
+            if limit:
+                baseline=v['baseline'][key]
+                rows[-1].update(full_rating=baseline['rating'],full_rank=baseline['rank'],full_status=baseline['status'],
+                    rating_change=r['rating']-baseline['rating'] if r['rating'] is not None and baseline['rating'] is not None else None,
+                    **v['coverage'][key])
     for row in rows:rating_families.describe(row,families)
     if versions=='best':rows=rating_families.select(rows)
     if cat=='all':
@@ -231,7 +249,8 @@ def report(path,q=None):
     else:assign_ranks(rows)
     query=str(q.get('q','')).casefold();rows=[r for r in rows if query in r['name'].casefold() or query in r['id'] or query in r['family'].casefold()]
     sort=q.get('sort','rating' if cat!='all' else 'name');direction=q.get('direction','desc' if cat!='all' else 'asc')
-    if sort not in ('rank','name','rating','games','wins','draws','losses','score','opponents','samples','los') or direction not in ('asc','desc'):raise ValueError('Invalid rating sort')
+    if sort not in ('rank','name','rating','games','wins','draws','losses','score','opponents','samples','los',
+                    'full_rating','full_rank','rating_change','included_games','included_pairs','included_opponents') or direction not in ('asc','desc'):raise ValueError('Invalid rating sort')
     rows.sort(key=lambda r:(r['name'].casefold(),r['id']))
     valid=[r for r in rows if r.get(sort) is not None];missing=[r for r in rows if r.get(sort) is None]
     valid.sort(key=lambda r:r[sort].casefold() if sort=='name' else r[sort],reverse=direction=='desc');rows=valid+missing
@@ -242,11 +261,20 @@ def report(path,q=None):
         else:row.update(rating(values[cat],row['id'],confidence))
     result={'pool':p,'category':cat,'total':len(rows),'offset':offset,'items':shown,
         'conditions':conditions,'confidence':confidence,'note':NOTE,'sort':sort,'direction':direction,'snapshot':time.time(),'versions':versions}
+    if limit:
+        result['opponent_range']=values[cat]['opponent_range']|{'baseline_revision':p['revision'],
+            'evidence_filters':{k:q.get(k) for k in ('tid','event','season','hardware','conditions','failures','before')}}
+        result['note']+=' '+rating_range.NOTE
     if versions=='best':result['note']+=' Best-version view selects the highest current point estimate per family, CPU threads or verified GPU hardware/backend, and fixed limit. It does not prove superiority. Ties use samples, games, then name/ID. Unavailable estimates use one representative, not a rated winner. All versions remain in the fit; ranks describe the selected view.'
     if cat!='all':
         v=values[cat];a=v['anchor'];result.update(anchor=a|{'name':v['entries'].get(a['entry'],{}).get('name','No reference yet')},pairs=v['pairs'],
           unpaired=v['unpaired'],official_games=sum(s['games'] for s in v['stats'].values())//2,
           counted_games=2*v['pairs']+v['unpaired'],sampling=v['sampling'],status=v.get('fit',{}).get('status','no_comparisons'))
+        fit=v.get('fit',{});result['fit_summary']={
+            'finite_configurations':len(fit.get('members',[])) if fit.get('status')=='ok' else 0,
+            'separated_configurations':len(fit.get('separated_members',[])),
+            'disconnected_configurations':sum(1 for key in v['stats'] if v['index'][key] not in fit.get('connected_index',{})),
+            'samples':fit.get('fit_samples',0)}
     else:result['anchors']={c:v['anchor']|{'name':v['entries'].get(v['anchor']['entry'],{}).get('name','No reference yet')} for c,v in values.items()}
     result['elapsed_ms']=1000*(time.monotonic()-started)
     if q.get('export')=='csv':return csv_export(result)
@@ -256,13 +284,15 @@ def report(path,q=None):
 
 def csv_export(result):
     stream=io.StringIO();w=csv.writer(stream)
-    w.writerow(['Rank','Engine','Configuration ID','Category','Threads','Games','Wins','Draws','Losses','Rating','CI lower','CI upper','Confidence','LOS vs reference','Samples','Status','Reference','Reference rating','Compute type','GPU models/count','Backend','Network','Hardware evidence','Engine family','Version view'])
+    extra=['Opponent range Elo','Full rating','Full rank','Full rating status','Rating change','Included games','Included opening pairs','Included opponents'] if result.get('opponent_range') else []
+    w.writerow(['Rank','Engine','Configuration ID','Category','Threads','Games','Wins','Draws','Losses','Rating','CI lower','CI upper','Confidence','LOS vs reference','Samples','Status','Reference','Reference rating','Compute type','GPU models/count','Backend','Network','Hardware evidence','Engine family','Version view']+extra)
     for row in result['items']:
         categories=row.get('categories') or {result['category']:row}
         for cat,r in categories.items():
             ci=r.get('ci') or [None,None];a=result.get('anchor') or result.get('anchors',{}).get(cat,{})
             c=row['compute']
-            w.writerow([r.get('rank'),row['name'],row['id'],cat,row['threads'],row['games'] if 'categories' not in row else '',r.get('wins'),r.get('draws'),r.get('losses'),r['rating'],*ci,result['confidence'],r.get('los'),r['samples'],r['status'],a.get('name'),a.get('rating'),c['kind'],device_label(c) if c['kind']!='cpu' else '',c['backend'],network_label(row['configuration']) if c['kind']!='cpu' else '',c['status'],row.get('family',''),result.get('versions','all')])
+            comparison=([result['opponent_range']['elo'],*[row.get(k) for k in ('full_rating','full_rank','full_status','rating_change','included_games','included_pairs','included_opponents')]] if extra else [])
+            w.writerow([r.get('rank'),row['name'],row['id'],cat,row['threads'],row['games'] if 'categories' not in row else '',r.get('wins'),r.get('draws'),r.get('losses'),r['rating'],*ci,result['confidence'],r.get('los'),r['samples'],r['status'],a.get('name'),a.get('rating'),c['kind'],device_label(c) if c['kind']!='cpu' else '',c['backend'],network_label(row['configuration']) if c['kind']!='cpu' else '',c['status'],row.get('family',''),result.get('versions','all')]+comparison)
     return stream.getvalue()
 
 
@@ -272,6 +302,11 @@ def text_export(result):
     lines.append('Version view: '+('Best version per family and configuration' if result.get('versions')=='best' else 'All versions'))
     a=result.get('anchor')
     if a:lines.append(f"Reference: {a['name']} = {n(a['rating'])} ({'user anchor' if a['explicit'] else 'internal scale; not an external rating'})")
+    comparison=result.get('opponent_range')
+    if comparison:
+        lines.append(f"Opponent range: +/-{comparison['elo']:g} Elo from all-opponent baseline; evidence revision {comparison['baseline_revision']}")
+        lines.append(f"Eligible games: {comparison['included_games']:,}; excluded by range: {comparison['outside_range_games']:,}; no finite baseline: {comparison['unrated_baseline_games']:,}")
+        lines.append('Games / W-D-L below are all official results in this scope. Elo / CI / LOS use the range selection.')
     rows=[]
     if result['category']=='all':
         heads=['Engine','Games',*[c+' (rank / Elo)' for c in CATEGORIES]]
@@ -282,10 +317,17 @@ def text_export(result):
         from .display import los_percent
         for r in result['items']:
             rows.append([str(r['rank']) if r['rank'] is not None else '—',r['name'],str(r['games']),str(r['wins']),str(r['draws']),str(r['losses']),n(r['rating']), ' to '.join(map(n,r['ci'])) if r['ci'] else '—',los_percent(r['los']),str(r['samples']),STATUS_LABELS.get(r['status'],r['status'])])
+        if comparison:
+            heads+=['Full Elo','Full rank','Change','Included games','Pairs','Opponents']
+            for cells,r in zip(rows,result['items']):
+                cells += [n(r['full_rating']),str(r['full_rank'] or '—'),n(r['rating_change']),str(r['included_games']),str(r['included_pairs']),str(r['included_opponents'])]
         lines.append(f"Official games: {result['official_games']:,}; games in rating samples: {result['counted_games']:,}; completed pairs: {result['pairs']:,}")
         sample=result.get('sampling',{})
         if sample.get('compatible_update_pairs'):lines.append(f"Included CPU pairs across system updates: {sample['compatible_update_pairs']:,}")
         if sample.get('excluded_games'):lines.append(f"Games outside rating samples: {sample['excluded_games']:,}; partner missing from this view: {sample['incomplete_pair_games']:,}; identity/color mismatch: {sample['identity_mismatch_games']:,}; incompatible conditions: {sample['incompatible_condition_games']:,}")
+        fit=result.get('fit_summary',{})
+        if fit.get('separated_configurations') or fit.get('disconnected_configurations'):
+            lines.append(f"Finite reference group: {fit['finite_configurations']:,} configurations from {fit['samples']:,} independent samples; separated results: {fit['separated_configurations']:,}; no completed reference path: {fit['disconnected_configurations']:,}.")
     widths=[max(len(h),*(len(r[i]) for r in rows)) if rows else len(h) for i,h in enumerate(heads)]
     lines+=['','  '.join(h.ljust(w) for h,w in zip(heads,widths)),'  '.join('-'*w for w in widths)]
     lines+=['  '.join(v.ljust(w) for v,w in zip(r,widths)) for r in rows]

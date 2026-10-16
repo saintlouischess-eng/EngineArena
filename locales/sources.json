@@ -16773,5 +16773,119 @@
   ],
   "Engine Arena — 1.9.6": [
     "desktop/Program.cs"
+  ],
+  "Elapsed": [
+    "desktop/Program.cs"
+  ],
+  "Opening saved workspace": [
+    "desktop/Program.cs"
+  ],
+  "Checking database integrity": [
+    "desktop/Program.cs"
+  ],
+  "Recovering the verified backup": [
+    "desktop/Program.cs"
+  ],
+  "Loading workspace tables": [
+    "desktop/Program.cs"
+  ],
+  "Checking workspace upgrades": [
+    "desktop/Program.cs"
+  ],
+  "Loading saved ratings": [
+    "desktop/Program.cs"
+  ],
+  "Reconciling saved games and PGNs": [
+    "desktop/Program.cs"
+  ],
+  "Preparing local services": [
+    "desktop/Program.cs"
+  ],
+  "Checking saved sessions": [
+    "desktop/Program.cs"
+  ],
+  "Starting local connection": [
+    "desktop/Program.cs"
+  ],
+  "Worker ready": [
+    "desktop/Program.cs"
+  ],
+  "Loading the interface…": [
+    "desktop/Program.cs"
+  ],
+  "Large workspaces can take longer to check. You can safely close this window and try again later.": [
+    "desktop/Program.cs"
+  ],
+  "Engine Arena could not start": [
+    "desktop/Program.cs"
+  ],
+  "Your saved workspace has not been reset. Close this window, then try opening Engine Arena again. If this continues, share the details below.": [
+    "desktop/Program.cs"
+  ],
+  "The interface could not load: ": [
+    "desktop/Program.cs"
+  ],
+  "Startup log: ": [
+    "desktop/Program.cs"
+  ],
+  "Ratings remain available for {0} configurations in the reference group. {1} configurations have separated results and need more comparisons; their games are still saved.": [
+    "Player Arena UI"
+  ],
+  "{0} configurations have no completed comparison path to the reference.": [
+    "Player Arena UI"
+  ],
+  "Separated results: {0}. Finite ratings in the reference group remain available.": [
+    "Player Arena UI"
+  ],
+  "Opponent range": [
+    "Player Arena UI"
+  ],
+  "All opponents": [
+    "Player Arena UI"
+  ],
+  "Custom range…": [
+    "Player Arena UI"
+  ],
+  "Maximum Elo difference": [
+    "Player Arena UI"
+  ],
+  "Apply range": [
+    "Player Arena UI"
+  ],
+  "Enter a positive Elo difference": [
+    "Player Arena UI"
+  ],
+  "Choose one time category for opponent-range ratings": [
+    "Player Arena UI"
+  ],
+  "Compare ratings using nearby opponents. Matchups are selected from the all-opponent ratings; saved results stay unchanged.": [
+    "Player Arena UI"
+  ],
+  "±{0} Elo: {1} eligible games; {2} outside range; {3} without a finite baseline.": [
+    "Player Arena UI"
+  ],
+  "Full Elo stays visible. CI and LOS use the filtered fit; selection uncertainty is not included. Games and W–D–L show the full official record.": [
+    "Player Arena UI"
+  ],
+  "Filtered Elo": [
+    "Player Arena UI"
+  ],
+  "Full Elo": [
+    "Player Arena UI"
+  ],
+  "Full rank": [
+    "Player Arena UI"
+  ],
+  "Change": [
+    "Player Arena UI"
+  ],
+  "Included games": [
+    "Player Arena UI"
+  ],
+  "Included opponents": [
+    "Player Arena UI"
+  ],
+  "History recalculates the all-opponent baseline at each stage end, then applies the selected range.": [
+    "Player Arena UI"
   ]
 }

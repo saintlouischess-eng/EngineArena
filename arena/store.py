@@ -37,7 +37,12 @@ class Store:
     Scheduling stores a cursor plus only a small ready window. Tournament profiles
     are immutable snapshots; editing the registry never changes a running test.
     """
-    def __init__(self,folder,*,defer_maintenance=False):
+    def __init__(self,folder,*,defer_maintenance=False,startup_progress=None):
+        def progress(phase):
+            if startup_progress:
+                try:startup_progress(phase)
+                except Exception:pass # Diagnostics must never change storage/recovery behavior.
+        progress('Opening saved workspace')
         self.folder=Path(folder).resolve();self.folder.mkdir(parents=True,exist_ok=True)
         self.path=self.folder/'arena.sqlite3';self.warning='';self.failure='';self.revision=0;self.backup_lock=threading.Lock()
         self.backup_revision=-1;self.backup_file=None;self.backup_signature=None
@@ -61,12 +66,15 @@ class Store:
         self.db.row_factory=sqlite3.Row
         try:
             if not receipt or not 0<=now()-self.checked_at<CHECK_INTERVAL:
+                progress('Checking database integrity')
                 if self.db.execute('PRAGMA quick_check').fetchone()[0]!='ok': raise sqlite3.DatabaseError('Integrity check failed')
                 self.checked_at=now()
         except sqlite3.DatabaseError:
+            progress('Recovering the verified backup')
             self.db.close(); self._restore()
             self.db=sqlite3.connect(self.path,isolation_level=None,timeout=30);self.db.row_factory=sqlite3.Row
             receipt=None;self.checked_at=now()
+        progress('Loading workspace tables')
         self.db.execute('PRAGMA journal_mode=WAL');self.db.execute('PRAGMA synchronous=FULL')
         self.db.execute('PRAGMA foreign_keys=ON');self.db.execute('PRAGMA busy_timeout=30000')
         self.db.executescript('''
@@ -108,6 +116,7 @@ class Store:
         ''')
         self.db.execute('INSERT OR IGNORE INTO workspace_version VALUES(1,?,0)',(uid(),))
         self.workspace_identity=self.db.execute('SELECT identity FROM workspace_version WHERE singleton=1').fetchone()[0]
+        progress('Checking workspace upgrades')
         from .pgn_output import initialize as initialize_pgn_output
         initialize_pgn_output(self)
         from .schedule_order import initialize as initialize_schedule
@@ -137,6 +146,7 @@ class Store:
         initialize_events(self)
         from .tournament_queue import initialize as initialize_queue
         initialize_queue(self)
+        progress('Loading saved ratings')
         from .rating_center import initialize as initialize_rating_center
         initialize_rating_center(self)
         from .player_store import initialize as initialize_player
@@ -155,6 +165,7 @@ class Store:
             from .storage import progress
             progress(self,busy=True,phase='Checking interrupted storage work',error='')
             return
+        progress('Reconciling saved games and PGNs')
         try:self.finish_startup()
         except SavingError:return
 

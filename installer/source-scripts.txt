@@ -204,6 +204,8 @@ validate_room_library_package.py
 update_rating_pair_locales.py
 validate_rating_pair_package.py
 validate_rating_pairs_ui.cjs
+validate_rating_separation_ui.cjs
+update_rating_separation_locales.py
 update_extension_locales.py
 validate_extension_ui.cjs
 validate_extension_package.py
@@ -211,3 +213,11 @@ validate_circuit_refresh.cjs
 validate_focus_sound.cjs
 validate_completed_event_ui.cjs
 update_event_summary_locales.py
+update_startup_locales.py
+validate_backup_health_package.py
+validate_backup_health_ui.cjs
+validate_interface_startup_package.py
+validate_interface_startup_ui.cjs
+update_rating_range_locales.py
+validate_rating_range_ui.cjs
+validate_rating_range_package.py

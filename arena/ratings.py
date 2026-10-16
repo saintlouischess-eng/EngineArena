@@ -78,14 +78,23 @@ def fit_pool(participant_count,observations,anchor=0):
         inputs.append((a,b,n,score,bins));adjacent[a].append(b);adjacent[b].append(a)
         if score>0:forward[a].append(b);backward[b].append(a)
         if score<n:forward[b].append(a);backward[a].append(b)
-    component=reach(anchor,adjacent);members=sorted(component);mapping={s:i for i,s in enumerate(members)};reference=mapping[anchor]
-    records=[(mapping[a],mapping[b],n,score,bins) for a,b,n,score,bins in inputs if a in component]
+    component=reach(anchor,adjacent)
+    # Separation only prevents finite offsets BETWEEN strong components. The
+    # reference's strong component still has identifiable relative ratings.
+    # Cross-component outcomes have limiting fitted scores 0/1 and contribute
+    # no curvature or score variance to that finite fit. Do not add pseudo-games
+    # or let a new all-loss opponent erase the established pool's estimates.
+    finite=reach(anchor,forward)&reach(anchor,backward)
+    members=sorted(finite);mapping={s:i for i,s in enumerate(members)};reference=mapping[anchor]
+    records=[(mapping[a],mapping[b],n,score,bins) for a,b,n,score,bins in inputs if a in finite and b in finite]
     totals=[0]*participant_count
     for a,b,n,_,_ in inputs:totals[a]+=n;totals[b]+=n
-    result={'members':members,'index':mapping,'anchor':reference,'samples':sum(r[2] for r in records),'participant_samples':totals,'status':'ok','theta':None,'hessian':[],'meat':[]}
-    if not records:result['status']='no_comparisons';return result
-    if reach(anchor,forward)!=component or reach(anchor,backward)!=component:
-        result['status']='no_finite_fit';return result
+    result={'members':members,'connected_members':sorted(component),'connected_index':dict.fromkeys(component),
+            'separated_members':sorted(component-finite),
+            'index':mapping,'anchor':reference,'samples':sum(n for a,b,n,_,_ in inputs if a in component),
+            'fit_samples':sum(r[2] for r in records),'participant_samples':totals,'status':'ok','theta':None,'hessian':[],'meat':[]}
+    if not records:
+        result['status']='no_finite_fit' if component-finite else 'no_comparisons';return result
     n=len(members);theta=[0.]*n;degree=[0.]*n
     for a,b,count,_,_ in records:degree[a]+=count;degree[b]+=count
     def objective(values):
@@ -122,11 +131,12 @@ def estimate(fit,slot,anchor_slot,anchor_rating,confidence=95):
     confidence=confidence_level(confidence)
     value={'slot':slot,'rating':None,'delta':None,'ci95':None,'ci':None,'confidence':confidence,'los':None,'samples':fit['participant_samples'][slot],'status':'disconnected'}
     if slot==anchor_slot:return value|{'rating':anchor_rating,'delta':0.,'status':'fixed_anchor'}
-    if slot not in fit['index']:return value
+    if slot not in fit['index']:
+        return value|{'status':'no_finite_fit'} if slot in fit['connected_index'] else value
     if fit['status']!='ok':return value|{'status':fit['status']}
     index=fit['index'][slot];theta=fit['theta'][index];delta=theta*SCALE;rating=anchor_rating+delta
     value.update(rating=rating,delta=delta,status='uncertainty_unavailable')
-    dimension=len(fit['members'])-1;samples=fit['samples']
+    dimension=len(fit['members'])-1;samples=fit['fit_samples']
     if samples<=dimension:return value
     rhs=[0.]*len(fit['members']);rhs[index]=1.
     try:column=solve(len(rhs),fit['hessian'],rhs,fit['anchor'])
@@ -202,9 +212,11 @@ def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95,sor
     selected=ordered if export else ordered[offset:offset+limit]
     rows=[row(p) for p in selected]
     result={'tournament':tid,'name':tournament['name'],'revision':revision,'anchor':anchor,'paired':paired,'sample_unit':'completed opening pairs' if paired else 'games',
-      'samples':cached['samples'],'connected_participants':len(cached['members']),'participant_count':len(profiles),'total':len(matching),'offset':offset,'items':rows,'status':cached['status'],
+      'samples':cached['samples'],'fit_samples':cached['fit_samples'],'connected_participants':len(cached['connected_members']),
+      'finite_participants':len(cached['members']),'separated_participants':len(cached['separated_members']),
+      'participant_count':len(profiles),'total':len(matching),'offset':offset,'items':rows,'status':cached['status'],
       'confidence':confidence,'sort':sort,'direction':direction,'model':f'Logistic expected-score pool fit; fixed reference rating; {"paired" if paired else "game"}-score sandwich normal {confidence:g}% intervals',
-      'assumptions':'Independent fixed samples, stable transitive strengths; intervals and LOS are approximate and conditional on the supplied anchor. No anchor-rating uncertainty or color parameter is estimated.',
+      'assumptions':'Independent fixed samples, stable transitive strengths; intervals and LOS are approximate and conditional on the supplied anchor. No anchor-rating uncertainty or color parameter is estimated. Separated results do not suppress finite ratings within the reference comparison group; their games remain recorded but do not add precision to that fit.',
       'elapsed_ms':1000*(time.monotonic()-started)}
     from .knockout import sample_note
     if sample_note(settings):result['model']+='; '+sample_note(settings)

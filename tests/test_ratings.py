@@ -48,6 +48,46 @@ def test_ten_thousand_ratings_use_sparse_comparisons():
     assert value['rating']==2400 and value['status']=='estimated' and value['ci95'][0]<2400<value['ci95'][1]
 
 
+@pytest.mark.parametrize('confidence',[80,95,99.9])
+def test_separated_newcomers_preserve_core_ratings_and_uncertainty(confidence):
+    core=[(0,1,[8,11,26,15,10]),(1,2,[10,3,7]),(2,0,[9,4,8])]
+    baseline=fit_pool(3,core,0)
+    # All-loss and all-win additions, a downstream group with finite internal
+    # differences but no finite offset to the reference, and a disconnected pair.
+    expanded=fit_pool(8,core+[(0,3,[0,0,10000]),(4,1,[0,0,5000]),
+                            (3,5,[10,20,10]),(6,7,[4,2,4])],0)
+    assert expanded['status']=='ok' and expanded['members']==[0,1,2]
+    assert expanded['separated_members']==[3,4,5]
+    assert expanded['fit_samples']==baseline['samples']
+    assert expanded['samples']==baseline['samples']+15040
+    for slot in (0,1,2):
+        a=estimate(baseline,slot,0,3628,confidence)
+        b=estimate(expanded,slot,0,3628,confidence)
+        for key in ('rating','delta','ci','ci95','los'):
+            assert b[key]==pytest.approx(a[key]) if a[key] is not None else b[key] is None
+    for slot in (3,4,5):
+        row=estimate(expanded,slot,0,3628,confidence)
+        assert row['status']=='no_finite_fit' and row['rating'] is row['ci'] is row['los'] is None
+    assert estimate(expanded,6,0,3628)['status']=='disconnected'
+
+
+def test_separation_resolves_with_return_score_and_anchor_is_not_replaced():
+    base=[(0,1,[5,10,8]),(1,2,[0,0,7])]
+    limited=fit_pool(3,base,2)
+    assert limited['status']=='no_finite_fit' and limited['members']==[2]
+    assert estimate(limited,0,2,2500)['rating'] is None
+    joined=fit_pool(3,base+[(1,2,[0,1,0])],2)
+    assert joined['status']=='ok' and joined['members']==[0,1,2]
+    assert all(estimate(joined,n,2,2500)['rating'] is not None for n in range(3))
+
+
+def test_ten_thousand_separated_entries_do_not_block_finite_sparse_fit():
+    fit=fit_pool(10000,[(0,1,[2,6,2])]+[(0,i,[0,0,1]) for i in range(2,10000)],0)
+    assert fit['status']=='ok' and fit['members']==[0,1] and len(fit['hessian'])==1
+    assert fit['fit_samples']==10 and len(fit['separated_members'])==9998
+    assert estimate(fit,1,0,2400)['rating']==2400
+
+
 def test_pool_official_replacement_pair_accounting_and_restart(tmp_path):
     s=Store(tmp_path);t=s.create_tournament('Pool',[{'name':'Alpha'},{'name':'Beta'}],{'cycles':2});tid=t['id']
     s.set_state(tid,'running');s.fill_queue(tid,4);games=[]

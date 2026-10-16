@@ -20,8 +20,9 @@ from .models import scheduled_pairs
 
 ROOT=Path(getattr(sys,'_MEIPASS',Path(__file__).resolve().parent.parent))
 
-async def create_app(folder,token):
-    db=await Database().open(folder,defer_maintenance=True);runner=Runner(db)
+async def create_app(folder,token,*,startup_progress=None):
+    db=await Database().open(folder,defer_maintenance=True,startup_progress=startup_progress);runner=Runner(db)
+    if startup_progress:startup_progress('Preparing local services')
     @web.middleware
     async def guard(request,handler):
         if request.path.startswith('/api/'):
@@ -782,17 +783,22 @@ async def create_app(folder,token):
         await runner.close()
         if rating_executor is not None:await asyncio.to_thread(rating_executor.shutdown,wait=True,cancel_futures=True)
     app.on_cleanup.append(cleanup)
+    if startup_progress:startup_progress('Checking saved sessions')
     await runner.start()
     await player.start()
     return app
 
 async def main_async(args):
-    token=args.token or secrets.token_urlsafe(32);app=await create_app(args.data,token);app['stop']=asyncio.Event()
+    from .startup import StartupProgress,write_ready
+    startup=StartupProgress(args.data)
+    token=args.token or secrets.token_urlsafe(32);app=await create_app(args.data,token,startup_progress=startup);app['stop']=asyncio.Event()
     app['db'].store.progress_callback=lambda value:print('ARENA_BACKUP '+json.dumps(value),flush=True)
+    startup('Starting local connection')
     server=web.AppRunner(app);await server.setup();site=web.TCPSite(server,'127.0.0.1',args.port);await site.start()
     port=site._server.sockets[0].getsockname()[1]
     info={'port':port,'token':token,'pid':os.getpid()}
-    if args.ready:Path(args.ready).write_text(json.dumps(info),encoding='utf-8')
+    if args.ready:write_ready(args.ready,info)
+    startup('Worker ready')
     print(f'Engine Arena ready on 127.0.0.1:{port}',flush=True)
     try:await app['stop'].wait()
     finally:await server.cleanup()

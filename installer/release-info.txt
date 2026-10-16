@@ -1,28 +1,15 @@
-Engine Arena 1.9.7 - release-check candidate
+Engine Arena 1.9.12 - opponent-range rating comparisons
 
 Designed by Mark Young. Coded with OpenAI Codex.
 
-Opening replay labels show the opening move number instead of negative
-engine-relative ply counts. Includes the completed-event summary fixes.
-Keeps creation order when adding same-timestamp tournaments to the queue.
-Updates the bundled multidict library to its patched 6.9.1 release.
+Compare full ratings with ratings against opponents within a configurable Elo
+range. Presets and custom ranges preserve opening pairs and the same anchor.
+Shows full and filtered ratings, changes, sample coverage, CI and LOS, with
+text/forum, CSV and JSON exports. Saved results remain unchanged.
 
-Corrects the champion season and distinguishes the final-match score from
-cumulative knockout standings. Placement playoffs have distinct group and
-sequence labels and a compact history table. Reports show shared conditions
-once, retain complete stage tables, and show recorded knockout placements.
+Includes the earlier rating, interface startup, closing and backup-display fixes.
+Saved tournaments, engines, games, PGNs and ratings are retained.
 
-Fixes Quick match saving when the full editor's PGN controls are not present.
-Includes the 1.9.5 focused-board sound and resizing fixes.
-
-Add new engines to a completed standalone round robin, preserving its earlier
-results and scheduling only the missing matchups. Preview the game count first;
-the extension saves paused. Event stages, Swiss and knockout cannot be extended.
-
-Focused Game now shows a fifty-move rule counter, or the automatic seventy-five
-move limit when claims are disabled. Hide it in Board & clocks if desired.
-Includes the custom-season overview refresh fix and the 1.9.3 CPU rating-pair
-compatibility correction. No replay is required for the rating correction.
-
-Pause and drain active games, close Engine Arena, then install. Existing data
-is retained. This private candidate has not been published to GitHub.
+Pause and drain active tournaments, then close Engine Arena before installing
+this update over your existing version. Resume your tournaments afterward.
+This private test build has not been published to GitHub.

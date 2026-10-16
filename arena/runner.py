@@ -17,8 +17,8 @@ class Database:
     def __init__(self):
         self.executor=ThreadPoolExecutor(max_workers=1,thread_name_prefix='DurableStore');self.store=None;self.pending_moves=[];self.flusher=None
         self.backup_executor=ThreadPoolExecutor(max_workers=1,thread_name_prefix='RecoveryBackup')
-    async def open(self,folder,*,defer_maintenance=False):
-        self.store=await asyncio.get_running_loop().run_in_executor(self.executor,functools.partial(Store,folder,defer_maintenance=defer_maintenance));return self
+    async def open(self,folder,*,defer_maintenance=False,startup_progress=None):
+        self.store=await asyncio.get_running_loop().run_in_executor(self.executor,functools.partial(Store,folder,defer_maintenance=defer_maintenance,startup_progress=startup_progress));return self
     async def call(self,method,*args,**kwargs):
         loop=asyncio.get_running_loop()
         if method=='backup':return await loop.run_in_executor(self.backup_executor,functools.partial(self.store.backup,*args,**kwargs))
