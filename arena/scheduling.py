@@ -27,7 +27,7 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
     from .sequential import frozen
     diagnostic_only=s['format']=='sprt' and frozen(store,tid)
     previous=scan
-    signature=(used,admission,t['round'])
+    signature=(used,admission,t['round'],t.get('setup_revision',0))
     compatible=scan and scan['signature'][1:]==signature[1:]
     if not compatible or not no_more_capacity(used,scan['signature'][0]):
         scan={'signature':signature,'pending_after':(-2,-1),'phase':'pending','future':t['cursor'],'reason':''}
@@ -40,12 +40,15 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
     def profile(slot):return store.participant(tid,slot)
 
     def eligible(a,b):
+        if active_slots is not None and (a not in active_slots or b not in active_slots):return False
         cost=game_cost(profile(a),profile(b),s['ponder'])
         allowed,why=fits(cost,used,admission)
         if allowed and '_local_used' in admission:
             allowed,why=fits(cost,admission['_local_used'],admission['_local_limits'])
         if not allowed and not scan['reason']:scan['reason']=why
         return allowed
+
+    active_slots=set(s['rr_active_slots']) if 'rr_active_slots' in s else None
 
     def rewind_pending(state):return dict(state,phase='pending',pending_after=(-2,-1))
 
@@ -60,6 +63,10 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
         resume=previous if from_pending and compatible else scan
         return empty|{'game':g,'scan':rewind_pending(resume),'white':profile(g['white']),'black':profile(g['black'])} if g else empty
 
+    from .rr_priority import choose
+    priority=choose(store,t,eligible,claim,limit,dry_run)
+    if priority:return priority
+
     # Prefer the earliest eligible recorded game, including retries and replays.
     if scan['phase']=='pending':
         rows=store.rows("SELECT id,number,schedule_index,white,black FROM games WHERE tid=? AND state='pending' AND invalid=0 AND (schedule_index,number)>(?,?)"+(" AND mode='diagnostic'" if diagnostic_only else '')+" ORDER BY schedule_index,number LIMIT ?",(tid,*scan['pending_after'],limit))
@@ -71,14 +78,14 @@ def dispatch(store,tid,used,admission,scan=None,limit=256,dry_run=False):
 
     # Dependent formats may only dispatch games from their committed round plan.
     if s['format'] in DYNAMIC or diagnostic_only:return empty|{'reason':scan['reason']}
-    total=t['total']//legs;decoder=round_pair if s.get('opening_policy')=='round' else static_pair
+    total=t['schedule_total']//legs;decoder=round_pair if s.get('opening_policy')=='round' else static_pair
     # With shared-round openings, matchups repeat every single schedule cycle.
     # If every pairing fails admission for a full cycle, later cycles cannot fit.
-    period=scheduled_pairs(t['participants'],s['format'],1,s['candidates']) if s['format']!='custom' else None if s['format']!='custom' else None
+    period=scheduled_pairs(t['slot_count'],s['format'],1,s['candidates']) if s['format']!='custom' else None if s['format']!='custom' else None
     checked=0
     while scan['future']<total and checked<limit:
         from .custom_matchups import pair,decode
-        position=scan['future'];k=canonical(position,t['participants'],s);a,b,rep=pair(k,t['participants'],s);checked+=1
+        position=scan['future'];k=canonical(position,t['slot_count'],s);a,b,rep=pair(k,t['slot_count'],s);checked+=1
         if not eligible(a,b):
             if s.get('rr_extensions'):
                 scan['future']=position+1

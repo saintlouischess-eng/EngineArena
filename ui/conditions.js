@@ -3,13 +3,20 @@
 // library never changes an existing tournament or any recorded attempt.
 loadPresets=async function(){
   state.presets=await api('presets');
-  $('#presetList').innerHTML=state.presets.map((p,i)=>ArenaI18n.h`<article class="preset"><h3>${esc(p.name)}</h3><p>${esc(tcText(p.settings.time_control))}<br>${p.settings.threads} thread(s) · ${p.settings.hash} MB hash<br>${p.settings.paired?ArenaI18n.t('Paired openings'):ArenaI18n.t('Single games')} · Ponder ${p.settings.ponder?'ON':'OFF'}</p><button data-edit-preset="${i}">Edit</button> <button data-copy-preset="${i}">Save a copy</button></article>`).join('');
+  $('#presetList').innerHTML=state.presets.map((p,i)=>ArenaI18n.h`<article class="preset"><h3>${esc(p.name)}</h3><p>${esc(tcText(p.settings.time_control))}<br>${p.settings.threads} thread(s) · ${p.settings.hash} MB hash<br>${p.settings.paired?ArenaI18n.t('Paired openings'):ArenaI18n.t('Single games')} · Ponder ${p.settings.ponder?'ON':'OFF'}</p><button data-edit-preset="${i}">Edit</button> <button data-copy-preset="${i}">Save a copy</button> <button class="danger-quiet" data-delete-preset="${i}">Delete…</button></article>`).join('')||ArenaI18n.h('<p class="caption">No saved presets. Use New preset to create one.</p>');
+  $$('[data-delete-preset]').forEach(b=>b.onclick=()=>deletePreset(state.presets[Number(b.dataset.deletePreset)]));
   $$('[data-edit-preset]').forEach(b=>b.onclick=()=>editPreset(state.presets[Number(b.dataset.editPreset)]));
   $$('[data-copy-preset]').forEach(b=>b.onclick=()=>editPreset(state.presets[Number(b.dataset.copyPreset)],true));
 };
+function deletePreset(p){
+  if(!p)return;
+  modal(ArenaI18n.t('Delete preset'),ArenaI18n.h`<p>Delete the saved preset <strong>${esc(p.name)}</strong>?</p><p>Existing tournaments and their recorded conditions will stay unchanged.</p>`,ArenaI18n.h`<button id="confirmDeletePreset" class="danger-quiet">Delete preset</button>`);
+  $('#confirmDeletePreset').onclick=safely(async()=>{await api('presets',{action:'delete',name:p.name,confirmed:true});$('#modal').close();await loadPresets();notify(ArenaI18n.t('Preset deleted.'));});
+}
 function editPreset(p=null,copy=false){
   const s=p?.settings||{threads:1,hash:1024,paired:true,ponder:false};
-  modal(copy?ArenaI18n.t('Copy test conditions'):p?ArenaI18n.t('Edit test conditions'):ArenaI18n.t('New test conditions'),ArenaI18n.h`${field('presetName',ArenaI18n.t('Preset name'),p?p.name+(copy?ArenaI18n.t(' (copy)'):''):ArenaI18n.t('My control'))}${tcEditor('ptc',s.time_control)}<div class="fields">${field('pThreads',ArenaI18n.t('Threads per engine'),s.threads,'number','min="1" step="1"')}${field('pHash',ArenaI18n.t('Hash per engine (MB)'),s.hash,'number','min="1" step="1"')}<label><input id="pPaired" type="checkbox" ${s.paired?'checked':''}> Paired openings</label><label><input id="pPonder" type="checkbox" ${s.ponder?'checked':''}> Enable pondering</label></div><p class="caption">Existing tournaments retain their recorded conditions. A different name saves another preset and keeps the original.</p>`,ArenaI18n.h`<button class="primary" id="saveP">Save preset</button>`);
+  modal(copy?ArenaI18n.t('Copy test conditions'):p?ArenaI18n.t('Edit test conditions'):ArenaI18n.t('New test conditions'),ArenaI18n.h`${field('presetName',ArenaI18n.t('Preset name'),p?p.name+(copy?ArenaI18n.t(' (copy)'):''):ArenaI18n.t('My control'))}${tcEditor('ptc',s.time_control)}<div class="fields">${field('pThreads',ArenaI18n.t('Threads per engine'),s.threads,'number','min="1" step="1"')}${field('pHash',ArenaI18n.t('Hash per engine (MB)'),s.hash,'number','min="1" step="1"')}<label><input id="pPaired" type="checkbox" ${s.paired?'checked':''}> Paired openings</label><label><input id="pPonder" type="checkbox" ${s.ponder?'checked':''}> Enable pondering</label></div><p class="caption">Existing tournaments retain their recorded conditions. A different name saves another preset and keeps the original.</p>`,ArenaI18n.h`<button class="primary" id="saveP">Save preset</button>${p&&!copy?ArenaI18n.h('<button id="deleteEditingPreset" class="danger-quiet">Delete preset…</button>'):''}`);
+  if($('#deleteEditingPreset'))$('#deleteEditingPreset').onclick=()=>deletePreset(p);
   wireTc('ptc');$('#saveP').onclick=safely(async()=>{
     await api('presets',{name:$('#presetName').value,original_name:p&&!copy?p.name:null,settings:{...s,time_control:readTc('ptc'),threads:Number($('#pThreads').value),hash:Number($('#pHash').value),paired:$('#pPaired').checked,ponder:$('#pPonder').checked}});
     $('#modal').close();await loadPresets();notify(ArenaI18n.t('Test conditions saved.'));
@@ -91,6 +98,6 @@ newTournament=async function(draft=null){
   $('#t960').closest('label').hidden=true;
   const sourceChanged=()=>{const s=$('#topeningSource').value;$('#savedPositionField').hidden=s!=='saved';$('#file960Field').hidden=s!=='file';$('#topening').closest('.field').hidden=s!=='file';$('#tdepth').closest('.field').hidden=s!=='file';};
   $('#topeningSource').onchange=sourceChanged;sourceChanged();
-  const presetChanged=$('#tpreset').onchange;$('#tpreset').onchange=()=>{const key=$('#tpreset').value;if(key!=='')$('#tponder').checked=state.presets[Number(key)].settings.ponder;return presetChanged?.();};
+  const presetChanged=$('#tpreset').onchange;$('#tpreset').onchange=()=>{const key=$('#tpreset').value;if(key!==''&&state.presets[Number(key)])$('#tponder').checked=state.presets[Number(key)].settings.ponder;return presetChanged?.();};
 };
 $('#newTournament').onclick=safely(newTournament);

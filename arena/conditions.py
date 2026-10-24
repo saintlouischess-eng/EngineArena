@@ -28,6 +28,13 @@ def save_preset(store,name,value,original=None):
         # copy; existing tournament snapshots never change.
     return {'name':name,'settings':result}
 
+def delete_preset(store,name,confirmed=False):
+    if confirmed is not True:raise ValueError('Confirm the preset name before deleting it')
+    if not isinstance(name,str) or not name:raise ValueError('Choose a saved preset')
+    with store.tx():
+        removed=store.db.execute('DELETE FROM presets WHERE name=?',(name,)).rowcount
+    return {'name':name,'deleted':bool(removed)}
+
 def position(value):
     if not isinstance(value,dict):raise ValueError('Position must be an object')
     variant=value.get('chess960',False)

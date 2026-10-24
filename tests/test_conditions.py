@@ -80,3 +80,18 @@ def test_named_position_snapshot_pairs_and_api_restart(tmp_path):
         assert json.loads(s.one('SELECT body FROM positions')['body'])['fen']!=saved['fen']
         s.close()
     asyncio.run(run())
+
+
+def test_delete_preset_survives_restart_without_changing_tournament(tmp_path):
+    s=Store(tmp_path);p=s.one('SELECT * FROM presets');body=json.loads(p['body'])
+    t=s.create_tournament('Snapshot',[{'name':'A'},{'name':'B'}],body)
+    before=s.tournament(t['id'])['settings']
+    with pytest.raises(ValueError,match='Confirm'):s.delete_preset(p['name'])
+    assert s.delete_preset(p['name'],True)['deleted']
+    assert not s.delete_preset(p['name'],True)['deleted']
+    with pytest.raises(ValueError,match='no longer exists'):s.save_preset(p['name'],body,p['name'])
+    s.close();s=Store(tmp_path)
+    assert s.rows('SELECT * FROM presets')==[]
+    assert s.tournament(t['id'])['settings']==before
+    assert s.save_preset('Fresh',body)['name']=='Fresh'
+    s.close()

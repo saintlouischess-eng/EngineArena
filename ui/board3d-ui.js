@@ -91,6 +91,7 @@ function paintFocusBoard(host,fen,last,crownSquares=[],knightFacings={},game={})
  }
  syncBoard3dZoom();
  const context={clock:ArenaScene3D.settings(displayPrefs.scene3d).environment==='live-club'?{kind:'focus',receivedAt:game.receivedAt||0,game:{clocks:game.clocks,clock_active:game.reviewing||state.connected===false?null:game.clock_active,search_elapsed:game.search_elapsed,last_move_seconds:game.last_move_seconds}}:null,game:game.game,plates:ArenaScene3D.settings(displayPrefs.scene3d).plates,key:(game.game||'')+':'+(game.attempt||''),white:game.white?.name||'',black:game.black?.name||'',event:game.tournament_name||state.snapshot?.name||'',score:game.result||'',captured:game.captured||[],reviewing:!!game.reviewing};
+ context.intention=typeof focusedIntention==='function'?focusedIntention(game):null;
  const signature=JSON.stringify([context,displayPrefs.scene3d,fen,last,crownSquares,knightFacings,displayPrefs.knights3d,!!state.flip,displayPrefs.camera3d,displayPrefs.crownMarks3d,displayPrefs.theme,host.clientWidth,host.clientHeight]);
  if(signature!==board3dSignature&&!document.hidden&&state.view==='overview'&&!panels.focus.hidden){board3dSignature=signature;requestSceneFrame([fen,state.flip,displayPrefs.camera3d||{},displayPrefs.theme==='light',last,displayPrefs.crownMarks3d===false?[]:crownSquares,displayPrefs.knights3d,knightFacings,context,displayPrefs.scene3d||{}])}
 }

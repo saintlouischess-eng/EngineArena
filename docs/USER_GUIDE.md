@@ -1,4 +1,7 @@
-# Engine Arena 1.9.5 — private candidate
+# Engine Arena 1.10.3 — user guide
+
+For current features, updating and validation, see [1.10.3 release notes](RELEASE_1_10_3.md), [viewing workflows](V1_10_WORKFLOWS.md), [RR replacements](V1_10_2_RATINGS_ONLY_WITHDRAWAL.md) and [clock correction](V1_10_3_ENGINE_CLOCK_RECEIPTS.md).
+
 
 ## Extend a completed round robin
 

@@ -100,7 +100,7 @@ async def create_app(folder,token,*,startup_progress=None):
         return web.Response(text=source,content_type='text/html',headers={'Cache-Control':'no-cache'})
     async def static(request):
         name=request.match_info['name']
-        if name not in ('tournament-extend.js','draw-rule.js','board3d-budget.js','board3d-club-motion.js','club-levy.glb','club-magnus.glb','club-fabiano.glb','club-hans.glb','club-bobby.glb','club-hikaru.glb','club-jonas.glb','club-nora.glb','board3d-club-room.js','board3d-club.js','club-arthur.glb','club-daniel.glb','club-elena.glb','club-mei.glb','club-staunton.glb','three-club-CopyShader.js','three-club-EffectComposer.js','three-club-MaskPass.js','three-club-OutputPass.js','three-club-OutputShader.js','three-club-Pass.js','three-club-RectAreaLightTexturesLib.js','three-club-RectAreaLightUniformsLib.js','three-club-RenderPass.js','three-club-SSAOPass.js','three-club-SSAOShader.js','three-club-ShaderPass.js','three-club-SimplexNoise.js','player-move-2.wav','player-move-3.wav','player-capture-2.wav','player-capture-3.wav','player-castle-2.wav','player-castle-3.wav','player-check-2.wav','player-check-3.wav','player-promotion-2.wav','player-promotion-3.wav','player-move.wav','player-capture.wav','player-castle.wav','player-check.wav','player-promotion.wav','player-win.wav','player-loss.wav','player-draw.wav','player-low.wav','player.js','player-workspace.js','player.css','player-board.js','player-sound.js','board3d-boards.js','board3d-model.js','board3d-environments.js','board3d-life.js','room-head.glb','board3d-photo.js','board3d-presentation.js','pgn-output.js','rating-center.js','rating-center.css','workflow.css','workflow.js','board3d.js','board3d-studio.js','board3d-recovery.js','board3d-crowns.js','staunton1849.glb','tal1962.glb','three.core.js','three.module.js','three-gltf.js','three-geometry-utils.js','three-room.js','three-hdr.js','three-grounded.js','three-skeleton-utils.js','board3d-ui.js','game-moves.js','studio.css','studio.js','profile-bulk.js','setup-workflow.js','setup-workflow.css','engine-arena.svg','sprt.js','events.css','events.js','seasons.js','circuits.js','circuits.css','season-insights.js','season-insights.css','custom-matchups.js','tournament-queue.js','tournament-queue.css','tournament-edit.js','schedule-order.js','engine-books.js','reliability.js','focus-layout.js','focus-layout.css','concurrency.js','i18n.js','language.js','storage.js','knockout.js','text-format.js','text-exports.js','text-exports.css','search.js','board-materials.js','board-materials.css','adjudication.js','table-controls.css','format.js','review.js','review.css','hardware.js','hardware-model.js','hardware.css','results.js','results-model.js','pgn.js','pgn.css','evaluation.js','evaluation-ui.js','evaluation.css','opening-presets.js','focus.js','focus.css','polish.js','help.js','polish.css','clocks.js','app.js','workspace.js','formats.js','conditions.js','reports.js','ratings.js','comparisons.js','graphs.js','style.css'):raise web.HTTPNotFound()
+        if name not in ('focus-director.js','focus-follow.js','standings-plus.js','appearance-plus.js','workflow-plus.css','tournament-extend.js','draw-rule.js','board3d-budget.js','board3d-club-motion.js','club-levy.glb','club-magnus.glb','club-fabiano.glb','club-hans.glb','club-bobby.glb','club-hikaru.glb','club-jonas.glb','club-nora.glb','board3d-club-room.js','board3d-club.js','club-arthur.glb','club-daniel.glb','club-elena.glb','club-mei.glb','club-staunton.glb','three-club-CopyShader.js','three-club-EffectComposer.js','three-club-MaskPass.js','three-club-OutputPass.js','three-club-OutputShader.js','three-club-Pass.js','three-club-RectAreaLightTexturesLib.js','three-club-RectAreaLightUniformsLib.js','three-club-RenderPass.js','three-club-SSAOPass.js','three-club-SSAOShader.js','three-club-ShaderPass.js','three-club-SimplexNoise.js','player-move-2.wav','player-move-3.wav','player-capture-2.wav','player-capture-3.wav','player-castle-2.wav','player-castle-3.wav','player-check-2.wav','player-check-3.wav','player-promotion-2.wav','player-promotion-3.wav','player-move.wav','player-capture.wav','player-castle.wav','player-check.wav','player-promotion.wav','player-win.wav','player-loss.wav','player-draw.wav','player-low.wav','player.js','player-workspace.js','player.css','player-board.js','player-sound.js','board3d-boards.js','board3d-model.js','board3d-environments.js','board3d-life.js','room-head.glb','board3d-photo.js','board3d-presentation.js','pgn-output.js','rating-center.js','rating-center.css','workflow.css','workflow.js','board3d.js','board3d-studio.js','board3d-recovery.js','board3d-crowns.js','staunton1849.glb','tal1962.glb','three.core.js','three.module.js','three-gltf.js','three-geometry-utils.js','three-room.js','three-hdr.js','three-grounded.js','three-skeleton-utils.js','board3d-ui.js','game-moves.js','studio.css','studio.js','profile-bulk.js','setup-workflow.js','setup-workflow.css','engine-arena.svg','sprt.js','events.css','events.js','seasons.js','circuits.js','circuits.css','season-insights.js','season-insights.css','custom-matchups.js','tournament-queue.js','tournament-queue.css','tournament-edit.js','schedule-order.js','engine-books.js','reliability.js','focus-layout.js','focus-layout.css','concurrency.js','i18n.js','language.js','storage.js','knockout.js','text-format.js','text-exports.js','text-exports.css','search.js','board-materials.js','board-materials.css','adjudication.js','table-controls.css','format.js','review.js','review.css','hardware.js','hardware-model.js','hardware.css','results.js','results-model.js','pgn.js','pgn.css','evaluation.js','evaluation-ui.js','evaluation.css','opening-presets.js','focus.js','focus.css','polish.js','help.js','polish.css','clocks.js','app.js','workspace.js','formats.js','conditions.js','reports.js','ratings.js','comparisons.js','graphs.js','style.css'):raise web.HTTPNotFound()
         return web.FileResponse(ROOT/'ui'/name,headers={'Cache-Control':'no-cache'})
     async def status(request):
         hardware.request()
@@ -228,24 +228,32 @@ async def create_app(folder,token,*,startup_progress=None):
     async def extend_tournament(request):
         tid=request.match_info['tid']
         if request.method=='GET':return web.json_response(await db.call('extension_call','info',tid))
-        body=await request.json();ids=body.get('profiles');profiles=[]
-        if not isinstance(ids,list) or not ids or any(not isinstance(v,str) for v in ids):
-            raise ValueError('Select at least one new engine profile.')
+        body=await request.json();ids=body.get('profiles',[]);profiles=[];removing=body.get('action')=='revise'
+        if not isinstance(ids,list) or (not ids and not removing) or any(not isinstance(v,str) for v in ids):
+            raise ValueError('Select new engine profiles or entrants to withdraw.')
         from .fingerprints import verify,capture
         for pid in ids:
             row=await db.call('one','SELECT body FROM profiles WHERE id=?',(pid,))
             if not row:raise ValueError('Profile no longer exists')
             p=json.loads(row['body']);await asyncio.to_thread(verify,p)
             p['fingerprints']=await asyncio.to_thread(capture,p);profiles.append(p)
-        if body.get('preview') is True:return web.json_response(await db.call('extension_call','preview',tid,profiles))
-        # Continuing an old result set with a replaced executable would silently mix versions.
-        for row in await db.call('rows','SELECT profile FROM participants WHERE tid=?',(tid,)):
-            await asyncio.to_thread(verify,json.loads(row['profile']))
+        scheduling=body.get('scheduling','catch_up');removed=body.get('removed',[]);result_policy=body.get('result_policy')
+        if body.get('preview') is True:
+            result=await db.call('roster_call','preview',tid,removed,profiles,scheduling,result_policy) if removing else await db.call('extension_call','preview',tid,profiles,scheduling)
+            return web.json_response(result)
+        # Any incumbent asked to play more games must still use its recorded binary.
+        if profiles:
+            t=await db.call('tournament',tid);active=t['settings'].get('rr_active_slots',list(range(t['slot_count'])))
+            for row in await db.call('rows','SELECT slot,profile FROM participants WHERE tid=?',(tid,)):
+                if row['slot'] in active and row['slot'] not in removed:await asyncio.to_thread(verify,json.loads(row['profile']))
         async with runner.lifecycle_lock:
-            result=await db.call('extension_call','extend',tid,profiles,body.get('expected'))
+            if removing:result=await db.call('roster_call','change',tid,removed,profiles,body.get('expected'),scheduling,result_policy)
+            else:result=await db.call('extension_call','extend',tid,profiles,body.get('expected'),scheduling)
             progress.reset(tid);runner.memory_budgets.pop(tid,None)
         runner.request_backup()
         return web.json_response(result)
+    async def roster_history(request):
+        return web.json_response(await db.call('roster_call','history',request.match_info['tid'],request.query.get('revision')))
     async def tournament(request):
         from .standings import read_snapshot
         tid=request.match_info['tid']
@@ -384,10 +392,10 @@ async def create_app(folder,token,*,startup_progress=None):
         return web.json_response(await asyncio.to_thread(calculate,db.store.path,request.match_info['tid'],int(request.query.get('row',0)),int(request.query.get('column',0)),request.query.get('q',''),confidence(request)))
     async def participants(request):
         tid=request.match_info['tid'];search='%'+request.query.get('q','')+'%';offset=max(0,int(request.query.get('offset',0)))
-        clause="tid=? AND json_extract(profile,'$.name') LIKE ?"
+        clause="tid=? AND json_extract(profile,'$.name') LIKE ? AND slot IN (SELECT slot FROM rankings WHERE tid=participants.tid)"
         total=await db.call('one','SELECT count(*) n FROM participants WHERE '+clause,(tid,search))
         rows=await db.call('rows','SELECT slot,profile FROM participants WHERE '+clause+' ORDER BY slot LIMIT 50 OFFSET ?',(tid,search,offset))
-        return web.json_response({'total':total['n'],'items':[{'slot':r['slot'],'name':json.loads(r['profile'])['name']} for r in rows]})
+        return web.json_response({'total':total['n'],'items':[{'slot':r['slot'],'name':json.loads(r['profile'])['name'],**({'id':json.loads(r['profile'])['id']} if json.loads(r['profile']).get('id') else {})} for r in rows]})
     from collections import OrderedDict
     report_cache=OrderedDict();report_lock=asyncio.Lock()
     rating_executor=None;rating_lock=asyncio.Lock()
@@ -555,7 +563,11 @@ async def create_app(folder,token,*,startup_progress=None):
         return web.Response(text=data,content_type=ctype,headers={'Content-Disposition':f'attachment; filename="official-{tid}.{fmt}"'})
     async def presets(request):
         if request.method=='GET':return web.json_response([{'name':r['name'],'settings':json.loads(r['body'])} for r in await db.call('rows','SELECT * FROM presets ORDER BY name')])
-        b=await request.json();return web.json_response(await db.call('save_preset',b['name'],b['settings'],b.get('original_name')))
+        b=await request.json()
+        if b.get('action')=='delete':return web.json_response(await db.call('delete_preset',b['name'],b.get('confirmed',False)))
+        return web.json_response(await db.call('save_preset',b['name'],b['settings'],b.get('original_name')))
+    async def activity_history(request):
+        return web.json_response(await db.call('activity_call','report',request.query.get('tid',''),int(request.query.get('offset',0))))
     async def positions(request):
         if request.method=='GET':return web.json_response([json.loads(r['body']) for r in await db.call('rows','SELECT body FROM positions ORDER BY name')])
         b=await request.json();return web.json_response(await db.call('save_position',b['name'],b))
@@ -771,6 +783,8 @@ async def create_app(folder,token,*,startup_progress=None):
     app.router.add_post('/api/profiles/inspect-options',inspect_profile_options)
     app.router.add_get('/api/profiles/selection',profile_selection)
     app.router.add_route('*','/api/setup-draft',setup_draft)
+    app.router.add_get('/api/activity',activity_history)
+    app.router.add_get('/api/tournaments/{tid}/roster-history',roster_history)
     app.router.add_route('*','/api/preferences',preferences);app.router.add_post('/api/ui-metrics',ui_metrics)
     app.router.add_route('*','/api/storage',storage)
     app.router.add_route('*','/api/pieces',pieces);app.router.add_get('/pieces/{group}/{file}',piece_file)

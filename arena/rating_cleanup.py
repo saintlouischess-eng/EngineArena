@@ -10,6 +10,7 @@ def gc(db):
     db.execute('DELETE FROM rc_conditions WHERE id NOT IN (SELECT conditions FROM rc_games)')
     db.execute('DELETE FROM rc_entries WHERE id NOT IN (SELECT white FROM rc_games UNION SELECT black FROM rc_games UNION SELECT entry FROM rc_anchors UNION SELECT predecessor FROM rc_links UNION SELECT entry FROM rc_links UNION SELECT entry FROM rc_blocks)')
     if db.execute("SELECT 1 FROM sqlite_master WHERE name='rc_families'").fetchone():db.execute('DELETE FROM rc_families WHERE entry NOT IN (SELECT id FROM rc_entries) OR pool NOT IN (SELECT id FROM rc_pools)')
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='rc_aliases'").fetchone():db.execute('DELETE FROM rc_aliases WHERE entry NOT IN (SELECT id FROM rc_entries)')
 
 
 def apply(db,receipts):

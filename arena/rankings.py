@@ -10,6 +10,21 @@ import random
 
 TIEBREAKS={'wins':'wins','black_wins':'black_wins','buchholz':'buchholz','sonneborn_berger':'sb','seed':'seed'}
 
+
+def explanation(row,settings):
+    keys=list(dict.fromkeys([*settings.get('tiebreaks',['wins','seed']),'seed']))
+    labels={'wins':'Wins','black_wins':'Black wins','buchholz':'Buchholz','sonneborn_berger':'Sonneborn–Berger','seed':'Seed'}
+    order='Points → '+' → '.join(labels[k] for k in keys)
+    values=[{'key':k,'name':labels[k],'value':row[TIEBREAKS[k]]+(1 if k=='seed' else 0),'direction':'lower first' if k=='seed' else 'higher first'} for k in keys]
+    if settings['format'] in ('knockout','double_elimination'):basis='Bracket progress and match results determine placement; game points are descriptive.'
+    elif settings['format']=='ladder':basis='Ladder position determines placement.'
+    elif row.get('previous_points') is None:basis='First in the current ranking order.'
+    elif row['points']!=row['previous_points']:basis='Points separate this entry from the entry immediately above.'
+    else:
+        key=next((k for k in keys if row[TIEBREAKS[k]]!=row.get('previous_'+TIEBREAKS[k])),None)
+        basis=(labels[key]+' separates the equal-point entries; '+('lower seed first (deterministic fallback).' if key=='seed' else 'higher value first.')) if key else 'All configured values tied; deterministic seed order.'
+    return {'ranking_basis':basis,'tiebreak_order':order,'tiebreak_values':values}
+
 def initialize(store):
     store.db.executescript('''
     CREATE TABLE IF NOT EXISTS rankings(tid TEXT,slot INTEGER,seed INTEGER,score REAL DEFAULT 0,

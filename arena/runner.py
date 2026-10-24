@@ -59,6 +59,8 @@ class Runner:
     def __init__(self,db):
         self.db=db;self.tasks={};self.live={};self.closed=False;self.error='';self.last_backup=time.monotonic();self.scheduler=None
         self.max_active=0;self.completed=0;self.started=time.monotonic();self.memory_budgets={};self.experiment_task=None;self.experiment_id=None;self.backup_task=None
+        from collections import deque
+        self.recent_finished=deque(maxlen=64)
         self.lifecycle_lock=asyncio.Lock();self.maintenance=False
         self.storage_task=None;self.backup_requested=False
         self.admission_scans={};self.resource_probes={}
@@ -100,6 +102,7 @@ class Runner:
             try:
                 async with self.lifecycle_lock:
                     await self.db.call('export_pending')
+                    await self.db.call('activity_call','observe',{v['tid'] for v in self.live.values()})
                     if self.backup_task and self.backup_task.done():
                         completed_backup=self.backup_task;self.backup_task=None;self.last_backup=time.monotonic()
                         completed_backup.result()
@@ -164,7 +167,7 @@ class Runner:
                         if not any(v['tid']==tid for v in self.live.values()):
                             t=await self.db.call('tournament',tid)
                             unfinished=await self.db.call('one',"SELECT count(*) n FROM games WHERE tid=? AND invalid=0 AND state IN ('running','pending')",(tid,))
-                            if not unfinished['n'] and t['cursor']*(2 if t['settings']['paired'] else 1)>=t['total'] and t['settings']['format'] not in ('swiss','knockout','double_elimination','ladder'):
+                            if not unfinished['n'] and t['cursor']*(2 if t['settings']['paired'] else 1)>=t['schedule_total'] and t['settings']['format'] not in ('swiss','knockout','double_elimination','ladder'):
                                 await self.db.call('execute',"UPDATE tournaments SET state='completed' WHERE id=?",(tid,))
                         if self.tasks:break
                     if not self.tasks and not tournaments and not self.external_resources:
@@ -267,7 +270,7 @@ class Runner:
         if not any(v['tid']==tid for v in self.live.values()):
             t=await self.db.call('tournament',tid)
             unfinished=await self.db.call('one',"SELECT 1 FROM games WHERE tid=? AND invalid=0 AND state IN ('running','pending') LIMIT 1",(tid,))
-            if not unfinished and t['cursor']*(2 if settings['paired'] else 1)>=t['total'] and settings['format'] not in ('swiss','knockout','double_elimination','ladder'):
+            if not unfinished and t['cursor']*(2 if settings['paired'] else 1)>=t['schedule_total'] and settings['format'] not in ('swiss','knockout','double_elimination','ladder'):
                 await self.db.call('execute',"UPDATE tournaments SET state='completed' WHERE id=?",(tid,))
 
     def _done(self,aid,task):
@@ -299,6 +302,8 @@ class Runner:
                     view=self.live.get(aid)
                     if view and view.get('status')==('White thinking' if color else 'Black thinking') and engine.info_position==view.get('fen'):
                         data=white_info(info,color)
+                        from .search_history import intention
+                        data['intention']=intention(board,data.get('pv'))
                         side='white' if color else 'black'
                         history=self.search_histories[aid][side];history.record(white_info(engine.last_update,color))
                         view['info']=data;view['info_side']=side
@@ -394,6 +399,12 @@ class Runner:
                 await self.db.call('execute','UPDATE attempts SET clocks=? WHERE id=?',(__import__('json').dumps(clock_snapshot()),aid))
                 for e in engines.values():await self.db.call('log',aid,list(e.log))
                 await self.db.call('finish',aid,result,reason,detail,identity);await self.db.call('export_pending');self.completed+=1
+                committed=await self.db.call('one','SELECT a.result,a.reason,a.detail,a.ended,g.official FROM attempts a JOIN games g ON g.id=a.gid WHERE a.id=?',(aid,))
+                if committed and committed['ended'] is not None:
+                    keys=('tid','game','number','fen','last_move','san','ply','clocks','crown_squares','knight_facings','captured','competition_label','claim_draws')
+                    final={k:view[k] for k in keys if k in view}
+                    final.update(attempt=aid,white={k:profiles[chess.WHITE].get(k) for k in ('id','name')},black={k:profiles[chess.BLACK].get(k) for k in ('id','name')},result=committed['result'],reason=committed['reason'],detail=committed['detail'],ended=committed['ended'],official=committed['official']==aid,clock_active=None,searches={},status=committed['result']+' · '+committed['reason'].replace('_',' '))
+                    self.recent_finished.append(final)
 
     async def pause(self,tid,cancel=False):
         await self.db.call('set_state',tid,'draining')
@@ -451,7 +462,7 @@ class Runner:
         views=[]
         for aid,v in self.live.items():
             item=dict(v);item['attempt']=aid;item['search_elapsed']=max(0,time.monotonic()-v['search_started']) if 'search_started' in v else 0;views.append(item)
-        return {'live':views,'scheduling':{'used':self.resource_usage(),'waiting':dict(self.scheduling_status)},'player_active':bool(self.external_resources),'maintenance':self.maintenance,'error':self.error or self.db.store.failure,'cpu_percent':cpu,
+        return {'live':views,'recent_finished':list(self.recent_finished),'scheduling':{'used':self.resource_usage(),'waiting':dict(self.scheduling_status)},'player_active':bool(self.external_resources),'maintenance':self.maintenance,'error':self.error or self.db.store.failure,'cpu_percent':cpu,
           'memory_used_gb':round(memory.used/2**30,2),'memory_available_gb':round(memory.available/2**30,2),'logical_cpus':psutil.cpu_count(),
           'active_games':len(self.tasks),'max_active_games':self.max_active,'engine_process_bound':2*len(self.tasks),
           'games_finished':self.completed,'uptime':time.monotonic()-self.started,'pgn_outputs':list(self.pgn_outputs.status.values()),
@@ -513,6 +524,7 @@ class Runner:
         await asyncio.gather(*list(self.tasks.values()),return_exceptions=True)
         try:
             await self.runtime.close()
+            await self.db.call('activity_call','close')
             if self.backup_task:await asyncio.gather(self.backup_task,return_exceptions=True)
             await self.db.call('backup',force=False)
         finally:

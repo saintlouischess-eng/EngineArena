@@ -9,15 +9,22 @@ from .pgn_options import normalize,from_query
 
 
 class OfficialPgnReader:
-    def __init__(self,path,tid,style='compact',perspective='engine',annotations=None,*,export_options=None):
+    def __init__(self,path,tid,style='compact',perspective='engine',annotations=None,*,export_options=None,roster_revision=None):
         self.style,self.perspective,self.annotations=options(style,perspective,annotations)
         self.export_options=normalize(export_options) if export_options is not None else None
         self.db=sqlite3.connect(Path(path).as_uri()+'?mode=ro',uri=True,timeout=30)
         try:
             self.db.execute('BEGIN')
             self.context=PgnContext(self.db,tid)
-            self.cursor=self.db.execute('''SELECT official FROM games
-                WHERE tid=? AND invalid=0 AND official IS NOT NULL ORDER BY number''',(tid,))
+            if roster_revision is not None:
+                import json
+                saved=self.db.execute('SELECT body FROM rr_revisions WHERE tid=? AND revision=?',(tid,int(roster_revision))).fetchone()
+                if not saved:raise ValueError('Roster revision not found')
+                body=json.loads(saved[0]);self.context.settings=body['settings'];self.context.name=body['name']
+                self.cursor=self.db.execute('SELECT a.aid FROM rr_revision_games a JOIN games g ON g.id=a.gid WHERE a.tid=? AND a.revision=? ORDER BY g.number',(tid,int(roster_revision)))
+            else:
+                self.cursor=self.db.execute('''SELECT official FROM games
+                    WHERE tid=? AND invalid=0 AND official IS NOT NULL ORDER BY number''',(tid,))
         except BaseException:
             self.db.close();raise
 
@@ -52,7 +59,7 @@ async def stream_official(request,path,tid):
     annotations=request.query.get('annotations')
     annotations=None if annotations is None else [v for v in annotations.split(',') if v]
     presentation=from_query(request.query)
-    def open_reader():reader.append(OfficialPgnReader(path,tid,request.query.get('style','compact'),request.query.get('perspective','engine'),annotations,export_options=presentation))
+    def open_reader():reader.append(OfficialPgnReader(path,tid,request.query.get('style','compact'),request.query.get('perspective','engine'),annotations,export_options=presentation,roster_revision=request.query.get('roster_revision')))
     def read():return reader[0].chunk()
     def close():
         if reader:reader[0].close()

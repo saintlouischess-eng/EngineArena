@@ -30,7 +30,7 @@ async function showTournamentReport({all=false,technical=false,performance=false
   if(!alive())return;
   $('#cancelReport')?.remove();
   const frame=document.createElement('iframe');frame.title=ArenaI18n.t('Tournament report preview');frame.className='report-preview';frame.setAttribute('sandbox','');root.replaceWith(frame);
-  let exportHtml=r.html;const refreshView=()=>{const doc=new DOMParser().parseFromString(r.html,'text/html');if(!$('#reportIncludePerformance').checked)doc.querySelectorAll('[data-report-performance]').forEach(e=>e.remove());exportHtml='<!doctype html>\n'+doc.documentElement.outerHTML;frame.srcdoc=exportHtml};$('#reportIncludePerformance').onchange=refreshView;refreshView();
+  let exportHtml=r.html;const refreshView=()=>{const doc=new DOMParser().parseFromString(r.html,'text/html');if(!$('#reportIncludePerformance').checked)doc.querySelectorAll('[data-report-performance]').forEach(e=>e.remove());exportHtml='<!doctype html>\n'+doc.documentElement.outerHTML;frame.srcdoc=exportHtml;delete frame.dataset.fontSize;if(typeof applyTextSizes==='function')applyTextSizes()};$('#reportIncludePerformance').onchange=refreshView;refreshView();
   $('#tournamentReportText').disabled=false;$('#tournamentReportText').onclick=()=>textExport(ArenaI18n.t('Tournament report'),()=>htmlReportText(exportHtml),{name:'tournament-report-'+tid});
   $('#saveTournamentReport').disabled=false;$('#saveTournamentReport').onclick=()=>download('engine-arena-report-'+tid+'.html',exportHtml,'text/html');
 }

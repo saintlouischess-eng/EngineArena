@@ -157,7 +157,7 @@ async def execute(db,case):
         try:move=board.parse_uci(info['pv'].split()[0]);matches=bool(move) and correct(move.uci())
         except ValueError:matches=False
         if matches:
-            elapsed=time.perf_counter()-engine.search_started
+            elapsed=max(0,engine.info_received-engine.search_started)
             if solved is None:solved=elapsed
             if stable is None:stable=elapsed
         else:stable=None

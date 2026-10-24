@@ -50,10 +50,13 @@ def page(store,tid,settings,offset=0,limit=100,sort='rank',direction='asc',confi
     from .reliability import tf_source
     sql=f'''WITH ranked AS (
         SELECT r.*,r.score+r.bye_points points,row_number() OVER(ORDER BY {rank_order}) rank
-        FROM rankings r LEFT JOIN json_each(?) l ON l.value=r.slot WHERE r.tid=?)
+        FROM rankings r LEFT JOIN json_each(?) l ON l.value=r.slot WHERE r.tid=?), explained AS (
+        SELECT *,lag(points) OVER(ORDER BY rank) previous_points,lag(wins) OVER(ORDER BY rank) previous_wins,
+          lag(black_wins) OVER(ORDER BY rank) previous_black_wins,lag(buchholz) OVER(ORDER BY rank) previous_buchholz,
+          lag(sb) OVER(ORDER BY rank) previous_sb,lag(seed) OVER(ORDER BY rank) previous_seed FROM ranked)
         SELECT r.*,a.w,a.d,a.l,a.p0,a.p1,a.p2,a.p3,a.p4,coalesce(tf.attempts,0) tf,coalesce(tf.official,0) tf_official,
             json_extract(p.profile,'$.name') name,{expression} sort_value
-        FROM ranked r JOIN aggregates a ON a.tid=r.tid AND a.a=r.slot AND a.b=-1
+        FROM explained r JOIN aggregates a ON a.tid=r.tid AND a.a=r.slot AND a.b=-1
         JOIN participants p ON p.tid=r.tid AND p.slot=r.slot
         LEFT JOIN {tf_source(store.db)} tf ON tf.tid=r.tid AND tf.slot=r.slot
         ORDER BY sort_value IS NULL,sort_value {direction},r.rank ASC LIMIT ? OFFSET ?'''
@@ -65,6 +68,9 @@ def page(store,tid,settings,offset=0,limit=100,sort='rank',direction='asc',confi
             output.append({'slot':r['slot'],'rank':r['rank'],'name':r['name'],**values,'points':r['points'],
                 'tf':r['tf'],'tf_official':r['tf_official'],'bye_points':r['bye_points'],'seed':r['seed']+1,'black_wins':r['black_wins'],
                 'buchholz':r['buchholz'],'sonneborn_berger':r['sb']})
+            from .rankings import explanation
+            output[-1].update(explanation(r,settings))
+            if settings.get('rr_withdrawn_retained'):output[-1]['withdrawn']=r['slot'] in settings['rr_withdrawn_retained']
             if competition:output[-1].update({k:v for k,v in competition['people'][r['slot']].items() if k not in ('name','slot')})
             if competition:
                 from .knockout import SAMPLE_NOTE

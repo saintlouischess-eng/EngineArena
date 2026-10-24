@@ -220,6 +220,7 @@ async function refresh(){
   state.connected=true;
   if(typeof renderQueueSummary==='function')renderQueueSummary(s.tournament_queue);
   state.live=s.live.map(g=>({...g,receivedAt:performance.now()}));
+  state.recentFinished=s.recent_finished||[];
   if(typeof renderManagerResources==='function')renderManagerResources(s.scheduling);
   if(typeof recordHardware==='function')recordHardware(s);
   $('#sideStatus').textContent=ArenaI18n.m`${s.active_games} active games · ${s.logical_cpus} logical CPUs`;

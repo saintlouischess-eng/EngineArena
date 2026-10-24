@@ -18,7 +18,7 @@ def crosstable(path,tid,row=0,column=0,search='',confidence=95):
         db.execute('BEGIN')
         tournament=db.execute('SELECT settings FROM tournaments WHERE id=?',(tid,)).fetchone()
         if not tournament:raise ValueError('Tournament not found')
-        settings=json.loads(tournament['settings']);where="FROM participants WHERE tid=? AND json_extract(profile,'$.name') LIKE ?";args=(tid,'%'+search+'%')
+        settings=json.loads(tournament['settings']);where="FROM participants WHERE tid=? AND json_extract(profile,'$.name') LIKE ? AND slot IN (SELECT slot FROM rankings WHERE tid=participants.tid)";args=(tid,'%'+search+'%')
         total=db.execute('SELECT count(*) '+where,args).fetchone()[0]
         def page(offset):return [dict(r) for r in db.execute("SELECT slot,json_extract(profile,'$.name') name "+where+' ORDER BY slot LIMIT 20 OFFSET ?',(*args,offset))]
         rows=page(row);columns=page(column);cells=[]

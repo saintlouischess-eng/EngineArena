@@ -7,6 +7,19 @@ FIELDS={'depth','seldepth','nodes','nps','hashfull','tbhits','time','cp','mate',
 MOVE=re.compile(r'^[a-h][1-8][a-h][1-8][qrbn]?$')
 
 
+def intention(board,pv):
+    """First legal primary-PV move, validated in the exact current position."""
+    import chess
+    tokens=pv.split() if isinstance(pv,str) else pv if isinstance(pv,list) else []
+    if not tokens:return None
+    try:move=board.parse_uci(tokens[0])
+    except (ValueError,TypeError,AttributeError):return None
+    if not move or move not in board.legal_moves:return None
+    target=move.to_square
+    if board.is_castling(move):target=chess.square(6 if board.is_kingside_castling(move) else 2,chess.square_rank(move.from_square))
+    return {'fen':board.fen(),'uci':board.uci(move),'from':chess.square_name(move.from_square),'to':chess.square_name(target)}
+
+
 def white_info(info,color):
     result={k:list(v) if isinstance(v,list) else v for k,v in info.items()}
     if not color:

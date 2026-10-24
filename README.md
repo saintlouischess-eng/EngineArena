@@ -1,14 +1,14 @@
 # Engine Arena
 
-**Engine Arena 1.9.12** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
+**Engine Arena 1.10.3** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
 
 **Designed by Mark Young. Coding and implementation by OpenAI Codex**, under Mark Young's direction.
 
-[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.9.12) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_9_12.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
+[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.10.3) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_10_3.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
 
 ## Install or update
 
-**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.9.12-win-x64.exe**, or the smaller **EngineArena-1.9.12-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
+**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.10.3-win-x64.exe**, or the smaller **EngineArena-1.10.3-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
 
 Pause and drain games, then close Engine Arena. Run setup in your existing installation folder, or extract the entire ZIP into a fresh folder and launch `EngineArena.exe`. You can update directly from an earlier release; intermediate updates are not needed. Saved profiles, tournaments, events and ratings are stored separately and retained. The ZIP creates no Start menu shortcuts or uninstaller. Engine Arena itself is unsigned.
 
@@ -16,10 +16,13 @@ Both packages use `%LOCALAPPDATA%\EngineArena\Data` by default. Only one copy ca
 
 ## New in this release
 
-Maintenance fixes improve startup and closing, prevent interface-loading errors,
-and keep established ratings visible when other entries have separated results.
-Rating Center also adds an optional opponent-rating-range sensitivity comparison.
-See [release notes](docs/RELEASE_1_9_12.md) for the changes and validation scope.
+Follow an engine, adjustable final-result hold, readable panel text sizes,
+optional tiebreak values, PV arrows, seven interface themes, deletable presets,
+persistent activity history, and clearer rating identities. Standalone round
+robins support add/withdraw/replace after pause and drain, with newcomer catch-up
+and optional ratings-only retention of withdrawn engines' games. Large-field
+rating convergence and delayed engine-reply timing are corrected.
+See [release notes](docs/RELEASE_1_10_3.md) for scope, workflow and limitations.
 
 ## Testing and tournament features
 
@@ -46,16 +49,11 @@ Useful guides: [Tournament manager](docs/SIMULTANEOUS_TOURNAMENTS.md), [knockout
 
 ## Release checks
 
-For this maintenance update, 98 targeted backend tests and 102 JavaScript tests
-passed. Source and packaged Rating Center checks covered exports, eight languages,
-restart and unchanged rating evidence. The packaged fixture contained 61
-configurations and 1,600 counted games. The installer remains the tested file;
-ZIP runtime files are checked against its payload manifest.
-
-The earlier 1.9.7 release passed broader format, lifecycle and recovery checks;
-see its historical [release report](docs/RELEASE_1_9_7.md). Those checks are not
-represented as a new complete test run for 1.9.12. The ongoing 400-entry test has
-not finished. See [current validation and limits](docs/RELEASE_1_9_12.md).
+959 backend tests and 105 JavaScript tests passed, plus 61 timing-focused tests
+against the packaged worker's code. Packaged roster replacement, restart,
+standings, PGN and retained-rating checks passed. Installer/ZIP integrity and
+corresponding source are verified. The 400-entry marathon is still running;
+this is not a completed endurance claim. See [validation and limits](docs/RELEASE_1_10_3.md).
 
 ## Build and source
 

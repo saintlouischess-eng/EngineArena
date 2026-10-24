@@ -81,6 +81,9 @@ export function create(canvas,onLost,settings,knightRotation,knightMode,onReady,
  const ring=new T.Shape();ring.moveTo(-.49,-.49);ring.lineTo(.49,-.49);ring.lineTo(.49,.49);ring.lineTo(-.49,.49);ring.closePath();const hole=new T.Path();hole.moveTo(-.471,-.471);hole.lineTo(-.471,.471);hole.lineTo(.471,.471);hole.lineTo(.471,-.471);hole.closePath();ring.holes.push(hole);
  const ringGeo=own(new T.ShapeGeometry(ring)),marks=[0,1].map(()=>{const m=new T.Mesh(squareGeo,highlight);m.rotation.x=-Math.PI/2;m.position.y=.006;const edge=new T.Mesh(ringGeo,outline);edge.position.z=.001;m.add(edge);scene.add(m);return m});
  const environment=surroundings(scene,assets,own,mat,textures,renderer,error=>{if(disposed)return;if(onReady)onReady(error);else if(!error&&lastArgs)render(...lastArgs)});
+ const intentionMat=mat(new T.MeshBasicMaterial({color:0x35b9f3,transparent:true,opacity:.88,depthWrite:false,toneMapped:false}));
+ const intentionShaft=new T.Mesh(own(new T.CylinderGeometry(.055,.055,1,8)),intentionMat),intentionTip=new T.Mesh(own(new T.ConeGeometry(.21,.4,12)),intentionMat);
+ scene.add(intentionShaft,intentionTip);intentionShaft.visible=intentionTip.visible=false;
  let life=null;
  const pieceGeometry=new Map(),pieceMaterials=new Map(),sourceMaterials=new Map();
  for(const source of Object.values(pieces))source.traverse(o=>{if(o.isMesh)for(const m of Array.isArray(o.material)?o.material:[o.material])sourceMaterials.set(m.name,m)});
@@ -156,6 +159,10 @@ export function create(canvas,onLost,settings,knightRotation,knightMode,onReady,
    previousFen=fen;previousGame=context.key||'';position=identity;canvas.dataset.knightMode=mode;canvas.dataset.knightRotations=JSON.stringify(directions);canvas.dataset.crownCount=String(count);renderer.shadowMap.needsUpdate=true;
   }
   marks.forEach((m,i)=>{const sq=last.slice(i*2,i*2+2);m.visible=/^[a-h][1-8]$/.test(sq);if(m.visible){m.position.x=sq.charCodeAt(0)-97-3.5;m.position.z=8-Number(sq[1])-3.5}});
+  const hint=context.intention,hasHint=hint&&hint.fen===fen&&/^[a-h][1-8]$/.test(hint.from)&&/^[a-h][1-8]$/.test(hint.to)&&!context.reviewing;
+  intentionShaft.visible=intentionTip.visible=!!hasHint;
+  if(hasHint){const point=s=>new T.Vector3(s.charCodeAt(0)-100.5,.055,4.5-Number(s[1])),start=point(hint.from),end=point(hint.to),dir=end.clone().sub(start),len=dir.length();dir.normalize();const q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),dir);intentionShaft.quaternion.copy(q);intentionTip.quaternion.copy(q);intentionShaft.scale.y=Math.max(.01,len-.3);intentionShaft.position.copy(start).addScaledVector(dir,(len-.3)/2);intentionTip.position.copy(end).addScaledVector(dir,-.2)}
+  canvas.dataset.intention=hasHint?hint.from+hint.to:'';
   if(tweens.length){const t=Math.min(1,(performance.now()-started)/duration),ease=t*t*(3-2*t);for(const a of tweens){a.mesh.position.lerpVectors(a.origin,a.target,ease);a.mesh.position.y+=Math.sin(t*Math.PI)*(a.knight?.42:.055);if(a.ghost&&!a.reveal)a.mesh.scale.copy(a.scale).multiplyScalar(1-ease)}renderer.shadowMap.needsUpdate=true;if(t>=1)finishMotion()}
   canvas.dataset.animating=String(tweens.length>0);canvas.dataset.environment=style.environment;canvas.dataset.highlight=String(style.highlight);
   placeLetters();scene.background=new T.Color(light?0xc9c6bd:0x202b30);renderer.info.reset();if(club)life.draw();else renderer.render(scene,camera);frameGate.submitted();canvas.dataset.frames=String(++frames);canvas.dataset.drawCalls=String(renderer.info.render.calls);

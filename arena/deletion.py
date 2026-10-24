@@ -95,7 +95,7 @@ def purge(db,ids,event_ids=(),keep_ratings=()):
     db.execute('DELETE FROM games WHERE id IN (SELECT id FROM deleted_games)')
     tables={r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     for table in ('participants','aggregates','engine_failures','audit','round_state','game_counts','rankings','ranking_meta',
-                  'sequential_state','sequential_samples','rating_anchors','report_revisions','run_sessions','opening_suites','tournament_queue','pgn_links','pgn_changes'):
+                  'sequential_state','sequential_samples','rating_anchors','report_revisions','run_sessions','opening_suites','tournament_queue','pgn_links','pgn_changes','activity_spans','rr_revisions','rr_revision_games'):
         if table in tables:db.execute(f'DELETE FROM {table} WHERE tid IN (SELECT id FROM deleted_tournaments)')
     if 'event_children' in tables:
         db.execute('DELETE FROM event_children WHERE tid IN (SELECT id FROM deleted_tournaments)')

@@ -24,6 +24,12 @@ async def search_result(future, started, allowance):
     """
     deadline=started+allowance
     while not future.done():
+        receipt=getattr(future,'receipt',None)
+        if receipt is not None and receipt.snapshot() is not None:
+            # The independent pipe reader has the reply. Let the protocol task
+            # consume its queued info/bestmove; play() checks the receipt time,
+            # never the delayed event-loop wakeup or the engine's own time field.
+            return await asyncio.shield(future)
         remaining=deadline-time.perf_counter()
         if remaining<=0:raise asyncio.TimeoutError
         await asyncio.wait((future,),timeout=max(.001,remaining))
@@ -66,6 +72,7 @@ class UciEngine:
         self.log=deque(maxlen=256);self.last_info={};self.search=None;self.uciok=None;self.ready=None;self.job=Job();self.error=None
         self.pondering=False;self.ponder_position=None;self.ponder_candidate=None;self.info_hook=None;self.last_update={};self.info_position=None
         self.runtime={};self.runtime_hook=None;self.process_started=None;self.process_ended=None;self.search_started=None
+        self.info_received=None
 
     def runtime_changed(self,line=None):
         from .runtime_evidence import observe_line
@@ -79,9 +86,9 @@ class UciEngine:
             except (ValueError,OSError) as e:raise EngineFailure('configuration_changed',str(e)) from e
             args=self.profile.get('args',[])
             if isinstance(args,str):args=shlex.split(args,posix=os.name!='nt');args=[a.strip('"') for a in args]
-            self.process=await asyncio.create_subprocess_exec(self.profile['path'],*args,cwd=self.profile.get('cwd') or str(Path(self.profile['path']).parent),
-                stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0,limit=65536)
+            from .engine_process import EngineProcess
+            self.process=await EngineProcess.create(self.profile['path'],*args,cwd=self.profile.get('cwd') or str(Path(self.profile['path']).parent),
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
             self.job.assign(self.process.pid)
             self.process_started=time.time();self.runtime_changed()
             if self.profile.get('affinity'):
@@ -119,14 +126,15 @@ class UciEngine:
         if '\n' in line or '\r' in line:raise EngineFailure('protocol_error','Newline in UCI command')
         self.log.append('> '+line)
         if not self.process or self.process.returncode is not None:raise EngineFailure('crash','Engine process exited')
-        try:self.process.stdin.write((line+'\n').encode());await self.process.stdin.drain()
+        try:self.process.stdin.write((line+'\n').encode());return await self.process.stdin.drain()
         except (OSError,ConnectionError) as e:raise EngineFailure('crash',str(e)) from e
 
     async def _read(self):
         try:
             count=0
             while raw:=await self.process.stdout.readline():
-                received=time.perf_counter()
+                received=getattr(raw,'received',None)
+                if received is None:received=time.perf_counter()
                 count+=1
                 line=raw.decode('utf-8','replace').strip();self.log.append('< '+line)
                 if line.startswith('info string '):self.runtime_changed(line)
@@ -137,9 +145,10 @@ class UciEngine:
                 elif line=='uciok' and self.uciok and not self.uciok.done():self.uciok.set_result(True)
                 elif line=='readyok' and self.ready and not self.ready.done():self.ready.set_result(True)
                 elif line.startswith('bestmove ') and self.search and not self.search.done():
+                    if hasattr(raw,'receipt') and raw.receipt is not getattr(self.search,'receipt',None):continue
                     tokens=line.split();ponder=tokens[3] if len(tokens)>=4 and tokens[2]=='ponder' else None
                     self.search.set_result((tokens[1],received,ponder))
-                elif line.startswith('info '):self._info(line)
+                elif line.startswith('info '):self._info(line,received)
                 # Complete/timestamp a received reply before yielding for UI and
                 # other engines. That fairness work must not extend its clock.
                 if count%64==0:await asyncio.sleep(0)
@@ -158,7 +167,10 @@ class UciEngine:
                 if count%64==0:await asyncio.sleep(0)
         except (ValueError,asyncio.CancelledError):pass
 
-    def _info(self,line):
+    def _info(self,line,received=None):
+        self.info_received=received if received is not None else time.perf_counter()
+        native_started=getattr(getattr(self.process,'stdin',None),'search_started',None)
+        if native_started is not None:self.search_started=native_started
         fields=line.split()
         if len(fields)>1 and fields[1]=='string':return
         if 'multipv' in fields:
@@ -182,7 +194,7 @@ class UciEngine:
             except ValueError:pass
         if 'pv' in fields:update['pv']=' '.join(normalize_promotion(m) for m in fields[fields.index('pv')+1:fields.index('pv')+65])
         from .telemetry import clean
-        elapsed=time.perf_counter()-self.search_started if self.search_started is not None else None
+        elapsed=self.info_received-self.search_started if self.search_started is not None else None
         self.last_update=clean(update,elapsed);self.last_info=clean(self.last_info|update,elapsed)
         if self.info_hook:self.info_hook(self.last_info)
 
@@ -194,13 +206,16 @@ class UciEngine:
             raise EngineFailure('timeout',f'Chess clock and tolerance exhausted before search; budget {clock_budget:.6f}s, tolerance {self.settings["tolerance"]:.6f}s')
         hit=self.pondering and self.ponder_position==board.fen()
         if hit:
-            if self.search.done():raise EngineFailure('protocol_error','Engine ended pondering before ponderhit/stop')
-            self.pondering=False;started=self.search_started=time.perf_counter();await self.send('ponderhit')
+            receipt=getattr(self.search,'receipt',None)
+            if self.search.done() or (receipt is not None and receipt.snapshot() is not None):raise EngineFailure('protocol_error','Engine ended pondering before ponderhit/stop')
+            self.pondering=False;started=self.search_started=time.perf_counter();sent=await self.send('ponderhit')
         else:
             if self.pondering:await self.stop_ponder()
             self.last_info={};self.last_update={};self.info_position=board.fen();self.search=asyncio.get_running_loop().create_future()
             await self.position(board)
-            started=self.search_started=time.perf_counter();await self.send(command)
+            if self.process and hasattr(self.process.stdout,'arm'):self.search.receipt=self.process.stdout.arm()
+            started=self.search_started=time.perf_counter();sent=await self.send(command)
+        if isinstance(sent,(int,float)):started=self.search_started=sent
         limit=min(hang,chess_deadline) if chess_deadline is not None else hang
         reason='timeout' if chess_deadline is not None and chess_deadline<=hang else 'hang'
         try:move,finished,ponder=await search_result(self.search,started,limit)
@@ -208,6 +223,10 @@ class UciEngine:
             elapsed=max(0,time.perf_counter()-started)
             raise EngineFailure(reason,f'{reason}: elapsed {elapsed:.6f}s, allowance {limit:.6f}s; command: {command}')
         elapsed=finished-started
+        processing_delay=max(0,time.perf_counter()-finished)
+        if processing_delay>=.05 or elapsed>limit:
+            self.log.append(f'# Clock receipt: {elapsed:.6f}s; processed after {processing_delay:.6f}s; allowance {limit:.6f}s')
+        if elapsed<0:raise EngineFailure('protocol_error','Engine replied before the search command was sent')
         if elapsed>limit:raise EngineFailure(reason,f'Move took {elapsed:.6f}s, allowance {limit:.6f}s')
         from .telemetry import clean
         info=clean(self.last_info,elapsed)
@@ -236,7 +255,9 @@ class UciEngine:
         try:predicted.push_uci(self.ponder_candidate)
         except ValueError:return
         self.last_info={};self.last_update={};self.search=asyncio.get_running_loop().create_future();self.ponder_position=predicted.fen();self.info_position=self.ponder_position;self.pondering=True
-        await self.position(predicted);await self.send(command.replace('go ','go ponder ',1))
+        await self.position(predicted)
+        if self.process and hasattr(self.process.stdout,'arm'):self.search.receipt=self.process.stdout.arm()
+        await self.send(command.replace('go ','go ponder ',1))
 
     async def stop_ponder(self):
         self.pondering=False;await self.send('stop')
@@ -256,6 +277,7 @@ class UciEngine:
             except Exception:pass
         for t in self.tasks:t.cancel()
         await asyncio.gather(*self.tasks,return_exceptions=True)
+        if self.process and hasattr(self.process,'close_pipes'):await self.process.close_pipes()
         for f in (self.search,self.uciok,self.ready):
             if f and f.done() and not f.cancelled():f.exception()
         if self.process_started is not None:self.process_ended=time.time();self.runtime_changed()

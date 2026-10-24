@@ -128,6 +128,8 @@ class Store:
         initialize_adjudication(self)
         from .runtime_evidence import initialize as initialize_runtime
         initialize_runtime(self)
+        from .activity import initialize as initialize_activity
+        initialize_activity(self)
         from .history import initialize as initialize_history
         initialize_history(self)
         from .experiments import initialize
@@ -142,6 +144,8 @@ class Store:
         initialize_books(self)
         from .tournament_edit import initialize as initialize_edit
         initialize_edit(self)
+        from .rr_roster import initialize as initialize_rr_roster
+        initialize_rr_roster(self)
         from .events import initialize as initialize_events
         initialize_events(self)
         from .tournament_queue import initialize as initialize_queue
@@ -154,7 +158,9 @@ class Store:
         self.schema_version=self.db.execute('PRAGMA schema_version').fetchone()[0]
         if receipt and receipt.get('schema_version')!=self.schema_version:self.backup_revision=-1
         with self.tx():
-            self.db.execute('INSERT OR IGNORE INTO presets VALUES(?,?)',('3m + 2s · 1 thread · 1 GB · paired',encode({'time_control':DEFAULTS['time_control'],'threads':1,'hash':1024,'ponder':False,'paired':True})))
+            if not self.one("SELECT 1 FROM preferences WHERE name='presets_initialized'"):
+                self.db.execute('INSERT OR IGNORE INTO presets VALUES(?,?)',('3m + 2s · 1 thread · 1 GB · paired',encode({'time_control':DEFAULTS['time_control'],'threads':1,'hash':1024,'ponder':False,'paired':True})))
+                self.db.execute("INSERT INTO preferences VALUES('presets_initialized','true')")
         from .deletion import ledger
         try:
             with contextlib.closing(ledger(self.folder)) as deletions:
@@ -306,7 +312,10 @@ class Store:
 
     def save_profile(self,profile):
         profile=self.validate_profile(profile)
-        with self.tx():self.db.execute('INSERT OR REPLACE INTO profiles VALUES(?,?,?)',(profile['id'],profile['name'],encode(profile)))
+        with self.tx():
+            self.db.execute('INSERT OR REPLACE INTO profiles VALUES(?,?,?)',(profile['id'],profile['name'],encode(profile)))
+            from .rating_aliases import renamed
+            renamed(self.db,profile)
         return profile
 
     def validate_profile(self,profile):
@@ -386,13 +395,17 @@ class Store:
         from .conditions import save_preset
         return save_preset(self,*args)
 
+    def delete_preset(self,*args):
+        from .conditions import delete_preset
+        return delete_preset(self,*args)
+
     def save_position(self,*args):
         from .conditions import save_position
         return save_position(self,*args)
 
     def prepare_tournament(self,profiles,settings,openings=None):
         s=DEFAULTS|settings;s.pop('_custom_index',None);TimeControl.parse(s['time_control'])
-        s.pop('rr_extensions',None)  # Internal append history never comes from a new setup.
+        [s.pop(key,None) for key in ('rr_extensions','rr_active_slots','rr_withdrawn_retained','rr_withdrawn_excluded','rr_schedule_total','rr_admission')]  # Internal append history never comes from a new setup.
         from .schedule_order import validate as validate_schedule
         validate_schedule(s)
         from .move_books import validate
@@ -476,6 +489,14 @@ class Store:
         from . import rating_center
         return getattr(rating_center,method)(self,*args,**kwargs)
 
+    def activity_call(self,method,*args):
+        from . import activity
+        return getattr(activity,method)(self,*args)
+
+    def roster_call(self,method,*args):
+        from . import rr_roster
+        return getattr(rr_roster,method)(self,*args)
+
     def pgn_output_configure(self,tid,output):
         from .pgn_output import configure
         return configure(self,tid,output)
@@ -502,6 +523,11 @@ class Store:
         t=self.one('SELECT * FROM tournaments WHERE id=?',(tid,))
         if not t:raise ValueError('Tournament not found')
         t['settings']=json.loads(t['settings']);t['participants']=self.db.execute('SELECT count(*) FROM participants WHERE tid=?',(tid,)).fetchone()[0]
+        t['slot_count']=t['participants']
+        from .rr_roster import standing_slots
+        t['active_participants']=len(t['settings'].get('rr_active_slots',range(t['participants'])))
+        t['participants']=len(standing_slots(t['settings'],t['slot_count']))
+        t['schedule_total']=t['settings'].get('rr_schedule_total',t['total'])
         from .tournament_edit import editable
         t['can_edit']=editable(self,t)
         from .events import membership
@@ -541,17 +567,19 @@ class Store:
             return advance_round(self,t,window,defer_pairing)
         queued=self.db.execute("SELECT count(*) FROM games WHERE tid=? AND state IN ('pending','running') AND invalid=0",(tid,)).fetchone()[0]
         count=max(0,window-queued);legs=2 if s['paired'] else 1
-        end=min(t['total']//legs,t['cursor']+max(256,(count+legs-1)//legs)) if count else t['cursor']
+        end=min(t['schedule_total']//legs,t['cursor']+max(256,(count+legs-1)//legs)) if count else t['cursor']
         if end<=t['cursor']:return
         with self.tx():
             from .schedule_order import canonical
+            active=set(s['rr_active_slots']) if 'rr_active_slots' in s else None
             for position in range(t['cursor'],end):
-                k=canonical(position,t['participants'],s)
+                k=canonical(position,t['slot_count'],s)
                 # Admission may already have materialized this pair farther ahead.
                 # Both legs are always inserted in one transaction.
                 if not self.one('SELECT id FROM games WHERE tid=? AND pair_no=? LIMIT 1',(tid,k)):
                     from .custom_matchups import pair
-                    a,b,rep=pair(k,t['participants'],s)
+                    a,b,rep=pair(k,t['slot_count'],s)
+                    if active is not None and (a not in active or b not in active):continue
                     self._insert_pair(tid,k,a,b,rep,s,fixed_colors=s['format']=='custom' or bool(s.get('rr_extensions')),schedule_index=position);count-=legs
                 if count<=0:
                     end=position+1;break
@@ -563,9 +591,13 @@ class Store:
 
     def claim(self,tid,gid=None):
         with self.tx():
-            t=self.one('SELECT state,dependency FROM tournaments WHERE id=?',(tid,))
+            t=self.one('SELECT state,dependency,settings FROM tournaments WHERE id=?',(tid,))
             if not t or t['state']!='running' or t['dependency']:return None
             clause=' AND id=?' if gid is not None else ''
+            active=json.loads(t['settings']).get('rr_active_slots')
+            if active is not None:
+                slots=','.join(str(int(v)) for v in active) or 'NULL'
+                clause+=f' AND white IN ({slots}) AND black IN ({slots})'
             from .sequential import frozen
             if frozen(self,tid):clause+=" AND mode='diagnostic'"
             g=self.one("SELECT * FROM games WHERE tid=? AND state='pending' AND invalid=0"+clause+' ORDER BY schedule_index,number LIMIT 1',(tid,gid) if gid is not None else (tid,))
@@ -764,6 +796,8 @@ class Store:
             else:sql+=' AND a.reason=?';args.append(reason)
         else:raise ValueError('Select games or a failure filter')
         games=self.rows(sql,args)
+        active=t['settings'].get('rr_active_slots')
+        if active is not None:games=[g for g in games if g['white'] in active and g['black'] in active]
         if not games:return {'queued':0}
         first_round=min(g['round'] for g in games)
         from .dependencies import effects,invalidate_playoffs,update_total

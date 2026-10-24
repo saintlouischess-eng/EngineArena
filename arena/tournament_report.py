@@ -59,6 +59,8 @@ def render(path,tid,confidence=95,all_engines=False,technical=True):
         cached=report_cache.read(path,cache_key)
         if cached is not None:return cached
         settings=json.loads(t['settings']);participants=view.one('SELECT count(*) n FROM participants WHERE tid=?',(tid,))['n']
+        from .rr_roster import standing_slots
+        participants=len(standing_slots(settings,participants))
         event_context=settings.get('event_context')
         event_member=view.one('SELECT valid FROM event_children WHERE tid=?',(tid,)) if event_context else None
         custom_rows=[]
@@ -106,6 +108,8 @@ def render(path,tid,confidence=95,all_engines=False,technical=True):
                 data=technical_readouts(view,tid,settings,standings,evidence['sessions'])
                 report_cache.write_technical(path,technical_key,data)
             evidence['technical']=data
+        from .standings import page
+        tiebreak_rows=page(view,tid,settings,0,max(1,len(standings)))
     finally:db.close()
     from .report_sections import label,failures,environment,engine_sections
     esc=lambda v:html.escape(str(v),quote=True)
@@ -154,11 +158,16 @@ def render(path,tid,confidence=95,all_engines=False,technical=True):
     rows=[];statistics=[]
     for i,item in enumerate(standings,1):
         rank,p,s=item['rank'],item['profile'],item['summary']
-        rows.append([rank['seed']+1 if competition else i,p['name'],s['games'],'–'.join(number(s[k],0) for k in ('wins','draws','losses')),number(rank['points']),number(s['score_pct'],2),number(s['draw_pct'],2),s['tf'],s['tf_official']])
+        name=p['name']+(' · '+_t('Withdrawn') if rank['slot'] in settings.get('rr_withdrawn_retained',[]) else '')
+        rows.append([rank['seed']+1 if competition else i,name,s['games'],'–'.join(number(s[k],0) for k in ('wins','draws','losses')),number(rank['points']),number(s['score_pct'],2),number(s['draw_pct'],2),s['tf'],s['tf_official']])
         if competition:rows[-1][2:2]=[rank.get('ko_finish',rank['ko_status']),f"{rank['match_wins']}–{rank['match_losses']}"]
         if settings['format']=='swiss':rows[-1].insert(5,number(rank['bye_points']))
         statistics.append([p['name'],s['pairs'] if settings['paired'] else s['games'],number(s['elo']),interval(s['ci']),interval(s['ci_conservative']),los_percent(s['los'])])
     body=_h('<h1>{0}</h1><p class="muted">Engine Arena tournament report · {1} · committed result revision {2}</p>' ,f"{esc(t['name'])}",f'{esc(timestamp)}',f'{revision}')+summary
+    if settings.get('rr_withdrawn_retained'):
+        body+='<p class="notice">'+esc(_t('Withdrawn entrants keep their played results. Unplayed games were canceled without awarding points. Game totals may differ between entrants.'))+'</p>'
+    if settings.get('rr_withdrawn_excluded'):
+        body+='<p class="notice">'+esc(_t('Games involving excluded entrants do not count toward tournament points, tiebreaks or statistics. Original games and historical ratings remain recorded. See roster revision history for original standings and PGNs.'))+'</p>'
     playoffs=evidence['openings']['playoffs'] or 0
     body+=_h('<p>')+_t('{0} regular games + {1} tiebreak games = {2} official games. ' ,f'{total - playoffs:,}',f'{playoffs:,}',f'{total:,}')+(_t('{0}% of the current schedule complete.' ,f"{100 * total / t['total']:.1f}") if t['total'] else _t('No games scheduled.'))+'</p>'
     if t['dependency'] or (t['state']!='completed' and t['note'] and not (competition and t['note'].startswith('Winner:'))):body+=_h('<p class="notice">')+esc(_message(t['dependency'] or t['note']))+'</p>'
@@ -201,6 +210,9 @@ def render(path,tid,confidence=95,all_engines=False,technical=True):
         headers.insert(5,_t('Bye points'))
         body+=_h('<p>Points include bye awards. Bye points do not count as played games or enter Elo, CI or LOS.</p>')
     body+=table(headers,rows)
+    if not competition:
+        body+='<details><summary>'+esc(_t('Tiebreak values and ranking explanation'))+'</summary><p>'+esc(_t('Points are compared first, then configured tiebreaks in order, then original seed. Values remain provisional while games are running. Display sorting does not change the official rank.'))+'</p>'
+        body+=table([_t('Rank'),_t('Engine'),_t('Tiebreak values'),_t('Ranking basis')],[(r['rank'],r['name'],'; '.join(v['name']+': '+str(v['value']) for v in r['tiebreak_values']),r['ranking_basis']) for r in tiebreak_rows])+'</details>'
     body+=_h('<h2>Descriptive game statistics</h2>')+table([_t('Engine'),_t('Complete pairs') if settings['paired'] else _t('Games'),_t('Δ Elo vs own opponents'),_t('Normal {0}% CI' ,f'{confidence:g}'),_t('Conservative {0}% CI' ,f'{confidence:g}'),_t('LOS %')],statistics)
     body+=_h('<p class="muted">Logistic Elo relative to each engine’s sampled opposition, not an opponent-adjusted common pool rating. ')+(_t('Paired estimates use only complete opening pairs.') if settings['paired'] else _t('Unpaired estimates use individual games.'))+_h(' Normal intervals and LOS are approximate; conservative intervals use Hoeffding bounds. Both require independent fixed samples and are not sequential stopping rules. LOS is not the probability of being the strongest engine in the field.</p>')
     if settings['paired']:

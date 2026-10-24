@@ -97,11 +97,21 @@ def fit_pool(participant_count,observations,anchor=0):
         result['status']='no_finite_fit' if component-finite else 'no_comparisons';return result
     n=len(members);theta=[0.]*n;degree=[0.]*n
     for a,b,count,_,_ in records:degree[a]+=count;degree[b]+=count
-    def objective(values):
-        total=0.
+    def objective_change(candidate):
+        # Compare the change per observation, not two large total losses. Near
+        # the optimum their difference is below floating-point summation noise,
+        # which used to reject the last Newton step and blank the entire pool.
+        changes=[]
         for a,b,count,score,_ in records:
-            x=values[a]-values[b];total+=count*(max(x,0)+math.log1p(math.exp(-abs(x))))-score*x
-        return total
+            x=theta[a]-theta[b];y=candidate[a]-candidate[b];delta=y-x
+            if abs(delta)<=1:
+                change=count*math.log1p(logistic(x)*math.expm1(delta))-score*delta
+            else:
+                def loss(z):
+                    return (count-score)*max(z,0)+score*max(-z,0)+count*math.log1p(math.exp(-abs(z)))
+                change=loss(y)-loss(x)
+            changes.append(change)
+        return math.fsum(changes)
     converged=False
     for iteration in range(100):
         gradient=[0.]*n;hessian=[]
@@ -111,10 +121,10 @@ def fit_pool(participant_count,observations,anchor=0):
         if max(abs(g)/max(1,d) for g,d in zip(gradient,degree))<1e-10:converged=True;break
         try:step=solve(n,hessian,gradient,reference)
         except ArithmeticError:break
-        old=objective(theta);gain=sum(a*b for a,b in zip(gradient,step));rate=1.
+        gain=math.fsum(a*b for a,b in zip(gradient,step));rate=1.
         while rate>1e-8:
             candidate=[a+rate*b for a,b in zip(theta,step)]
-            if objective(candidate)<=old-1e-4*rate*gain+1e-12:theta=candidate;break
+            if objective_change(candidate)<=-1e-4*rate*gain:theta=candidate;break
             rate/=2
         else:break
     if not converged:result['status']='not_converged';return result
@@ -163,7 +173,9 @@ def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95,sor
         anchor=db.execute('SELECT slot,rating FROM rating_anchors WHERE tid=?',(tid,)).fetchone()
         anchor=dict(anchor) if anchor else {'slot':0,'rating':0.}
         revision=db.execute('SELECT revision FROM report_revisions WHERE tid=?',(tid,)).fetchone();revision=revision[0] if revision else 0
-        profiles=[{'slot':r['slot'],'name':r['name']} for r in db.execute("SELECT slot,json_extract(profile,'$.name') name FROM participants WHERE tid=? ORDER BY slot",(tid,))]
+        profiles=[{'slot':r['slot'],'name':r['name']} for r in db.execute("SELECT slot,json_extract(profile,'$.name') name FROM participants WHERE tid=? AND slot IN (SELECT slot FROM rankings WHERE tid=participants.tid) ORDER BY slot",(tid,))]
+        by_slot={p['slot']:p for p in profiles}
+        if anchor['slot'] not in by_slot:anchor={'slot':profiles[0]['slot'],'rating':0.,'note':'Former reference withdrawn; revised standings use the first active entrant at zero.'}
         key=(str(path),tid,revision,anchor['slot'])
         cached=_cache.get(key)
         if cached is None:
@@ -175,10 +187,10 @@ def pool_report(path,tid,offset=0,limit=50,search='',export='',confidence=95,sor
     finally:db.close()
     # Close the read transaction before CPU work so WAL checkpointing can proceed.
     if cached is None:
-        cached=fit_pool(len(profiles),observations,anchor['slot']);_cache[key]=cached
+        cached=fit_pool(max(by_slot)+1,observations,anchor['slot']);_cache[key]=cached
         while len(_cache)>2:_cache.popitem(last=False)
     else:_cache.move_to_end(key)
-    anchor['name']=profiles[anchor['slot']]['name'];query=search.casefold()
+    anchor['name']=by_slot[anchor['slot']]['name'];query=search.casefold()
     matching=[p for p in profiles if query in p['name'].casefold()]
     # Cache uncertainty solves by report revision/reference/confidence. Simple
     # sorts need only the fitted strengths, not an expensive solve for every row.

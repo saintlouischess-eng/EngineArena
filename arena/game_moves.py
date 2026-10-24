@@ -19,7 +19,8 @@ def tournament_variant(path,tid):
 
 
 def read_moves(path, gid, aid=None, after=0, limit=200):
-    after=int(after);limit=int(limit)
+    last_page=after=='last'
+    after=0 if last_page else int(after);limit=int(limit)
     if after < 0 or not 1 <= limit <= 500:raise ValueError('Invalid move page')
     db=sqlite3.connect(Path(path).resolve().as_uri()+'?mode=ro',uri=True,timeout=10)
     db.row_factory=sqlite3.Row
@@ -37,9 +38,10 @@ def read_moves(path, gid, aid=None, after=0, limit=200):
             a=db.execute('SELECT * FROM attempts WHERE gid=? ORDER BY seq DESC LIMIT 1',(gid,)).fetchone()
         attempt=dict(a) if a else None
         if attempt:
-            attempt={k:attempt[k] for k in ('id','seq','mode','started','ended','result','reason','clocks')}
+            attempt={k:attempt[k] for k in ('id','seq','mode','started','ended','result','reason','detail','clocks')}
             attempt['clocks']=json.loads(attempt['clocks'] or '{}')
             attempt['official']=attempt['id']==g['official'] and not g['invalid']
+            if last_page:after=max(0,db.execute('SELECT coalesce(max(ply),0) FROM moves WHERE aid=?',(attempt['id'],)).fetchone()[0]-1)
         variant=tournament_variant(str(path),g['tid'])
         root,history,warning=opening_board(opening,variant)
         marks=CrownMarks(root)
@@ -76,10 +78,10 @@ def read_moves(path, gid, aid=None, after=0, limit=200):
                 item['knight_facings']=marks.knight_snapshot()
                 item['captured']=marks.capture_snapshot()
                 items.append(item)
-        profiles={side:{'name':db.execute("SELECT json_extract(profile,'$.name') FROM participants WHERE tid=? AND slot=?",(g['tid'],g[side])).fetchone()[0]} for side in ('white','black')}
+        profiles={side:dict(db.execute("SELECT json_extract(profile,'$.name') name,json_extract(profile,'$.id') id FROM participants WHERE tid=? AND slot=?",(g['tid'],g[side])).fetchone()) for side in ('white','black')}
         # Return display identity only, not executable paths or full profile options.
         return {'game':g['id'],'tid':g['tid'],'number':g['number'],'state':g['state'],'invalid':bool(g['invalid']),
-                'white':{'name':profiles['white']['name']},'black':{'name':profiles['black']['name']},
+                'white':profiles['white'],'black':profiles['black'],
                 'opening':opening,'opening_moves':opening_rows,'opening_crown_squares':initial_marks,'opening_knight_facings':initial_knights,'opening_captured':initial_captured,'warning':warning,'attempt':attempt,
                 'latest_ply':latest,'after':after,'items':items,'has_more':bool(items and items[-1]['ply']<latest)}
     finally:db.close()

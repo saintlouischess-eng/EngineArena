@@ -49,6 +49,8 @@ def initialize(store):
       END;
     ''')
     store.db.execute('INSERT OR IGNORE INTO rc_pools VALUES(?,?,?,?,?,?)', ('main', 'Engine Arena ratings', 1, time.time(), 0, encode(RULES)))
+    from .rating_aliases import initialize as initialize_aliases
+    initialize_aliases(store)
 
 
 def control(value):
@@ -173,6 +175,8 @@ def sync(store, g, aid, pool_id=None):
         for slot,e in zip((g['white'],g['black']),entries):
             key,label,threads,body,config = e
             db.execute('INSERT OR IGNORE INTO rc_entries VALUES(?,?,?,?,?)',(key,label,threads,encode(body),first))
+            from .rating_aliases import record
+            record(db,key,profiles[0 if slot==g['white'] else 1],recorded)
             identities = context.get('identities') or []
             if slot < len(identities):
                 family = str(context.get('id')) + ':' + str(identities[slot])

@@ -4,16 +4,19 @@ let retainedFocus=null,retainedTid='';
 function selectedFocusGame(){
  if(retainedTid!==state.tid){retainedFocus=null;retainedTid=state.tid;focusId=''}
  const games=state.live.filter(g=>g.tid===state.tid);
- const live=games.find(g=>g.game===focusId);
- if(live)retainedFocus=live;
- if(!live&&games.length&&displayPrefs.followNextGame!==false&&!(typeof browsingRecordedMoves==='function'&&browsingRecordedMoves())){focusId=games[0].game;retainedFocus=games[0]}
+ if(typeof focusDirectorSelect==='function'){
+  const chosen=focusDirectorSelect(games);if(chosen){focusId=chosen.game;retainedFocus=chosen}
+ }else{
+  const live=games.find(g=>g.game===focusId);if(live)retainedFocus=live;
+  if(!live&&games.length&&displayPrefs.followNextGame!==false&&!(typeof browsingRecordedMoves==='function'&&browsingRecordedMoves())){focusId=games[0].game;retainedFocus=games[0]}
+ }
  if(retainedFocus&&!games.some(g=>g.game===retainedFocus.game))games.push({...retainedFocus,clock_active:null,status:retainedFocus.clock_active?ArenaI18n.t('Saved game'):retainedFocus.status});
- if(!games.some(g=>g.game===focusId))focusId=games[0]?.game||'';
+ if(!games.some(g=>g.game===focusId))focusId=typeof followedProfile==='function'&&followedProfile()?'':games[0]?.game||'';
  const options=games.length?games.map(g=>ArenaI18n.h`<option value="${g.game}">Game ${g.number+1} · ${esc(g.white.name)} / ${esc(g.black.name)}</option>`).join(''):ArenaI18n.h('<option value="">No active game</option>');
  for(const id of ['focusPicker','searchGamePicker']){stableHtml('#'+id,options);$('#'+id).value=focusId;$('#'+id).disabled=!games.length}
  const chosen=games.find(g=>g.game===focusId);if(chosen)retainedFocus=chosen;return chosen;
 }
-for(const id of ['focusPicker','searchGamePicker'])$('#'+id).onchange=()=>{focusId=$('#'+id).value;renderFocus()};
+for(const id of ['focusPicker','searchGamePicker'])$('#'+id).onchange=()=>{focusId=$('#'+id).value;if(typeof clearEngineFollow==='function')clearEngineFollow();renderFocus()};
 $('#searchSide').onchange=()=>{displayPrefs.searchSide=$('#searchSide').value;saveDisplay();renderFocus()};
 $('#searchGamePicker').dataset.help=ArenaI18n.t('Choose a live game. This selection is shared with the focused board and graphs that follow it.');
 $('#searchSide').dataset.help=ArenaI18n.t('Follow the thinking engine automatically, or pin White or Black. A pinned engine retains its latest search while the opponent thinks. Scores always use White’s perspective.');

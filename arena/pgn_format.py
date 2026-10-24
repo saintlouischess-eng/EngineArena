@@ -77,6 +77,7 @@ def options(style='compact', perspective='engine', annotations=None):
 class PgnContext:
     def __init__(self, db, tid):
         self.db = db
+        self.has_ratings = bool(db.execute("SELECT 1 FROM sqlite_master WHERE name='rc_games'").fetchone())
         row = db.execute('SELECT name,settings FROM tournaments WHERE id=?', (tid,)).fetchone()
         if row is None: raise ValueError('Tournament not found')
         self.tid, self.name = tid, row[0]
@@ -111,6 +112,12 @@ def render_attempt(db, aid, style='compact', perspective='engine', annotations=N
     pgn.setup(board)
     white, black = ctx.profile(g['white']), ctx.profile(g['black'])
     identity = json.loads(a['identity'] or '{}')
+    if style=='archive' or presentation and any(k in presentation['headers'] for k in ('WhiteRatingConfiguration','BlackRatingConfiguration','WhiteProfileId','BlackProfileId')):
+        # Only the exact committed contribution for this attempt is authoritative.
+        rated=db.execute('SELECT white,black FROM rc_games WHERE gid=? AND aid=? LIMIT 1',(g['id'],aid)).fetchone() if getattr(ctx,'has_ratings',False) else None
+        for i,(side,profile) in enumerate((('White',white),('Black',black))):
+            if rated:pgn.headers[side+'RatingConfiguration']=rated[i]
+            if profile.get('id'):pgn.headers[side+'ProfileId']=profile['id']
     reason = a['reason'] or 'unterminated'
     termination = ('unterminated' if (a['result'] or '*') == '*' else
                    'time forfeit' if reason == 'timeout' else
