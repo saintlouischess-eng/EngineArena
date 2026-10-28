@@ -36,3 +36,22 @@ def test_tf_selfplay_invalidated_and_non_timeout_failures(tmp_path):
         s.execute('DROP TABLE engine_failures')
     with contextlib.closing(Store(tmp_path)) as s:
         assert s.engine_failures(t['id'],0)['total']==1
+
+
+def test_official_tf_sort_and_paging_after_replacement_preserve_attempt_history(tmp_path):
+    with contextlib.closing(Store(tmp_path)) as s:
+        t=s.create_tournament('TF modes',[profile('A'),profile('B')],{'cycles':1,'retry_limit':0})
+        tid=t['id'];g=run_claim(s,t);s.finish(g['aid'],'0-1','timeout')
+        for reason,result in [('timeout','0-1'),('checkmate','1-0')]:
+            s.set_state(tid,'paused');s.requeue(tid,[g['id']],mode='replacement')
+            s.set_state(tid,'running');a=s.claim(tid);assert a['id']==g['id'];s.finish(a['aid'],result,reason)
+        other=s.claim(tid);assert other['white']==g['black'];s.finish(other['aid'],'0-1','timeout')
+        historical=s.snapshot(tid,limit=1,sort='tf',direction='desc')['standings'][0]
+        official=s.snapshot(tid,limit=1,sort='tf_official',direction='desc')['standings'][0]
+        assert (historical['slot'],historical['tf'],historical['tf_official'])==(g['white'],2,0)
+        assert (official['slot'],official['tf'],official['tf_official'])==(other['white'],1,1)
+        second=s.snapshot(tid,offset=1,limit=1,sort='tf_official',direction='desc')['standings'][0]
+        assert second['slot']==g['white'] and second['tf_official']==0
+        assert s.engine_failures(tid,g['white'])['total']==2
+    with contextlib.closing(Store(tmp_path)) as s:
+        assert s.snapshot(tid,limit=1,sort='tf_official',direction='desc')['standings'][0]['slot']==other['white']

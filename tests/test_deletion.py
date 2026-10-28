@@ -85,7 +85,7 @@ def test_deletion_reclaims_orphan_snapshot_sidecars_and_known_scratch(tmp_path):
         assert not scratch_files(tmp_path)
         assert (folder/'unrelated.tmp').read_text()=='Preserve me'
         assert s.backup_file.exists()
-        assert s.db.execute('PRAGMA freelist_count').fetchone()[0]==0
+        assert s.db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
     finally:s.close()
 
 

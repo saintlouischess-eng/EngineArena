@@ -16887,5 +16887,161 @@
   ],
   "History recalculates the all-opponent baseline at each stage end, then applies the selected range.": [
     "Player Arena UI"
+  ],
+  "Ocean Blue": [
+    "ui/appearance-plus.js"
+  ],
+  "Emerald Club": [
+    "ui/appearance-plus.js"
+  ],
+  "Royal Violet": [
+    "ui/appearance-plus.js"
+  ],
+  "Burgundy": [
+    "ui/appearance-plus.js"
+  ],
+  "Mint Lagoon": [
+    "ui/appearance-plus.js"
+  ],
+  "Lavender": [
+    "ui/appearance-plus.js"
+  ],
+  "Peach & Copper": [
+    "ui/appearance-plus.js"
+  ],
+  "Sky Blue": [
+    "ui/appearance-plus.js"
+  ],
+  "CI display": [
+    "ui/rating-display.js"
+  ],
+  "Full bounds": [
+    "ui/rating-display.js"
+  ],
+  "Plus / minus (±)": [
+    "ui/rating-display.js"
+  ],
+  "Rating decimals": [
+    "ui/rating-display.js"
+  ],
+  "CI decimals": [
+    "ui/rating-display.js"
+  ],
+  "Display only. Asymmetric intervals show separate minus and plus values; unbounded intervals keep their full bounds. Sorting and calculations use unrounded values.": [
+    "ui/rating-display.js"
+  ],
+  "Rebel; Chess System Tal": [
+    "ui/rating-center.js"
+  ],
+  "Match any name, family or configuration ID. Separate searches with commas or semicolons.": [
+    "ui/rating-center.js"
+  ],
+  "Matching any:": [
+    "ui/rating-center.js"
+  ],
+  "Clear search": [
+    "ui/rating-center.js"
+  ],
+  "Remove search: {0}": [
+    "ui/rating-center.js"
+  ],
+  "No engines match this search": [
+    "ui/rating-center.js"
+  ],
+  "Try another name or clear the search. The other rating filters still apply.": [
+    "ui/rating-center.js"
+  ],
+  "50-move counter": [
+    "ui/focus-follow.js"
+  ],
+  "Show or hide the draw-rule counter. This changes only the display, not the game rules. If fifty-move claims are disabled, the counter shows the automatic seventy-five-move limit.": [
+    "ui/focus-follow.js"
+  ],
+  "Follow winning games": [
+    "ui/focus-follow.js"
+  ],
+  "Winning-game options…": [
+    "ui/focus-follow.js"
+  ],
+  "Next winning game": [
+    "ui/focus-follow.js"
+  ],
+  "Waiting for a qualifying winning position…": [
+    "ui/focus-follow.js"
+  ],
+  "Winning-game watch · {0} advantage: {1}": [
+    "ui/focus-follow.js"
+  ],
+  "Winning-game watch · staying with this game": [
+    "ui/focus-follow.js"
+  ],
+  "Winning-game watch": [
+    "ui/focus-follow.js"
+  ],
+  "Minimum advantage (pawns)": [
+    "ui/focus-follow.js"
+  ],
+  "Confirm advantage for (seconds)": [
+    "ui/focus-follow.js"
+  ],
+  "Stay with the selected game": [
+    "ui/focus-follow.js"
+  ],
+  "Until the game finishes": [
+    "ui/focus-follow.js"
+  ],
+  "Until its advantage fades": [
+    "ui/focus-follow.js"
+  ],
+  "Minimum viewing time (seconds)": [
+    "ui/focus-follow.js"
+  ],
+  "Advantage must stay below the threshold for (seconds)": [
+    "ui/focus-follow.js"
+  ],
+  "Save watching options": [
+    "ui/focus-follow.js"
+  ],
+  "Automatically find a live game where either side has a clear advantage. The score is an engine estimate, not a win probability or a guaranteed result.": [
+    "ui/focus-follow.js"
+  ],
+  "Find a live game with a sustained engine-evaluated advantage. Stay with it instead of chasing larger scores on other boards. Estimates do not guarantee a win.": [
+    "ui/focus-follow.js"
+  ],
+  "Immediately choose another qualifying live game. This skips the confirmation delay and final-result hold. If none is available, keep this board while waiting.": [
+    "ui/focus-follow.js"
+  ],
+  "Until the game finishes is the calmest option. In fade mode, both timing limits must pass before switching, and another qualifying game must be available. A larger score on another board never interrupts a game that still qualifies.": [
+    "ui/focus-follow.js"
+  ],
+  "Next winning game switches immediately when another candidate is available. Finish hold still displays the official result before the next automatic selection. Manual game selection or Follow engine ends winning-game watch.": [
+    "ui/focus-follow.js"
+  ],
+  "Show controls": [
+    "ui/focus-layout.js"
+  ],
+  "Hide controls": [
+    "ui/focus-layout.js"
+  ],
+  "Hide setup controls to give the board more room. Clocks, game status and your watching settings stay active. Show controls brings them back.": [
+    "ui/focus-layout.js"
+  ],
+  "Deleted database space is reused automatically. Use Reclaim disk space under Worker & recovery to shrink the files.": [
+    "ui/app.js",
+    "ui/rating-center.js",
+    "ui/seasons.js",
+    "ui/storage.js"
+  ],
+  "Pause and drain games before deleting. Recovery backups are also cleaned. Large workspaces may take longer. This cannot be undone.": [
+    "ui/app.js",
+    "ui/rating-center.js",
+    "ui/seasons.js",
+    "ui/storage.js"
+  ],
+  "Delete records": [
+    "ui/app.js",
+    "ui/rating-center.js",
+    "ui/seasons.js",
+    "ui/storage.js"
   ]
 }

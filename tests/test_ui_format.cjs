@@ -25,3 +25,18 @@ test('legacy search-thread aliases match resource precedence',()=>{
  assert.equal(f.resourceOption({'CPU Usage':100},'threads'),undefined);
  assert.equal(f.resourceOption({'Max CPUs':4,Threads:2},'threads'),'Threads');
 });
+
+test('rating interval presentation preserves asymmetric and unbounded evidence',()=>{
+ assert.equal(f.interval([2980.25,3020.25],3000.25,'bounds',2),'2,980.25 – 3,020.25');
+ assert.equal(f.interval([2980.25,3020.25],3000.25,'error',0),'±20');
+ assert.equal(f.interval([2982.125,3024.375],3000,'error',2),'−17.88 / +24.38');
+ assert.equal(f.interval([2982.125,3024.375],3000,'error',1),'−17.9 / +24.4');
+ assert.equal(f.interval([3000,3000],3000,'error',0),'±0');
+ assert.equal(f.interval(['-infinity',3012],3000,'error',0),'−∞ – 3,012');
+ assert.equal(f.interval([2900,'+infinity'],'+infinity','error',1),'2,900.0 – +∞');
+ assert.equal(f.interval(null,3000,'error',1),'—');
+ assert.equal(f.interval([null,3010],3000,'error',1),'—');
+ assert.deepEqual(f.ratingDisplay({ratingDigits:0,ciDigits:2,ciMode:'error'}),{ratingDigits:0,ciDigits:2,ciMode:'error'});
+ assert.deepEqual(f.ratingDisplay({ratingDigits:9,ciDigits:-1,ciMode:'bad'}),{ratingDigits:1,ciDigits:1,ciMode:'bounds'});
+ assert.deepEqual(f.ratingDisplay(),{ratingDigits:1,ciDigits:1,ciMode:'bounds'});
+});

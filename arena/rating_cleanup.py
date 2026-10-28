@@ -62,7 +62,7 @@ def apply(db,receipts):
 
 def pending(store):
     from .deletion import ledger,discard_temporary
-    from .storage import compact,progress
+    from .storage import finish_record_cleanup,progress
     from .store import SavingError
     try:
         with closing(ledger(store.folder)) as log:receipts=list(log.execute('SELECT seq,body FROM rating_actions ORDER BY seq'))
@@ -81,12 +81,12 @@ def pending(store):
                     with closing(sqlite3.connect(temporary)) as dest:
                         source.backup(dest);dest.execute('PRAGMA journal_mode=DELETE')
                         with dest:apply(dest,receipts);dest.execute("DELETE FROM storage_jobs WHERE name='ratings'")
-                        compact(dest)
+                        if any(not dest.execute('SELECT 1 FROM rc_receipts WHERE seq=?',(seq,)).fetchone() for seq,_ in receipts):
+                            raise OSError('Recovery backup rating cleanup is incomplete')
                 with temporary.open('r+b') as f:f.flush();os.fsync(f.fileno())
                 os.utime(temporary,ns=(stamp.st_atime_ns,stamp.st_mtime_ns));os.replace(temporary,path)
             if store.one("SELECT 1 FROM storage_jobs WHERE name='ratings'"):
-                compact(store.db);store.execute("DELETE FROM storage_jobs WHERE name='ratings'")
-                store.db.execute('PRAGMA wal_checkpoint(TRUNCATE)');store.backup_revision=-1
+                finish_record_cleanup(store,'ratings')
             progress(store,busy=False,phase='Complete')
     except (sqlite3.Error,OSError) as exc:
         store.failure=f'Rating cleanup failed: {exc}. Scheduling stopped; retry saving to finish cleanup.'

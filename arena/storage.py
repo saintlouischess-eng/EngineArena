@@ -120,6 +120,18 @@ def compact(db):
     if db.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise OSError('Compacted database integrity check failed')
 
 
+def finish_record_cleanup(store,job):
+    """Commit logical cleanup without rewriting every unrelated database page.
+
+    Deleted pages are reusable immediately. Physical shrinking and a full
+    integrity scan belong to explicit storage optimization. FULL-synchronous
+    WAL commits remain durable even when a report reader delays checkpointing.
+    """
+    store.execute('DELETE FROM storage_jobs WHERE name=?',(job,))
+    store.db.execute('PRAGMA wal_checkpoint(PASSIVE)')
+    store.backup_revision=-1
+
+
 def compact_snapshot(store,path,index,total):
     from .deletion import discard_temporary
     from .log_storage import migrate,pack_completed

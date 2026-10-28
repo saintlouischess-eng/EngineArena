@@ -1,5 +1,7 @@
 'use strict';
 const tfHelp=ArenaI18n.t('TF counts time forfeits in all competition attempts, including retries and replaced results. Diagnostics are excluded. Click to inspect; official losses are shown separately.');
+function standingsTFMode(){return displayPrefs.tfMode==='attempts'?'attempts':'official'}
+function standingsTFHelp(){return standingsTFMode()==='attempts'?tfHelp:ArenaI18n.t('TF counts current official time-forfeit losses. Replaced and excluded results do not count. Click to inspect all historical attempts.');}
 document.addEventListener('click',safely(async e=>{const button=e.target.closest('[data-tf]');if(!button)return;e.stopImmediatePropagation();await showEngineFailures(state.tid,Number(button.dataset.tf));}),true);
 async function showEngineFailures(tid,slot,reason='timeout',offset=0){
  const r=await api(`tournaments/${tid}/failures/${slot}?reason=${reason}&offset=${offset}`),c=r.counts.find(c=>c.reason===reason)||{attempts:0,official:0};

@@ -1,0 +1,52 @@
+// Isolated button-to-preview-to-output regression; no worker or OBS connection.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+const M=require('../ui/broadcast-model.js'),root=process.cwd(),out=path.join(root,'test-output/broadcast-ticker-speed');fs.mkdirSync(out,{recursive:true});
+const assetsRoot=path.join(root,process.argv.includes('--packaged')?'release/EngineArena/worker/_internal/ui':'ui');
+let config=JSON.parse(fs.readFileSync(path.join(root,'test-output/broadcast-designer/default-config.json'),'utf8'));
+config.ticker_seconds=150;config.ticker_style.custom='Testing ticker speed with a steady line of chess results, game endings and tournament progress.';
+const errors=[],measurements=[];
+(async()=>{const browser=await chromium.launch({headless:true,channel:'msedge'});try{
+ const context=await browser.newContext({viewport:{width:1920,height:1080}});
+ context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
+ await context.route('**/*',async route=>{const u=new URL(route.request().url());assert.equal(u.hostname,'ticker.test');
+  if(['/feed','/preview-feed'].includes(u.pathname))return route.fulfill({json:{config,connected:true,server_time:Date.now()/1000,scene_since:Date.now()/1000,summary:{},game:null,headlines:[]}});
+  if(u.pathname==='/config'){if(route.request().method()==='POST')config=route.request().postDataJSON();return route.fulfill({json:{config,viewer_url:'http://ticker.test/view?key=fixture'}})}
+  if(u.pathname==='/tournaments')return route.fulfill({json:[]});
+  const name=u.pathname==='/control'?'broadcast-designer.html':['/view','/preview'].includes(u.pathname)?'broadcast-view.html':u.pathname.slice(8);
+  const file=path.join(assetsRoot,name);assert.ok(file.startsWith(assetsRoot+path.sep));
+  const type={'.js':'text/javascript','.json':'application/json','.css':'text/css','.svg':'image/svg+xml','.png':'image/png'}[path.extname(file)]||'text/html';
+  return route.fulfill({body:fs.readFileSync(file),contentType:type});
+ });
+ const editor=await context.newPage();await editor.goto('http://ticker.test/control?key=fixture');await editor.waitForFunction(()=>document.querySelector('#message').textContent.startsWith('Ready'));
+ const frame=editor.frameLocator('#preview');await frame.locator('.ticker-wire').waitFor();await editor.locator('[data-tab=ticker]').click();
+ const duration=()=>frame.locator('.ticker-wire').evaluate(e=>Number.parseFloat(getComputedStyle(e).animationDuration));
+ const position=()=>frame.locator('.ticker-wire').evaluate(e=>new DOMMatrixReadOnly(getComputedStyle(e).transform).m41);
+ const velocity=()=>frame.locator('.ticker-wire').evaluate(e=>{const a=e.getAnimations()[0],x=()=>new DOMMatrixReadOnly(getComputedStyle(e).transform).m41;const before=x();a.currentTime+=1000;const distance=before-x();a.currentTime-=1000;return distance});
+ await frame.locator('.ticker-wire').evaluate(e=>{const a=e.getAnimations()[0];a.pause();a.currentTime=37500});
+ const initialPosition=await position(),initialVelocity=await velocity();
+ measurements.push({step:'initial',duration:await duration()});
+ await editor.getByRole('button',{name:'Faster',exact:true}).click();await editor.waitForTimeout(100);measurements.push({step:'show Faster',duration:await duration()});
+ assert.equal(await duration(),125,'Faster must change the private preview immediately');assert.equal(config.ticker_seconds,150,'Preview must not silently change output');
+ assert.ok(Math.abs(await position()-initialPosition)<1,'Changing speed must not jump visible text');
+ const fasterVelocity=await velocity();assert.ok(Math.abs(fasterVelocity/initialVelocity-1.2)<.01,'Visible text must actually move 20% faster');measurements.push({initial_pixels_per_second:initialVelocity,faster_pixels_per_second:fasterVelocity,position_jump:Math.abs(await position()-initialPosition)});
+ await editor.getByRole('button',{name:'Slower',exact:true}).click();await editor.waitForTimeout(100);assert.equal(await duration(),150);
+ await editor.selectOption('#preset','marathon');await editor.click('#resetScene');await editor.locator('[data-tab=ticker]').click();
+ await editor.getByRole('button',{name:'Faster',exact:true}).click();await editor.waitForTimeout(100);measurements.push({step:'marathon Show Faster',duration:await duration()});
+ assert.equal(await duration(),125,'A preset must not make the visible Faster button ineffective');
+ await editor.getByLabel('Ticker mode',{exact:true}).selectOption('headlines');assert.equal(await editor.getByRole('button',{name:'Faster',exact:true}).isDisabled(),true);
+ await editor.getByLabel('Ticker mode',{exact:true}).selectOption('scroll');assert.equal(await editor.getByRole('button',{name:'Faster',exact:true}).isDisabled(),false);
+ await editor.getByLabel('Scroll pace: seconds per pass (higher = slower)',{exact:true}).fill('300');await editor.getByLabel('Ticker text size',{exact:true}).click();await editor.waitForTimeout(100);assert.equal(await duration(),300);
+ await editor.getByLabel('Additional messages (one per line)',{exact:true}).fill('Custom chess news');await editor.getByLabel('Ticker text size',{exact:true}).click();
+ await editor.getByLabel('Ticker settings for',{exact:true}).selectOption('show');await editor.getByRole('button',{name:'Faster',exact:true}).click();await editor.waitForTimeout(100);assert.equal(await duration(),300,'Show defaults must respect explicit scene overrides');assert.ok((await editor.locator('#inspectorContent').textContent()).includes('This scene has ticker overrides'));
+ await editor.getByLabel('Ticker settings for',{exact:true}).selectOption('scene');
+ const program=await context.newPage();await program.goto('http://ticker.test/view?key=fixture');await program.locator('.ticker-wire').waitFor();assert.equal(await program.locator('.ticker-wire').evaluate(e=>parseFloat(getComputedStyle(e).animationDuration)),150);
+ await editor.click('#apply');await editor.waitForFunction(()=>document.querySelector('#message').textContent.startsWith('Applied'));await program.waitForFunction(()=>getComputedStyle(document.querySelector('.ticker-wire')).animationDuration==='300s');assert.equal(M.effective(config).ticker_seconds,300);
+ for(const tab of ['board','panel','show','ticker'])await editor.locator('[data-tab='+tab+']').click();
+ await editor.selectOption('#panelType','text');await editor.click('#addPanel');await editor.getByLabel('Message',{exact:true}).fill('The tournament continues.');await editor.getByLabel('Title',{exact:true}).click();await editor.waitForTimeout(100);assert.ok((await frame.locator('.text-panel').textContent()).includes('The tournament continues.'));
+ await editor.getByRole('button',{name:'Revert',exact:true}).click();await editor.waitForTimeout(100);assert.equal(await frame.locator('.text-panel').count(),0);
+ await editor.locator('[data-tab=ticker]').click();await editor.screenshot({path:path.join(out,'fixed-controls.png')});
+ assert.deepEqual(errors,[]);
+ }finally{fs.writeFileSync(path.join(out,process.argv.includes('--packaged')?'packaged-ui-report.json':'ui-report.json'),JSON.stringify({errors,measurements},null,2));await browser.close()}
+ console.log(JSON.stringify({result:'PASS',measurements}));
+})().catch(e=>{console.error(e);process.exitCode=1});

@@ -88,17 +88,20 @@ def test_optimize_and_delete_reclaim_real_files_preserving_results_and_pgn(tmp_p
                 assert read(db,g['aid'],10000,False)==before_logs
                 assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
                 assert db.execute('PRAGMA freelist_count').fetchone()[0]==0
-        # Deletion must also shrink files even if they were written by an older build.
+        # Deletion removes records immediately and leaves reusable free pages.
+        # Only explicit storage cleanup rewrites the large shared database.
         legacy(s,g['aid'],7000)
         s.backup();s.db.execute('PRAGMA wal_checkpoint(TRUNCATE)');before=inventory(s)['total_bytes']
         s.delete_tournament(tid,'Preserved')
-        assert inventory(s)['total_bytes']<before*.3
+        assert inventory(s)['reclaimable_bytes']>0
         assert s.snapshot(keep)['official_games']==1
         assert not s.db.execute('SELECT 1 FROM log_blocks WHERE aid=?',(g['aid'],)).fetchone()
         for path in (tmp_path/'backups').glob('recovery-*.sqlite3'):
             with closing(sqlite3.connect(path)) as db:
                 assert not db.execute('SELECT 1 FROM tournaments WHERE id=?',(tid,)).fetchone()
-                assert db.execute('PRAGMA freelist_count').fetchone()[0]==0
+                assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
+        result=s.optimize_storage()
+        assert result['total_bytes']<before*.3 and result['reclaimable_bytes']==0
     finally:s.close()
 
 

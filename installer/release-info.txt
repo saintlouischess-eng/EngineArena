@@ -1,15 +1,75 @@
-Engine Arena 1.10.3 - engine clock receipt correction
+Engine Arena 1.12.6
 
-Includes the full 1.10 workflow update, fair round-robin replacement standings,
-and the large-list Rating Center stability fix.
+1.12.6 polishes the broadcast Moves & thinking panel for television and phone
+viewing. Engine-reported NPS appears beside depth, with compact K/M units and
+the exact speed in its tooltip; unavailable speed shows a dash. Long engine
+names shorten without pushing the search metrics out of view.
 
-Engine replies are now timestamped by independent pipe readers. A delayed
-application event loop no longer charges its processing delay to an engine that
-has already replied. Actual late replies, silent-engine watchdogs, clock tolerance,
-and pondering rules still apply. Stale telemetry is bounded without dropping
-protocol replies. Delayed processing is recorded in diagnostic logs.
+The embedded history graph and opening-book information line have been removed
+from this panel, leaving more room for larger move and thinking text. Dedicated
+graph panels remain available in Broadcast Designer. Saved layouts, tournament
+results, ratings, opening assignments and broadcast settings are preserved.
 
-No historical game result or rating is changed by this update. Pause and drain,
-close Engine Arena, install over the existing version, and resume when convenient.
-See docs/V1_10_3_ENGINE_CLOCK_RECEIPTS.md for details and limitations.
-Designed by Mark Young. Coded with OpenAI Codex.
+1.12.5 improves broadcast watchability: the finished board stays visible while
+waiting for the next fresh game. The game panel shows move/side context, short
+played/PV lines, matchup standings and both engines' evaluation history.
+Evaluation numbers are horizontal; shared thread labels and shorter development
+hashes improve tables without changing stored identities. The completion estimate
+uses a steadier rolling window when available, with a five-minute display hold.
+
+Close-game selection now uses exact-profile Elo gaps when ratings are available,
+with standings as a fallback. It still follows each selected game from opening to
+result. Known opening metadata and explicit engine-analysis attribution are
+preserved in the broadcast feed.
+
+1.12.4 adds both engine ratings to result ticker headlines, including engines
+outside the top 20. Rating labels are bold and readable; missing estimates show
+Elo pending. Upset text explicitly describes the opponent's higher rating,
+not a rating gain. Broadcast standings and ratings are uniformly bold, and the
+2D thinking arrow is slimmer while preserving its selected color and delay.
+
+Open OBS from Broadcast Designer > OBS program output & switching to start it
+at verified Normal Windows process priority. An already-open OBS is reused.
+The launcher preserves profiles/scenes and never starts streaming or recording.
+It remains independent of Codex. A custom OBS path can be saved if necessary.
+
+1.12.3 redesigns the broadcast header with a larger adjustable logo, organized
+progress statistics, a live progress bar and estimated time remaining. Paused,
+draining, disconnected and completed events have explicit status messages.
+The final score now appears in a ribbon below the board, preserving the entire
+final position and keeping the board size stable during the result hold.
+
+1.12.2 adds separate broadcast column-heading and detail-text sizes, larger
+readable defaults, and visible text-fit feedback. Main text auto-fitting can
+be disabled; the private designer warns about overflow. Saved layouts preserve
+these choices. A 2D board grid fix prevents clipped bottom-rank pieces.
+The Live/game-status indicator now shares the last-move footer, freeing more
+vertical space for the featured chessboard.
+Evaluation-bar width and score text size are adjustable per show or scene;
+the board automatically fits the remaining space in 2D and 3D.
+Engine Elo badges beside the featured players are larger and bold.
+Completion percentage and engine count are larger and higher contrast, with
+independent sizing through the header panel's detail-text setting.
+
+1.12.1 fixes ticker speed buttons not refreshing the designer preview, clarifies
+scene/default ticker settings, and changes speed without jumping the text.
+
+Workflow polish: dedicated Ticker tab, immediate control previews, automatic
+draft saving, expanded preview, section navigation, output/pending status,
+working panel layers/colors, duplicate panels, consistent keyboard nudging,
+result-list paging, and saved-layout/image round trips.
+
+Broadcast Designer: private preview, saved scenes, movable/resizable panels,
+12 scene presets, configurable standings/ratings, event playlists, both-engine
+graphs with individual colors/styles, and the complete 2D/3D appearance library.
+
+Ticker presets and speed controls, separate colors for scores and game endings,
+custom messages, separators and spacing. Visible text finishes its pass before
+updating. Normal scene/event changes preserve complete-game coverage.
+
+Pause and drain running games, then close Engine Arena before installing.
+End a live broadcast before updating its helper. The Broadcast workspace offers
+a confirmed helper restart if an earlier version is running. OBS keeps its URL.
+Remove old OBS Custom CSS after transferring its colors to the designer.
+
+See docs/BROADCAST_DESIGNER.md for workflows and data-source limits.

@@ -51,7 +51,7 @@ public sealed class ArenaWindow : Window
     public ArenaWindow()
     {
         L.LoadFromArguments();
-        Title = L.T("Engine Arena — 1.10.3"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
+        Title = L.T("Engine Arena — 1.12.6"); Width = 1600; Height = 1000; MinWidth = 1050; MinHeight = 700;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(16, 19, 24));
         Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/assets/engine-arena.ico", UriKind.Absolute));
@@ -113,7 +113,7 @@ public sealed class ArenaWindow : Window
         var args = Environment.GetCommandLineArgs();
         var dataIndex = Array.IndexOf(args, "--data");
         var data = dataIndex >= 0 && dataIndex + 1 < args.Length ? Path.GetFullPath(args[dataIndex + 1]) : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EngineArena", "Data");
-        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.10.3";
+        if (dataIndex >= 0) Title = L.T("Engine Arena — ") + new DirectoryInfo(data).Name + " · 1.12.6";
         workspaceFolder = data; L.Load(data);
         // Claim the workspace before touching its readiness file. A second desktop
         // must not erase the live worker's connection record or launch a rival worker.

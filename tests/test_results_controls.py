@@ -128,6 +128,7 @@ def test_http_sort_export_confidence_and_profile_delete(tmp_path):
             preview=await client.post('/api/profiles/delete',json={'ids':[p['id']],'preview':True});assert (await preview.json())['names']==['Disposable clone']
             deleted=await client.post('/api/profiles/delete',json={'ids':[p['id']],'confirmed':True});assert (await deleted.json())['count']==1
             assert (await client.get('/assets/results.js')).status==200
+            assert (await client.get('/assets/rating-display.js')).status==200
         assert 'Normal 90% CI' in render(tmp_path/'arena.sqlite3',t['id'],90)
     asyncio.run(run())
 

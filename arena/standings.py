@@ -6,7 +6,7 @@ import sqlite3
 from .stats import summarize, confidence_level
 from .rankings import order_sql
 
-SORTS={'rank','name','games','wins','draws','losses','tf','points','score_pct','draw_pct','elo','ci','los','pairs','seed'}
+SORTS={'rank','name','games','wins','draws','losses','tf','tf_official','points','score_pct','draw_pct','elo','ci','los','pairs','seed'}
 
 def page(store,tid,settings,offset=0,limit=100,sort='rank',direction='asc',confidence=95,method='normal',competition=None):
     confidence=confidence_level(confidence)
@@ -42,7 +42,7 @@ def page(store,tid,settings,offset=0,limit=100,sort='rank',direction='asc',confi
             if order:
                 ladder=json.dumps(order);rank_order='coalesce(l.key,2147483647),r.seed'
     expressions={'rank':'r.rank','name':"json_extract(p.profile,'$.name') COLLATE NOCASE",'seed':'r.seed',
-        'games':'a.w+a.d+a.l','wins':'a.w','draws':'a.d','losses':'a.l','tf':'coalesce(tf.attempts,0)','points':'r.points',
+        'games':'a.w+a.d+a.l','wins':'a.w','draws':'a.d','losses':'a.l','tf':'coalesce(tf.attempts,0)','tf_official':'coalesce(tf.official,0)','points':'r.points',
         'score_pct':'100.0*(a.w+a.d*.5)/nullif(a.w+a.d+a.l,0)',
         'draw_pct':'100.0*a.d/nullif(a.w+a.d+a.l,0)',
         'pairs':'a.p0+a.p1+a.p2+a.p3+a.p4' if paired else 'NULL'}

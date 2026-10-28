@@ -1,10 +1,10 @@
 'use strict';
 const focusDirector=new ArenaFocusDirector.Director();
 let focusStatus={holding:false,waiting:false},focusFinalPending='',focusArrowState={key:'',since:0};
-const focusWatching=document.createElement('div');focusWatching.className='focus-watching';
-focusWatching.innerHTML=ArenaI18n.h`<button id="followEngine">Follow engine…</button><button id="stopFollowEngine" hidden>Stop following</button><label>Finish hold <input id="focusFinishHold" type="number" min="0" max="60" step="1" aria-label="Final position hold in seconds"> s</label><button id="focusNextGame" hidden>Next game</button><label><input id="focusPvArrow" type="checkbox"> Best-move arrow</label><label>Delay <input id="focusArrowDelay" type="number" min="0" max="10" step="0.1" aria-label="Best-move arrow delay in seconds"> s</label><span id="followEngineStatus" role="status"></span>`;
+const focusWatching=document.createElement('div');focusWatching.className='focus-watching';focusWatching.id='focusWatchControls';
+focusWatching.innerHTML=ArenaI18n.h`<button id="followEngine">Follow engine…</button><button id="stopFollowEngine" hidden>Stop following</button><label>Finish hold <input id="focusFinishHold" type="number" min="0" max="60" step="1" aria-label="Final position hold in seconds"> s</label><button id="focusNextGame" hidden>Next game</button><label><input id="focusPvArrow" type="checkbox"> Best-move arrow</label><label>Delay <input id="focusArrowDelay" type="number" min="0" max="10" step="0.1" aria-label="Best-move arrow delay in seconds"> s</label><label><input id="focusWinningWatch" type="checkbox"> Follow winning games</label><button id="focusWinningOptions">Winning-game options…</button><button id="focusNextWinning" hidden>Next winning game</button><label><input id="focusDrawRuleToggle" type="checkbox"> 50-move counter</label><span id="followEngineStatus" role="status"></span>`;
 panels.focus.querySelector('.panel-tools').after(focusWatching);
-function clearEngineFollow(){displayPrefs.followEngine=null;focusDirector.reset(state.tid);saveDisplay();paintFollowControls()}
+function clearEngineFollow(){displayPrefs.followEngine=null;displayPrefs.winningWatch={...ArenaFocusDirector.winningSettings(displayPrefs.winningWatch),enabled:false};focusDirector.reset(state.tid);saveDisplay();paintFollowControls()}
 function followedProfile(){return displayPrefs.followEngine?.tid===state.tid?displayPrefs.followEngine.profile:''}
 function focusDirectorSelect(games){
  const recent=state.recentFinished||[],live=games.find(g=>g.game===focusId),saved=recent.find(g=>g.game===focusId&&(!retainedFocus?.attempt||g.attempt===retainedFocus.attempt));
@@ -20,15 +20,39 @@ function focusDirectorSelect(games){
   }
   return {...retainedFocus,clock_active:null,status:ArenaI18n.t('Waiting for committed result…')};
  }
- focusStatus=focusDirector.select({tid:state.tid,live:games,recent,current:focusId,retained:retainedFocus,profile:followedProfile(),auto:displayPrefs.followNextGame!==false,review:typeof browsingRecordedMoves==='function'&&browsingRecordedMoves(),hold:displayPrefs.finishHold??3,now:performance.now(),connected:state.connected!==false});
+ focusStatus=focusDirector.select({tid:state.tid,live:games,recent,current:focusId,retained:retainedFocus,profile:followedProfile(),auto:displayPrefs.followNextGame!==false,review:typeof browsingRecordedMoves==='function'&&browsingRecordedMoves(),hold:displayPrefs.finishHold??3,now:performance.now(),connected:state.connected!==false,winning:displayPrefs.winningWatch});
  paintFollowControls();return focusStatus.game;
 }
 function paintFollowControls(){
- const followed=followedProfile(),label=followed?displayPrefs.followEngine.name:'';
+ const followed=followedProfile(),label=followed?displayPrefs.followEngine.name:'',winning=ArenaFocusDirector.winningSettings(displayPrefs.winningWatch);
+ $('#focusWinningWatch').checked=winning.enabled;$('#focusNextWinning').hidden=!winning.enabled;
+ $('#focusDrawRuleToggle').checked=displayPrefs.showDrawRule!==false;
  $('#stopFollowEngine').hidden=!followed;$('#focusNextGame').hidden=!focusStatus.holding;
- $('#followEngineStatus').textContent=focusStatus.holding?ArenaI18n.t('Final result · viewing hold'):followed?(focusStatus.waiting?ArenaI18n.t('Waiting for '):ArenaI18n.t('Following '))+label:'';
+ const estimate=focusStatus.estimate,score=estimate?(estimate.mate!==null?'M'+Math.abs(estimate.mate):(Math.abs(estimate.cp)/100).toFixed(2)):'';
+ $('#followEngineStatus').textContent=focusStatus.holding?ArenaI18n.t('Final result · viewing hold'):winning.enabled?(focusStatus.waiting?ArenaI18n.t('Waiting for a qualifying winning position…'):estimate?ArenaI18n.t('Winning-game watch · {0} advantage: {1}',ArenaI18n.t(estimate.side==='white'?'White':'Black'),score):ArenaI18n.t('Winning-game watch · staying with this game')):followed?(focusStatus.waiting?ArenaI18n.t('Waiting for '):ArenaI18n.t('Following '))+label:'';
  if(document.activeElement!==$('#focusFinishHold'))$('#focusFinishHold').value=displayPrefs.finishHold??3;$('#focusPvArrow').checked=!!displayPrefs.pvArrow;if(document.activeElement!==$('#focusArrowDelay'))$('#focusArrowDelay').value=displayPrefs.pvArrowDelay??1;
 }
+function setWinningWatch(value){displayPrefs.winningWatch=ArenaFocusDirector.winningSettings(value);if(displayPrefs.winningWatch.enabled)displayPrefs.followEngine=null;focusDirector.reset(state.tid);if(typeof sheetReset==='function')sheetReset('');renderFocus();return persistDisplay()}
+$('#focusWinningWatch').onchange=safely(()=>setWinningWatch({...ArenaFocusDirector.winningSettings(displayPrefs.winningWatch),enabled:$('#focusWinningWatch').checked}));
+$('#focusWinningWatch').dataset.help=ArenaI18n.t('Find a live game with a sustained engine-evaluated advantage. Stay with it instead of chasing larger scores on other boards. Estimates do not guarantee a win.');
+$('#focusNextWinning').onclick=()=>{focusDirector.nextWinning(retainedFocus);if(typeof sheetReset==='function')sheetReset('');renderFocus()};
+$('#focusNextWinning').dataset.help=ArenaI18n.t('Immediately choose another qualifying live game. This skips the confirmation delay and final-result hold. If none is available, keep this board while waiting.');
+$('#focusWinningOptions').onclick=()=>{
+ const p=ArenaFocusDirector.winningSettings(displayPrefs.winningWatch);
+ modal(ArenaI18n.t('Winning-game watch'),ArenaI18n.h`<p>Automatically find a live game where either side has a clear advantage. The score is an engine estimate, not a win probability or a guaranteed result.</p><div class="fields"><label><input id="winningEnabled" type="checkbox" ${p.enabled?'checked':''}> Follow winning games</label>
+ ${field('winningPawns',ArenaI18n.t('Minimum advantage (pawns)'),p.pawns,'number','min="0.5" max="20" step="0.5" required')}
+ ${field('winningConfirm',ArenaI18n.t('Confirm advantage for (seconds)'),p.confirm,'number','min="0" max="30" step="1" required')}
+ <div class="field"><label for="winningStay">Stay with the selected game</label><select id="winningStay"><option value="finish">Until the game finishes</option><option value="fade">Until its advantage fades</option></select></div>
+ ${field('winningMinimum',ArenaI18n.t('Minimum viewing time (seconds)'),p.minimum,'number','min="5" max="300" step="1" required')}
+ ${field('winningFade',ArenaI18n.t('Advantage must stay below the threshold for (seconds)'),p.fade,'number','min="5" max="120" step="1" required')}</div>
+ <p class="caption">Until the game finishes is the calmest option. In fade mode, both timing limits must pass before switching, and another qualifying game must be available. A larger score on another board never interrupts a game that still qualifies.</p>
+ <p class="caption">Next winning game switches immediately when another candidate is available. Finish hold still displays the official result before the next automatic selection. Manual game selection or Follow engine ends winning-game watch.</p>`,ArenaI18n.h`<button id="saveWinningWatch" class="primary">Save watching options</button>`);
+ $('#winningStay').value=p.stay;
+ const sync=()=>{const fixed=$('#winningStay').value==='finish';$('#winningMinimum').disabled=fixed;$('#winningFade').disabled=fixed};$('#winningStay').onchange=sync;sync();
+ $('#saveWinningWatch').onclick=safely(async()=>{if(!['winningPawns','winningConfirm','winningMinimum','winningFade'].every(id=>$('#'+id).reportValidity()))return;await setWinningWatch({enabled:$('#winningEnabled').checked,pawns:Number($('#winningPawns').value),confirm:Number($('#winningConfirm').value),stay:$('#winningStay').value,minimum:Number($('#winningMinimum').value),fade:Number($('#winningFade').value)});$('#modal').close()});
+};
+$('#focusDrawRuleToggle').dataset.help=ArenaI18n.t('Show or hide the draw-rule counter. This changes only the display, not the game rules. If fifty-move claims are disabled, the counter shows the automatic seventy-five-move limit.');
+$('#focusDrawRuleToggle').onchange=safely(async()=>{displayPrefs.showDrawRule=$('#focusDrawRuleToggle').checked;renderFocus();await persistDisplay()});
 $('#stopFollowEngine').onclick=()=>{clearEngineFollow();renderFocus()};
 $('#focusNextGame').onclick=()=>{focusDirector.skip();if(typeof sheetReset==='function')sheetReset('');renderFocus()};
 for(const [id,key,min,max] of [['focusFinishHold','finishHold',0,60],['focusArrowDelay','pvArrowDelay',0,10]])$('#'+id).onchange=()=>{const el=$('#'+id);if(!el.reportValidity())return;displayPrefs[key]=Math.max(min,Math.min(max,Number(el.value)));saveDisplay();renderFocus()};
@@ -40,7 +64,7 @@ $('#followEngine').onclick=safely(async()=>{
  async function load(){const version=++gen,r=await api(`tournaments/${tid}/participants?q=${encodeURIComponent($('#followSearch').value)}&offset=${offset}`);if(version!==gen||!$('#followChoices'))return;
   $('#followChoices').innerHTML=r.items.map(p=>`<button class="follow-choice" data-follow-slot="${p.slot}" ${p.id?'':'disabled'}>${esc(p.name)} <small>${esc(p.id||ArenaI18n.t('No saved profile identity'))}</small></button>`).join('');
   $('#followPage').textContent=`${r.total?offset+1:0}–${Math.min(offset+50,r.total)} / ${r.total}`;$('#followPrev').disabled=!offset;$('#followNext').disabled=offset+50>=r.total;
-  $$('[data-follow-slot]').forEach(b=>b.onclick=()=>{const p=r.items.find(x=>x.slot===Number(b.dataset.followSlot));displayPrefs.followEngine={tid,profile:p.id,name:p.name};focusId='';retainedFocus=null;focusDirector.reset(tid);saveDisplay();$('#modal').close();renderFocus()});
+  $$('[data-follow-slot]').forEach(b=>b.onclick=()=>{const p=r.items.find(x=>x.slot===Number(b.dataset.followSlot));displayPrefs.winningWatch={...ArenaFocusDirector.winningSettings(displayPrefs.winningWatch),enabled:false};displayPrefs.followEngine={tid,profile:p.id,name:p.name};focusId='';retainedFocus=null;focusDirector.reset(tid);saveDisplay();$('#modal').close();renderFocus()});
  }
  $('#followSearch').oninput=safely(()=>{offset=0;return load()});$('#followPrev').onclick=safely(()=>{offset=Math.max(0,offset-50);return load()});$('#followNext').onclick=safely(()=>{offset+=50;return load()});await load();
 });

@@ -5,6 +5,14 @@ body[data-arena-theme=parchment],.theme-parchment{--bg:#eee6d5;--panel:#fff8eb;-
 body[data-arena-theme=contrast],.theme-contrast{--bg:#000;--panel:#080808;--raised:#202020;--border:#b9c2ca;--text:#fff;--muted:#ddd;--danger:#ffaaa4}
 .theme-dark{--bg:#10151d;--panel:#171f2a;--text:#e8eef5;--muted:#92a2b6;--accent:#7de1c3;--raised:#1d2836}
 .theme-light{--bg:#eef2f6;--panel:#fff;--text:#182736;--muted:#5a6d80;--accent:#187961;--raised:#f5f7fa}
+body[data-arena-theme=ocean],.theme-ocean{--bg:#103b65;--panel:#164b79;--raised:#205d90;--border:#6495bc;--text:#f4faff;--muted:#c1dcef;--danger:#ffb9b2;--dark:#082d50}
+body[data-arena-theme=emerald],.theme-emerald{--bg:#104839;--panel:#185b47;--raised:#226c55;--border:#6baf8c;--text:#f3fff7;--muted:#c2e5d0;--danger:#ffc1b8;--dark:#0b342a}
+body[data-arena-theme=royal],.theme-royal{--bg:#3d245e;--panel:#503273;--raised:#62418a;--border:#a48ac1;--text:#fff7ff;--muted:#e1cdec;--danger:#ffb8bc;--dark:#2e194c}
+body[data-arena-theme=burgundy],.theme-burgundy{--bg:#581f38;--panel:#6b2c46;--raised:#803a55;--border:#b98196;--text:#fff6f2;--muted:#efd0d8;--danger:#ffc2a8;--dark:#401729}
+body[data-arena-theme=lagoon],.theme-lagoon{--bg:#c5e9db;--panel:#e6f6ed;--raised:#acd9c5;--border:#518976;--text:#143c32;--muted:#325b4c;--danger:#a52b30;--dark:#b6dfcf}
+body[data-arena-theme=lavender],.theme-lavender{--bg:#dfd1f0;--panel:#f3eafb;--raised:#cebae6;--border:#87739e;--text:#3b254e;--muted:#594269;--danger:#a32e44;--dark:#d5c3e9}
+body[data-arena-theme=peach],.theme-peach{--bg:#f1ceb6;--panel:#fff0df;--raised:#e7b999;--border:#ad7957;--text:#4b2b1b;--muted:#67452f;--danger:#a62d21;--dark:#eac2a4}
+body[data-arena-theme=sky],.theme-sky{--bg:#c7e3f5;--panel:#eaf6ff;--raised:#aacfec;--border:#628fab;--text:#16384e;--muted:#31546d;--danger:#ac303e;--dark:#b4d7ee}
 body[data-accent=teal]{--accent:#7de1c3}body.light[data-accent=teal]{--accent:#176c55}
 body[data-accent=blue]{--accent:#89c9ff}body.light[data-accent=blue]{--accent:#145dac}
 body[data-accent=amber]{--accent:#f7cb71}body.light[data-accent=amber]{--accent:#805307}
@@ -18,3 +26,5 @@ body[data-arena-theme] .primary{background:var(--accent);color:var(--bg)}body.li
 
 body[data-arena-theme]{--surface-soft:color-mix(in srgb,var(--bg) 65%,var(--panel));--surface-header:color-mix(in srgb,var(--panel) 70%,var(--raised));--line:var(--border);--results-accent:var(--accent)}
 #extendSearch{display:block;width:100%;margin-top:6px}#rosterHistory{margin:12px 0;display:block}.theme-preview{--surface-soft:var(--panel);--surface-header:var(--raised)}
+.rating-display-controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.rating-display-controls label{display:grid;gap:5px;color:var(--muted);font-size:.85em}.rating-display-controls select{max-width:100%}.rc-display-controls{padding:12px 20px}.rc-table td{font-variant-numeric:tabular-nums}.theme-preview button.primary{background:var(--accent);color:var(--bg)}
+#themePreview .primary{background:var(--accent);color:var(--preview-button-text,var(--bg))}

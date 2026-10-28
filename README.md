@@ -1,14 +1,14 @@
 # Engine Arena
 
-**Engine Arena 1.10.3** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, and playing against engines.
+**Engine Arena 1.12.6** is a Windows desktop application for chess-engine testing, automated tournaments and seasons, live analysis, playing against engines, and configurable OBS broadcasts.
 
 **Designed by Mark Young. Coding and implementation by OpenAI Codex**, under Mark Young's direction.
 
-[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.10.3) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_10_3.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
+[Download installer or ZIP](https://github.com/saintlouischess-eng/EngineArena/releases/tag/v1.12.6) · [User guide](docs/USER_GUIDE.md) · [Release notes](docs/RELEASE_1_12_6.md) · [Report an issue](https://github.com/saintlouischess-eng/EngineArena/issues)
 
 ## Install or update
 
-**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.10.3-win-x64.exe**, or the smaller **EngineArena-1.10.3-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
+**Windows 11 x64 (Intel/AMD).** Choose the complete **EngineArenaSetup-1.12.6-win-x64.exe**, or the smaller **EngineArena-1.12.6-win-x64.zip** extract-and-run download. Both have the same features and graphics. The ZIP requires an existing Microsoft WebView2 Runtime; the installer includes its offline setup. Python and .NET are included in both.
 
 Pause and drain games, then close Engine Arena. Run setup in your existing installation folder, or extract the entire ZIP into a fresh folder and launch `EngineArena.exe`. You can update directly from an earlier release; intermediate updates are not needed. Saved profiles, tournaments, events and ratings are stored separately and retained. The ZIP creates no Start menu shortcuts or uninstaller. Engine Arena itself is unsigned.
 
@@ -16,13 +16,19 @@ Both packages use `%LOCALAPPDATA%\EngineArena\Data` by default. Only one copy ca
 
 ## New in this release
 
-Follow an engine, adjustable final-result hold, readable panel text sizes,
-optional tiebreak values, PV arrows, seven interface themes, deletable presets,
-persistent activity history, and clearer rating identities. Standalone round
-robins support add/withdraw/replace after pause and drain, with newcomer catch-up
-and optional ratings-only retention of withdrawn engines' games. Large-field
-rating convergence and delayed engine-reply timing are corrected.
-See [release notes](docs/RELEASE_1_10_3.md) for scope, workflow and limitations.
+Broadcast Designer provides independent OBS output, complete-game selection,
+2D/3D boards, editable layouts and scenes, twelve presets, 23 panel types,
+configurable standings/ratings pagination, ticker colors and speed, player Elo
+badges, thinking arrows, graphs, readable TV-sized information and verified
+Normal-priority OBS startup. It includes larger game details and compact NPS.
+Use the private preview before applying a scene to your show.
+
+Also included since 1.10.3: colorful interface themes, rating/CI presentation
+choices, multi-name rating searches, winning-game following, collapsible focus
+controls, official/all-attempt TF counts and faster record deletion.
+
+See [release notes](docs/RELEASE_1_12_6.md) and the
+[Broadcast Designer guide](docs/BROADCAST_DESIGNER.md).
 
 ## Testing and tournament features
 
@@ -32,7 +38,7 @@ See [release notes](docs/RELEASE_1_10_3.md) for scope, workflow and limitations.
 - **Time controls:** sudden death, Fischer increment, simple/Bronstein delay, staged and repeating controls, fixed move time, depth, and pure `go nodes N` without a chess-clock limit. Readiness and hang watchdogs are separate.
 - **Openings:** shared PGN/EPD/FEN/Polyglot starting positions, paired or unpaired games, seeded selection, capacity previews, and optional per-profile PGN/Polyglot move books. Two copies of the same engine can play moves from different books.
 - **Live results:** sortable standings, W-D-L, score/draw percentages, head-to-head, completed opening pairs, Elo estimates, configurable confidence intervals, LOS and anchored pool ratings. Visible time-forfeit counters lead to the original failure attempts.
-- **Recovery and review:** transactional move/result saving, rotating verified backups, preserved interrupted attempts, automatic retries, diagnostic replays and explicit official replacements. Later-round dependencies are handled explicitly. Deletion and storage maintenance reclaim space in the database and affected backups.
+- **Recovery and review:** transactional move/result saving, rotating verified backups, preserved interrupted attempts, automatic retries, diagnostic replays and explicit official replacements. Later-round dependencies are handled explicitly. Deletion preserves recovery safeguards; explicit storage maintenance can reclaim disk space.
 - **Experiments:** EPD suites, fixed-node/depth/time benchmarks and thread-scaling comparisons with saved conditions and readable results.
 
 ## Viewing and exports
@@ -49,11 +55,15 @@ Useful guides: [Tournament manager](docs/SIMULTANEOUS_TOURNAMENTS.md), [knockout
 
 ## Release checks
 
-959 backend tests and 105 JavaScript tests passed, plus 61 timing-focused tests
-against the packaged worker's code. Packaged roster replacement, restart,
-standings, PGN and retained-rating checks passed. Installer/ZIP integrity and
-corresponding source are verified. The 400-entry marathon is still running;
-this is not a completed endurance claim. See [validation and limits](docs/RELEASE_1_10_3.md).
+The final 1.12.6 build passed 33 focused Python tests, 26 JavaScript tests,
+eight isolated layout workflows and eight packaged-helper checks. Shipping
+assets, package manifests and archive integrity were verified. The public ZIP
+uses the tested installer runtime without recompiling it.
+
+The 400-entry marathon continues beyond 47,000 counted games. Current results
+and ratings reconcile, backups work, and the Windows-shortcut launch survived
+the owner's Codex shutdown/reopen test. This is ongoing testing, not a completed
+month-long endurance claim for 1.12.6. See the release notes for scope and limits.
 
 ## Build and source
 

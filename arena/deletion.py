@@ -133,7 +133,7 @@ def rebuild_pgn(store):
 
 def apply_pending(store):
     from .store import SavingError
-    from .storage import compact,progress,scratch_files
+    from .storage import finish_record_cleanup,progress,scratch_files
     from .rating_cleanup import pending as rating_pending
     rating_pending(store)
     try:
@@ -165,20 +165,18 @@ def apply_pending(store):
                         dest.execute('PRAGMA journal_mode=DELETE')
                         with dest:purge(dest,ids,event_ids,keep_ratings)
                         with dest:dest.execute("DELETE FROM storage_jobs WHERE name='delete'")
-                        progress(store,phase=f'Compacting backup {index} of {len(recovery_files)}')
-                        compact(dest)
+                        # The source is an already-verified recovery image;
+                        # check the deletion, not every unrelated page/index.
+                        if contains_deleted(dest,ids,event_ids):
+                            raise OSError('Recovery backup still contains deleted records')
                 with temporary.open('r+b') as f:f.flush();os.fsync(f.fileno())
                 os.utime(temporary,ns=(stamp.st_atime_ns,stamp.st_mtime_ns));os.replace(temporary,path)
             discard_temporary(store.folder/'backups'/'backup.tmp')
             rebuild_pgn(store)
             if store.one("SELECT 1 FROM storage_jobs WHERE name='delete'"):
-                progress(store,phase='Returning deleted database space to Windows')
-                compact(store.db)
-                store.execute("DELETE FROM storage_jobs WHERE name='delete'")
-                store.db.execute('PRAGMA wal_checkpoint(TRUNCATE)')
-                store.backup_revision=-1
+                finish_record_cleanup(store,'delete')
             # Clear abandoned cleanup images and sidecars of retired snapshots
-            # only after verified replacements and main compaction succeed.
+            # only after scrubbed replacements and main cleanup succeed.
             for path in scratch_files(store.folder):path.unlink(missing_ok=True)
             files=list((store.folder/'backups').glob('recovery-*.sqlite3'))
             store._backup_progress(backup_count=len(files),total_bytes=sum(p.stat().st_size for p in files))

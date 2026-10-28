@@ -12,6 +12,25 @@ const ArenaFocusLayout=(()=>{
 })();
 if(typeof module!=='undefined')module.exports=ArenaFocusLayout;
 if(typeof document!=='undefined'){
+ const controlsToggle=document.createElement('button');controlsToggle.id='focusControlsToggle';controlsToggle.type='button';controlsToggle.className='subtle';
+ controlsToggle.setAttribute('aria-controls','focusSetupTools focusWatchControls');
+ controlsToggle.dataset.help=ArenaI18n.t('Hide setup controls to give the board more room. Clocks, game status and your watching settings stay active. Show controls brings them back.');
+ panels.focus.querySelector('.panel-tools').id='focusSetupTools';
+ panels.focus.querySelector('.panel-heading h2').after(controlsToggle);
+ function syncFocusControls(){
+  const hidden=displayPrefs.panels.focus?.controlsHidden===true;
+  panels.focus.classList.toggle('focus-controls-hidden',hidden);
+  controlsToggle.textContent=ArenaI18n.t(hidden?'Show controls':'Hide controls');
+  controlsToggle.setAttribute('aria-expanded',String(!hidden));
+ }
+ controlsToggle.onclick=safely(async()=>{
+  displayPrefs.panels.focus={...panelSettings('focus'),controlsHidden:!displayPrefs.panels.focus?.controlsHidden};
+  // Only change presentation: keep the current game, renderer and follow state.
+  syncFocusControls();await persistDisplay();
+ });
+ const displayBeforeFocusControls=applyDisplay;
+ applyDisplay=function(){syncFocusControls();displayBeforeFocusControls()};
+ syncFocusControls();
  function focusLayoutOptions(){return ArenaFocusLayout.normalize(displayPrefs.panels.focus?.clocks)}
  function styleFocusLayout(root,value=focusLayoutOptions()){
   const p=ArenaFocusLayout.normalize(value),stage=root.querySelector('.focus-stage');if(!stage)return;

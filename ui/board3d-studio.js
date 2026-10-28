@@ -160,6 +160,7 @@ export function create(canvas,onLost,settings,knightRotation,knightMode,onReady,
   }
   marks.forEach((m,i)=>{const sq=last.slice(i*2,i*2+2);m.visible=/^[a-h][1-8]$/.test(sq);if(m.visible){m.position.x=sq.charCodeAt(0)-97-3.5;m.position.z=8-Number(sq[1])-3.5}});
   const hint=context.intention,hasHint=hint&&hint.fen===fen&&/^[a-h][1-8]$/.test(hint.from)&&/^[a-h][1-8]$/.test(hint.to)&&!context.reviewing;
+  intentionMat.color.set(/^#[0-9a-f]{6}$/i.test(context.intentionColor||'')?context.intentionColor:0x35b9f3);
   intentionShaft.visible=intentionTip.visible=!!hasHint;
   if(hasHint){const point=s=>new T.Vector3(s.charCodeAt(0)-100.5,.055,4.5-Number(s[1])),start=point(hint.from),end=point(hint.to),dir=end.clone().sub(start),len=dir.length();dir.normalize();const q=new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),dir);intentionShaft.quaternion.copy(q);intentionTip.quaternion.copy(q);intentionShaft.scale.y=Math.max(.01,len-.3);intentionShaft.position.copy(start).addScaledVector(dir,(len-.3)/2);intentionTip.position.copy(end).addScaledVector(dir,-.2)}
   canvas.dataset.intention=hasHint?hint.from+hint.to:'';

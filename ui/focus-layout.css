@@ -1,4 +1,12 @@
 .dock-panel[data-panel=focus] .focus-content:not(.is-empty){grid-template-rows:auto minmax(160px,1fr);overflow:auto;overscroll-behavior:contain;container-type:inline-size}
+/* A presentation-only collapse; result/status, clocks and recovery notices remain visible. */
+.dock-panel[data-panel=focus].focus-controls-hidden .panel-tools,
+.dock-panel[data-panel=focus].focus-controls-hidden .focus-watching,
+.dock-panel[data-panel=focus].focus-controls-hidden .panel-heading>:not(h2):not(.dock-handle):not(#focusControlsToggle):not([data-float]):not([data-expand]),
+.dock-panel[data-panel=focus].focus-controls-hidden .focus-toolbar button,
+.dock-panel[data-panel=focus].focus-controls-hidden .board-3d-controls{display:none}
+.dock-panel[data-panel=focus].focus-controls-hidden>.panel-title{padding-top:7px;padding-bottom:7px}
+#focusControlsToggle{white-space:nowrap}
 .focus-stage{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(120px,1fr);gap:10px;min-width:0;min-height:0}
 .focus-stage>.focus-clocks{display:grid;grid-column:1;grid-row:1;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-self:start;min-width:0}
 .focus-stage>.focus-board,.dock-panel[data-panel=focus] .focus-stage>.focus-board{grid-column:1;grid-row:2;min-width:0;min-height:120px;container-type:size;display:grid;place-items:center}

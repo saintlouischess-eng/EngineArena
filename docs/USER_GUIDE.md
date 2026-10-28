@@ -1,6 +1,6 @@
-# Engine Arena 1.10.3 — user guide
+# Engine Arena 1.12.6 — user guide
 
-For current features, updating and validation, see [1.10.3 release notes](RELEASE_1_10_3.md), [viewing workflows](V1_10_WORKFLOWS.md), [RR replacements](V1_10_2_RATINGS_ONLY_WITHDRAWAL.md) and [clock correction](V1_10_3_ENGINE_CLOCK_RECEIPTS.md).
+See the [current release notes](RELEASE_1_12_6.md) and [Broadcast Designer guide](BROADCAST_DESIGNER.md) for the latest broadcasting, viewing and update workflows.
 
 
 ## Extend a completed round robin
@@ -246,7 +246,7 @@ unsupported sensors show Unavailable.
 
 **Worker & recovery** controls backup count, interval, storage estimates and
 optimization. Deleting a tournament removes its records from recovery copies and
-reclaims managed database space. Export anything you want to keep before deletion.
+makes deleted database space reusable. Use **Reclaim disk space** to shrink files separately. Export anything you want to keep before deletion.
 
 ## Final laptop check and feedback
 
